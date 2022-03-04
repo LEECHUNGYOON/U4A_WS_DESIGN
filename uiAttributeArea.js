@@ -1,381 +1,8 @@
 (function(){
   //우측 페이지(attribute 영역) 구성
   oAPP.fn.uiAttributeArea = function(oRPage){
-
-    //property, event, Aggregation 입력값 처리.
-    function lf_chgAttrVal(is_attr, uitp){
-
-      //화면에서 UI추가, 이동, 삭제 및 attr 변경시 변경 flag 처리.
-      oAPP.fn.setChangeFlag();
-
-      var l_val = is_attr.UIATV;
-      var l_dval = "";
-
-      //checkbox에서 발생한 이벤트인경우.
-      if(uitp === "CHECK"){
-        //checkbox를 선택한경우 abap_true로, 선택하지 않은경우 abap_false 처리.
-        l_val = is_attr.UIATV_c === true ? "X":"";
-      }
-
-      //미리보기 화면의 대상 ui의 프로퍼티 변경처리.
-      oAPP.fn.previewUIsetProp(is_attr);
-
-      //default 값 얻기.
-      if(is_attr.OBJID !== "ROOT"){
-        l_dval = oAPP.DATA.LIB.T_0023.find( a => a.UIATK === is_attr.UIATK ).DEFVL;
-
-      }
-
-      //프로퍼티 입력건 수집 항목에 현재 UI의 프로퍼티가 수집됐는지 확인.
-      var l_indx = oAPP.attr.prev[is_attr.OBJID]._T_0015.findIndex( a => a.OBJID === is_attr.OBJID && a.UIATT === is_attr.UIATT);
-
-      //default 값과 동일한 경우 수집항목이 존재하지 않는경우 exit.
-      if(l_dval === l_val && l_indx === -1){
-        return;
-      }
-
-      //default 값과 동일한 경우 수집항목이 존재하는경우 해당 라인 제거 후 exit.
-      if(l_dval === l_val && l_indx !== -1){
-        var l_indx = oAPP.attr.prev[is_attr.OBJID]._T_0015.splice(l_indx,1);
-        return;
-      }
-
-      //입렵값이 default값과 다른경우 수집한 항목이 존재시 해당 라인의 입력값 변경 처리.
-      if(l_indx !== -1){
-        oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].UIATV = l_val;
-        return;
-      }
-
-      //입력값 default값과 다른경우 해당 라인이 수집되지 않을시 신규라인 생성 처리.
-      var ls_0015 = oAPP.fn.crtStru0015();
-
-      oAPP.fn.moveCorresponding(is_attr, ls_0015);
-
-      ls_0015.APPID = oAPP.attr.appInfo.APPID;
-      ls_0015.GUINR = oAPP.attr.appInfo.GUINR;
-
-      ls_0015.UIATV = l_val;
-
-      oAPP.attr.prev[is_attr.OBJID]._T_0015.push(ls_0015);
-
-    } //property, event, Aggregation 입력값 처리.
-
-
-
-    //바인딩 & 이벤트 팝업 호출 처리 function.
-    function lf_bindNEvtPopup(oEvent){
-
-      var l_ctxt = oEvent.oSource.getBindingContext();
-      if(!l_ctxt){return;}
-
-      var ls_attr = l_ctxt.getProperty();
-      if(!ls_attr){return;}
-
-      //Aggregation의 바인딩 팝업 버튼 선택시.
-      if(ls_attr.UIATY === "3"){
-
-        var l_agrnm = oAPP.fn.getUIAttrFuncName(oAPP.attr.prev[ls_attr.OBJID], ls_attr.UIATY,ls_attr.UIATT,'_sGetter');
-
-        //n건 바인딩시 Aggregation에 UI가 1개만 존재해야함.
-        if(oAPP.attr.prev[ls_attr.OBJID][l_agrnm]().length > 2){
-          parent.showMessage(sap, 10, 'E', 'If you have one or more child objects, you can not specify a model.');
-          return;
-        }
-
-      } //바인딩 & 이벤트 팝업 호출 처리 function.
-
-
-
-      var l_func = "",l_title = "",f_callback;
-
-      //UI Attribute Type에 따른 분기.
-      switch(ls_attr.UIATY){
-        case "1": //property
-          l_func = 'callBindPopup';
-          l_title = 'Property';
-          f_callback = lf_bindCallBack;
-          break;
-
-        case "2": //event
-          l_func = 'createEventPopup';
-          f_callback = lf_eventCallBack;
-          break;
-
-        case "3": //Aggregation
-          l_func = 'callBindPopup';
-          l_title = 'Aggregation';
-          f_callback = lf_bindCallBack;
-          break;
-
-        default:
-          return;
-
-      } //UI Attribute Type에 따른 분기.
-
-      //대상 function이 존재하는경우 호출 처리.
-      if(typeof oAPP.fn[l_func] !== "undefined"){
-        oAPP.fn[l_func](l_title, ls_attr, f_callback);
-        return;
-      }
-
-      //대상 function이 존재하지 않는경우 script 호출.
-      oAPP.fn.getScript(l_func,function(){
-        oAPP.fn[l_func](l_title, ls_attr, f_callback);
-      });
-
-    } //바인딩 & 이벤트 팝업 호출 처리 function.
-
-
-
-    //이벤트 팝업 call back 이벤트
-    function lf_eventCallBack(is_attr, evtnm){
-
-      is_attr.UIATV = evtnm;
-      //DDLB항목에 바인딩한 정보 추가.
-      //is_attr.T_DDLB.push({KEY:evtnm,TEXT:evtnm});
-
-      //화면 갱신 처리.
-      oAPP.attr.oModel.refresh();
-
-      //attr 변경건이 수집됐는지 확인.
-      var l_indx = oAPP.attr.prev[is_attr.OBJID]._T_0015.findIndex( a => a.UIATK === is_attr.UIATK );
-
-      //수집된건이 존재하는경우.
-      if(l_indx !== -1){
-
-        oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].UIATV = evtnm;
-
-      }else{
-
-        //수집된건이 없는경우 신규 라인 생성 처리.
-        var ls_0015 = oAPP.fn.crtStru0015();
-
-        //attribute라인정보 MOVE-CORRESPONDING 처리.
-        oAPP.fn.moveCorresponding(is_attr, ls_0015);
-
-        //attr변경건 수집 처리.
-        oAPP.attr.prev[is_attr.OBJID]._T_0015.push(is_attr);
-
-      }
-
-    } //이벤트 팝업 call back 이벤트
-
-
-
-    //바인딩 팝업 Call Back 이벤트
-    function lf_bindCallBack(is_tree,is_attr,is_unbind){
-
-      //unbind 처리된경우.
-      if(is_unbind === true){
-        lf_unbindAttr(is_attr);
-        return;
-      }
-
-      //바인딩 팝업에서 선택한 PATH 정보.
-      is_attr.UIATV = is_tree.CHILD;
-
-      //바인딩됨 FLAG 처리.
-      is_attr.ISBND = "X";
-
-      //추가속성정의
-      is_attr.MPROP = "";
-
-      if(is_attr.UIATY === "1" && is_tree.MPROP !== ""){
-        is_attr.MPROP = is_tree.MPROP;
-      }
-
-      //이벤트가 아닌경우.
-      if(is_attr.UIATY !== "2"){
-        //화면 잠금 처리.
-        is_attr.edit = false;
-      }
-
-
-      //프로퍼티의 DDLB 항목에서 바인딩 처리한경우.
-      if(is_attr.UIATY === "1" && is_attr.T_DDLB){
-        //DDLB항목에 바인딩한 정보 추가.
-        is_attr.T_DDLB.push({KEY:is_attr.UIATV,TEXT:is_attr.UIATV});
-      }
-
-      //화면 갱신 처리.
-      oAPP.attr.oModel.refresh();
-
-      //미리보기 화면 갱신 처리.
-      oAPP.fn.previewUIsetProp(is_attr);
-
-      //attr 변경건이 수집됐는지 확인.
-      var l_indx = oAPP.attr.prev[is_attr.OBJID]._T_0015.findIndex( a => a.UIATK === is_attr.UIATK );
-
-      //수집된건이 존재하는경우.
-      if(l_indx !== -1){
-
-        oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].UIATV = is_tree.CHILD;
-        oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].ISBND = "X";
-        oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].MPROP = "";
-
-        if(is_attr.MPROP !== ""){
-          oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].MPROP = is_attr.MPROP;
-        }
-
-      }else{
-
-        //수집된건이 없는경우 신규 라인 생성 처리.
-        var ls_0015 = oAPP.fn.crtStru0015();
-
-        //attribute라인정보 MOVE-CORRESPONDING 처리.
-        oAPP.fn.moveCorresponding(is_attr, ls_0015);
-
-        //attr변경건 수집 처리.
-        oAPP.attr.prev[is_attr.OBJID]._T_0015.push(is_attr);
-
-      }
-
-      if(is_attr.UIATY === "1"){
-        //property에서 바인딩 처리 한 경우.
-
-        //n건 바인딩 처리건인경우 부모 UI에 현재 UI 매핑 처리.
-        oAPP.fn.setModelBind(oAPP.attr.prev[is_attr.OBJID]);
-
-      }else if(is_attr.UIATY === "3"){
-        //Aggregation에서 바인딩 처리 한 경우.
-
-        //자신 UI에 N건 바인딩 처리함 매핑.
-        oAPP.fn.setAggrBind(oAPP.attr.prev[is_attr.OBJID],is_attr.UIATT, is_attr.UIATV);
-      }
-
-    } //바인딩 팝업 Call Back 이벤트
-
-
-
-    //바인딩 해제 처리 function.
-    function lf_unbindAttr(is_attr){
-
-      //바인딩 해제 재귀호출.
-      function lf_unbindAttrRec(oUI, UIATT){
-
-        //n건 바인딩이 없는경우 exit.
-        if(oUI._BIND_AGGR[UIATT].length === 0){
-          return;
-        }
-
-
-        //N건 바인딩 설정한 하위 UI가 존재하는경우.
-        for(var i=0, l=oUI._BIND_AGGR[UIATT].length; i<l; i++){
-
-          //해당 UI로 파생된 N건 바인딩처리 UI가 존재하는경우.
-          if(jQuery.isEmptyObject(oUI._BIND_AGGR[UIATT][i]._BIND_AGGR) !== true){
-
-            //하위를 탐색하며 바인딩 해제 처리.
-            for(var j in oUI._BIND_AGGR[UIATT][i]._BIND_AGGR){
-              lf_unbindAttrRec(oUI._BIND_AGGR[UIATT][i], j);
-            }
-            continue;
-          }
-
-          //현재 UI에 설정된 N건 바인딩 해제 처리.
-          for(var j=oUI._BIND_AGGR[UIATT][i]._T_0015.length-1; j>=0; j--){
-
-            //바인딩된건이 아닌경우 SKIP.
-            if(oUI._BIND_AGGR[UIATT][i]._T_0015[j].ISBND !== "X"){continue;}
-
-            //바인딩건인경우 N건 바인딩 처리된 건인지 판단.
-            if(oAPP.fn.chkBindPath(is_attr.UIATV, oUI._BIND_AGGR[UIATT][i]._T_0015[j].UIATV) === true){
-              //N건 바인딩된 건인경우 바인딩 해제 처리.
-              oUI._BIND_AGGR[UIATT][i]._T_0015.splice(j,1);
-            }
-
-          }
-
-        }
-
-        //현재 UI에 설정된 N건 바인딩 해제 처리.
-        for(var i=oUI._T_0015.length-1; i>=0; i--){
-
-          //바인딩된건이 아닌경우 SKIP.
-          if(oUI._T_0015[i].ISBND !== "X"){continue;}
-
-          //바인딩건인경우 N건 바인딩 처리된 건인지 판단.
-          if(oAPP.fn.chkBindPath(is_attr.UIATV, oUI._T_0015[i].UIATV) === true){
-            //N건 바인딩된 건인경우 바인딩 해제 처리.
-            oUI._T_0015.splice(i,1);
-          }
-
-        }
-
-        if(oAPP.fn.chkBindPath(is_attr.UIATV, oUI._MODEL[UIATT]) !== true){
-          return;
-        }
-
-        //Aggregation에 n건 바인딩 처리 제거.
-        delete oUI._MODEL[UIATT];
-
-      } //바인딩 해제 재귀호출.
-
-
-
-      //DDLB로 출력된 프로퍼티의 이전값이 바인딩된 값인경우.
-      if(is_attr.UIATY === "1" && is_attr.ISBND === "X" && is_attr.T_DDLB){
-
-        var l_indx = is_attr.T_DDLB.findIndex( a => a.KEY === is_attr.UIATV );
-
-        if(l_indx !== -1){
-          //DDLB 항목에서 해당 라인 삭제 처리.
-          is_attr.T_DDLB.splice(l_indx, 1);
-
-        }
-
-      }
-
-      //Aggregation에서 unbind처리한 경우 자기 하위 ui를 탐색하면서 n건 바인딩 해제 처리.
-      if(is_attr.UIATY === "3"){
-        lf_unbindAttrRec(oAPP.attr.prev[is_attr.OBJID],is_attr.UIATT);
-      }
-
-      is_attr.UIATV = "";
-
-      //property 바인딩 해제건인경우.
-      if(is_attr.UIATY === "1" && is_attr.UIATK.substr(3) !== "EXT"){
-        //해당 property의 default 값 매핑.
-        is_attr.UIATV = oAPP.attr.prev[is_attr.OBJID].mProperties[is_attr.UIATT];
-      }
-
-
-      //Aggregation에서 호출되지 않은경우.
-      if(is_attr.UIATY !== "3"){
-        //값을 직접 입력 가능 처리.
-        is_attr.edit = true;
-      }
-
-      //바인딩 FLAG 초기화.
-      is_attr.ISBND = "";
-
-      //property의 바인딩 추가속성 정의 초기화.
-      is_attr.MPROP = "";
-
-      //attr 변경건이 수집됐는지 확인.
-      var l_indx = oAPP.attr.prev[is_attr.OBJID]._T_0015.findIndex( a => a.UIATK === is_attr.UIATK );
-
-      //수집된건이 존재하는경우.
-      if(l_indx !== -1){
-        //수집된건 제거 처리.
-        oAPP.attr.prev[is_attr.OBJID]._T_0015.splice(l_indx, 1);
-      }
-
-      //화면 갱신 처리.
-      oAPP.attr.oModel.refresh();
-
-      //미리보기 화면 갱신 처리.
-      oAPP.fn.previewUIsetProp(is_attr);
-
-      //ATTRIBUTE 영역 갱신 처리.
-      oAPP.fn.updateAttrList(is_attr.UIOBK, is_attr.OBJID);
-
-
-    } //바인딩 해제 처리 function.
-
-
-
-
+    
+    //우측 attr전체 form.
     var oRFm = new sap.ui.layout.form.Form({editable:true,
       layout: new sap.ui.layout.form.ResponsiveGridLayout({labelSpanL:12,labelSpanM:12,columnsL:1})});
     oRPage.addContent(oRFm);
@@ -394,103 +21,9 @@
 
     //OBJID를 변경 이벤트.
     oRInp1.attachChange(function(oEvent){
-
-      ls_uiinfo = oAPP.attr.oModel.getProperty("/uiinfo");
-
-      //대문자 변환 처리.
-      ls_uiinfo.OBJID = ls_uiinfo.OBJID.toUpperCase();
-
-      ls_uiinfo.OBJID_stat = "None";
-      ls_uiinfo.OBJID_stxt = "";
-
-      var l_sep = "";
-
-      //OBJID의 첫번째 문자가 숫자인경우 오류 처리.
-      if(isNaN(ls_uiinfo.OBJID.substr(0,1)) !== true){
-        ls_uiinfo.OBJID_stat = "Error";
-        ls_uiinfo.OBJID_stxt = "Object ID cannot start with a number.";
-        l_sep = "\r\n";
-      }
-
-      var reg = /[^A-Z0-9]/;
-
-      //특수문자가 입력된경우 오류 처리.
-      if(reg.test(ls_uiinfo.OBJID) === true){
-        ls_uiinfo.OBJID_stat = "Error";
-        ls_uiinfo.OBJID_stxt = ls_uiinfo.OBJID_stxt + l_sep + "Cannot enter special characters in the object ID.";
-      }
-
-      //동일 OBJID 존재여부 확인.
-      if(ls_uiinfo.OBJID !== ls_uiinfo.OBJID_bf){
-        var l_indx = oAPP.attr.oModel.oData.TREE.findIndex( a=> a.OBJID === ls_uiinfo.OBJID);
-
-        //동일 OBJID를 입력한 경우.
-        if(l_indx !== -1){
-          ls_uiinfo.OBJID_stat = "Error";
-          ls_uiinfo.OBJID_stxt = ls_uiinfo.OBJID_stxt + l_sep + "Duplicate object ID cannot be entered.";
-        }
-      }
-
-      //오류가 발생한 경우 exit.
-      if(ls_uiinfo.OBJID_stat === "Error"){
-        oAPP.attr.oModel.setProperty("/uiinfo", ls_uiinfo);
-        parent.showMessage(sap, 10, "E", ls_uiinfo.OBJID_stxt);
-        return;
-      }
-
-      //이전 UI OBJECT에 수집된 ATTR 정보가 존재하는경우.
-      if(oAPP.attr.prev[ls_uiinfo.OBJID_bf]._T_0015.length !== 0){
-        //ATTR의 OBJECT ID를 변경건으로 매핑.
-        for(var i=0, l= oAPP.attr.prev[ls_uiinfo.OBJID_bf]._T_0015.length; i<l; i++){
-          oAPP.attr.prev[ls_uiinfo.OBJID_bf]._T_0015[i].OBJID = ls_uiinfo.OBJID;
-        }
-
-      }
-
-      //변경된 이름으로 UI 수집 처리.
-      oAPP.attr.prev[ls_uiinfo.OBJID] = oAPP.attr.prev[ls_uiinfo.OBJID_bf];
-
-      //이전 이름의 UI 제거.
-      delete oAPP.attr.prev[ls_uiinfo.OBJID_bf];
-
-      //OBJID에 해당하는건 검색.
-      var l_tree = oAPP.attr.oModel.oData.TREE.find( a => a.OBJID === ls_uiinfo.OBJID_bf );
-
-      //OBJID ID 변경건으로 매핑.
-      l_tree.OBJID = ls_uiinfo.OBJID;
-
-      //해당 UI의 CHILD UI 정보 얻기.
-      var lt_child = oAPP.attr.oModel.oData.TREE.filter( a => a.POBID === ls_uiinfo.OBJID_bf );
-
-      //CHILD 정보가 존재하는 경우.
-      if(lt_child.length !== 0){
-        //CHILD의 부모 OBJECT ID 를 변경 처리.
-        for(var i=0,l=lt_child.length; i<l; i++){
-          lt_child[i].POBID = ls_uiinfo.OBJID;
-        }
-      }
-
-
-      //UI 디자인 영역의 선택 라인 정보 얻기.
-      l_tree = oAPP.attr.oModel.getObject(ls_uiinfo.treePath);
-
-      //OBJID ID 변경건으로 매핑.
-      l_tree.OBJID = ls_uiinfo.OBJID;
-
-      //design 영역의 CHILD 정보가 존재하는 경우.
-      if(l_tree.zTREE.length !== 0){
-        //CHILD의 부모 OBJECT ID 를 변경 처리.
-        for(var i=0,l=l_tree.zTREE.length; i<l; i++){
-          l_tree.zTREE[i].POBID = ls_uiinfo.OBJID;
-        }
-      }
-
-      //이전 OBJID를 변경된 ID로 업데이트.
-      ls_uiinfo.OBJID_bf = ls_uiinfo.OBJID;
-
-      oAPP.attr.oModel.setProperty("/uiinfo", ls_uiinfo);
-      oAPP.attr.oModel.refresh();
-
+      
+      //OBJID 변경건 처리.
+      oAPP.fn.attrChnageOBJID();
 
     }); //OBJID를 변경 이벤트.
 
@@ -510,7 +43,6 @@
       oAPP.fn.setDesc(oRInp1.getValue(), this.getValue());
 
     }); //Description 변경 이벤트.
-
 
 
 
@@ -538,27 +70,34 @@
     oRElm3.addField(oRTab1);
     oAPP.attr.oRTab1 = oRTab1;
 
+    //attribute명 컬럼.
     var oRCol1 = new sap.m.Column({width:"30%"});
     oRTab1.addColumn(oRCol1);
 
+    //attribute입력 컬럼
     var oRCol2 = new sap.m.Column();
     oRTab1.addColumn(oRCol2);
 
+    //attribute 첫번째 아이콘(바인딩, 서버 이벤트)
     var oRCol3 = new sap.m.Column({width:"25px",hAlign:"Center"});
     oRTab1.addColumn(oRCol3);
 
+    //attribute 두번째 아이콘(프로퍼티 help, 클라이언트 이벤트)
     var oRCol4 = new sap.m.Column({width:"25px",hAlign:"Center"});
     oRTab1.addColumn(oRCol4);
 
-
+    //attribute 출력 List Item.
     var oRListItem1 = new sap.m.ColumnListItem();
 
+    //attribute명.
     var oRObjStat1 = new sap.m.ObjectStatus({text:"{UIATT}",icon:"{UIATT_ICON}"});
     oRListItem1.addCell(oRObjStat1);
 
+    //attribute 입력 hbox
     var oRHbox1 = new sap.m.HBox({width:"100%",direction:"Column",renderType:"Bare",alignItems:"Center"});
     oRListItem1.addCell(oRHbox1);
 
+    //attribute 직접입력 필드
     var oRInp2 = new sap.m.Input({value:"{UIATV}",editable:"{edit}",visible:"{inp_visb}",
       showValueHelp:"{showF4}",enabled:"{/IS_EDIT}",valueState:"{valst}",valueStateText:"{valtx}"});
     oRHbox1.addItem(oRInp2);
@@ -568,78 +107,20 @@
 
       var ls_attr = this.getBindingContext().getProperty();
 
-      lf_chgAttrVal(ls_attr);
+      //attribute 입력건 변경처리.
+      oAPP.fn.attrChgAttrVal(ls_attr);
 
     }); //attr 입력필드 이벤트.
 
 
 
     //input f4 help 이벤트
-    oRInp2.attachValueHelpRequest(function(){
-
-      //f4 help callback 이벤트.
-      function lf_returnDOC(param){
-        debugger;
-          var l_fldnm = "";
-          switch(ls_ua003.ITMCD){
-            case "DH001040":  //Code Page
-              l_fldnm = "CPATTR";
-              break;
-
-            case "DH001100":  //Authorization Group
-              l_fldnm = "P_GROUP";
-              break;
-
-            defalut:
-              return;
-
-          }
-
-          //f4 help에서 선택한 라인의 codepage 정보 매핑.
-          that.setValue(param[l_fldnm]);
-
-          //변경처리 function 수행.
-          lf_chgAttrVal(ls_0015);
-
-      }   //f4 help callback 이벤트.
-
-
+    oRInp2.attachValueHelpRequest(function(oEvent){
 
       var ls_0015 = this.getBindingContext().getProperty();
 
-
-      //ROOT항목이 아닌경우.
-      if(ls_0015.OBJID !== "ROOT"){
-        return;
-      }
-
-
-      //ROOT의 attrubite항목중 f4 help를 선택한 경우.
-
-      //코드마스터 DOCUMENT항목의 해당하는 itmcd 정보 얻기.
-      var ls_ua003 = oAPP.DATA.LIB.T_9011.find( a => a.CATCD === "UA003" && a.ITMCD === ls_0015.UIATK );
-
-      //가능엔트리 항목이 존재하지 않는경우 EXIT.
-      if(!ls_ua003 || ls_ua003.FLD05 === ""){
-        return;
-
-      }
-
-      var that = this;
-
-
-      //f4 help팝업을 load한경우.
-      if(typeof oAPP.fn.callF4HelpPopup !== "undefined"){
-        //f4 help 팝업 호출.
-        oAPP.fn.callF4HelpPopup(ls_ua003.FLD05,ls_ua003.FLD05,[],[],lf_returnDOC);
-        return;
-      }
-
-      //f4help 팝업을 load하지 못한경우.
-      oAPP.fn.getScript("callF4HelpPopup",function(){
-          //f4 help 팝업 function load 이후 팝업 호출.
-          oAPP.fn.callF4HelpPopup(ls_ua003.FLD05,ls_ua003.FLD05,[],[],lf_returnDOC);
-      });
+      //f4 help 버튼 선택 이벤트.
+      oAPP.fn.attrCallValueHelp(oEvent, ls_0015);
 
     }); //input f4 help 이벤트
 
@@ -662,15 +143,15 @@
 
       }
 
-      lf_chgAttrVal(ls_0015, "DDLB");
+      //attr 변경처리.
+      oAPP.fn.attrChgAttrVal(ls_0015, "DDLB");
 
     }); //DDLB 선택 이벤트.
 
 
-
+    //DDLB ITEM.
     var oRItm1 = new sap.ui.core.ListItem({key:"{KEY}",text:"{TEXT}",additionalText:"{DESC}"});
     oRSel1.bindAggregation('items',{path:"T_DDLB",template:oRItm1,templateShareable:true});
-
     oRHbox1.addItem(oRSel1);
 
     //Attribute Button UI
@@ -680,21 +161,19 @@
     //버튼 선택 이벤트.
     oRBtn1.attachPress(function(oEvent){
       //해당 라인의 바인딩 정보 얻기.
-      var l_ctxt = this.getBindingContext();
-      if(!l_ctxt){return;}
-
-      var ls_0015 = oAPP.attr.oModel.getProperty(l_ctxt.getPath());
+      var ls_0015 = this.getBindingContext().getProperty();
 
       switch(ls_0015.UIATT){
-
         case "DH001022":
           //CSS Link Add
           oAPP.fn.fnCssJsLinkAddPopupOpener("CSS");
           break;
+
         case "DH001023":
           //JS Link Add
           oAPP.fn.fnCssJsLinkAddPopupOpener("JS");
           break;
+
         case "DH001026":
           //Web Security Settings
           oAPP.fn.fnWebSecurityPopupOpener();
@@ -718,7 +197,7 @@
       var ls_attr = this.getBindingContext().getProperty();
 
       //ATTR 변경건 처리.
-      lf_chgAttrVal(ls_attr,"CHECK");
+      oAPP.fn.attrChgAttrVal(ls_attr,"CHECK");
 
     }); //체크박스 선택 이벤트
 
@@ -726,153 +205,44 @@
 
     //바인딩(서버 이벤트) 아이콘
     var oRIcon1 = new sap.ui.core.Icon({src:"{icon1_src}",color:"{icon1_color}"});
+    oRListItem1.addCell(oRIcon1);
 
     //바인딩(서버 이벤트) 아이콘 선택 이벤트
     oRIcon1.attachPress(function(oEvent){
 
-      //appcontainer callback 이벤트.
-      function lf_appCallback(param){
-        l_attr.UIATV = param.APPID;
+      var ls_attr = this.getBindingContext().getProperty();
 
-        //AppID 입력값 변경 처리.
-        lf_chgAttrVal(l_attr);
-
-        //AppDescript 프로퍼티 정보 얻기.
-        var l_find = oAPP.attr.oModel.oData.T_ATTR.find( a=> a.UIATK === "EXT00000031");
-        if(typeof l_find === "undefined"){return;}
-
-        //AppDescript 입력값 변경 처리.
-        lf_chgAttrVal(l_find);
-
-        //model 갱신 처리.
-        oAPP.attr.oModel.refresh();
-
-      } //appcontainer callback 이벤트.
-
-
+      //appcontainer의 AppID 프로퍼티인경우 f4 help 팝업 호출.
+      if(oAPP.fn.attrAppf4Popup(ls_attr) === true){
+        return;
+      }
 
       //sap.m.Tree, sap.ui.table.TreeTable의 parent, child 프로퍼티 바인딩처리건 점검.
-      function lf_chkTreeProp(is_attr){
-
-        var l_UIATK = "";
-
-        //attribute key에 따른 로직 분기.
-        switch(is_attr.UIATK){
-          case "EXT00001190":   //sap.m.Tree의 parent
-          case "EXT00001191":   //sap.m.Tree의 child
-
-            //items Aggregation의 attribute key 매핑.
-            l_UIATK = "AT000006260";
-            break;
-
-          case "EXT00001192":   //sap.ui.table.TreeTable의 parent
-          case "EXT00001193":   //sap.ui.table.TreeTable의 child
-
-            //rows Aggregation의 attribute key 매핑.
-            l_UIATK = "AT000013146";
-            break;
-
-          default:
-            //sap.m.Tree, sap.ui.table.TreeTable의 parent, child 프로퍼티가 아닌경우 exit.
-            return false;
-
-        }
-
-        //점검대상 Aggregation 검색.
-        var ls_attr = oAPP.attr.oModel.oData.T_ATTR.find( a=> a.UIATK === l_UIATK);
-
-        //해당 Aggregation에 N건 바인딩 처리를 하지 않은경우.
-        if(!ls_attr || ls_attr.UIATV === ""){
-
-          is_attr.valst = "Error";
-          is_attr.valtx = "Model information does not exist in Aggregation items.";
-          oAPP.attr.oModel.refresh();
-
-          //Model information does not exist in Aggregation items.
-          showMessage(sap, 20, "E", is_attr.valtx);
-          return true;
-
-        }
-
-
-      } //sap.m.Tree, sap.ui.table.TreeTable의 parent, child 프로퍼티 바인딩처리건 점검.
-
-
-      var l_ctxt = this.getBindingContext();
-
-      var l_attr = l_ctxt.getProperty();
-
-      //appcontainer의 AppID 프로퍼티인경우.
-      if(l_attr.UIATK === "EXT00000030"){
-
-        var l_opt = {autoSearch: true,
-                     initCond: {PACKG: "", APPID: "", APPNM: "", ERUSR: "",HITS: 500}
-                    };
-
-        //application f4 help 팝업 호출.
-        if (typeof oAPP.fn.fnAppF4PopupOpen !== "undefined") {
-           oAPP.fn.fnAppF4PopupOpen(l_opt, lf_appCallback);
-           return;
-        }
-
-        //js load후 application f4 help 팝업 호출.
-        oAPP.loadJs("fnAppF4PopupOpen", function() {
-           oAPP.fn.fnAppF4PopupOpen(l_opt, lf_appCallback);
-        });
-
+      if(oAPP.fn.attrChkTreeProp(ls_attr) === true){
         return;
       }
 
-
-
-      //f4 help callback function.
-      function lf_returnDOC(a){
-        debugger;
-      } //f4 help callback function.
-
-
-
-      //selectOption2의 F4HelpID프로퍼티인경우.
-      if(l_attr.UIATK === "EXT00001188"){
-
-        //f4 help팝업을 load한경우.
-        if(typeof oAPP.fn.callF4HelpPopup !== "undefined"){
-          //f4 help 팝업 호출.
-          oAPP.fn.callF4HelpPopup("DD_SHLP","DD_SHLP",[],[],lf_returnDOC);
-          return;
-        }
-
-        //f4help 팝업을 load하지 못한경우.
-        oAPP.fn.getScript("callF4HelpPopup",function(){
-            //f4 help 팝업 function load 이후 팝업 호출.
-            oAPP.fn.callF4HelpPopup("DD_SHLP","DD_SHLP",[],[],lf_returnDOC);
-        });
-
+      //select option2의 F4HelpID 프로퍼티의 팝업 호출 처리.
+      if(oAPP.fn.attrSelOption2F4HelpID(ls_attr) === true){
         return;
       }
-
-
-      //sap.m.Tree, sap.ui.table.TreeTable의 parent, child 프로퍼티 바인딩처리건 점검.
-      if(lf_chkTreeProp(l_attr) === true){
-        return;
-      }
-
 
       //바인딩 & 이벤트 팝업 호출 처리 function.
-      lf_bindNEvtPopup(oEvent);
+      oAPP.fn.attrBindNEvtPopup(ls_attr);
 
     }); //바인딩(서버 이벤트) 아이콘 선택 이벤트
 
 
-
-
-    oRListItem1.addCell(oRIcon1);
+    
 
     //help(script 이벤트) 아이콘
     var oRIcon2 = new sap.ui.core.Icon({src:"{icon2_src}",color:"{icon2_color}"});
+    oRListItem1.addCell(oRIcon2);    
 
     //help(script 이벤트) 아이콘 선택 이벤트
     oRIcon2.attachPress(function(oEvent){
+
+      oAPP.fn.attr
 
       //property help DOCUMENT 팝업 호출.
       function lf_helpProp(){
@@ -929,12 +299,10 @@
 
 
     }); //help(script 이벤트) 아이콘 선택 이벤트
+    
 
 
-
-    oRListItem1.addCell(oRIcon2);
-
-
+    //attribute출력 tab에 바인딩 처리.
     oRTab1.bindAggregation("items",{path:"/T_ATTR",template:oRListItem1});
 
   };  //우측 페이지(attribute 영역) 구성
@@ -942,8 +310,796 @@
 
 
 
+  //DOCUMENT의 F4 HELP 호출 처리.
+  oAPP.fn.attrCallValueHelpDOC = function(is_attr){
+    
+    //DOCUMENT에서 f4 help 호출한건이 아닌경우 exit.
+    if(is_attr.OBJID !== "ROOT"){return;}
+
+    //f4 help callback 이벤트.
+    function lf_returnDOC(param){
+      debugger;
+        var l_fldnm = "";
+        switch(ls_ua003.ITMCD){
+          case "DH001040":  //Code Page
+            l_fldnm = "CPATTR";
+            break;
+
+          case "DH001100":  //Authorization Group
+            l_fldnm = "P_GROUP";
+            break;
+
+          defalut:
+            return;
+
+        }
+
+        //f4 help에서 선택한 라인의 codepage 정보 매핑.
+        is_attr.UIATV = param[l_fldnm];
+
+        //모델 갱신 처리.
+        oAPP.attr.oModel.refresh();
+
+        //변경처리 function 수행.
+        oAPP.fn.attrChgAttrVal(is_attr);
+
+    }   //f4 help callback 이벤트.
+
+
+
+    //코드마스터 DOCUMENT항목의 해당하는 itmcd 정보 얻기.
+    var ls_ua003 = oAPP.DATA.LIB.T_9011.find( a => a.CATCD === "UA003" && a.ITMCD === is_attr.UIATK );
+
+    //가능엔트리 항목이 존재하지 않는경우 EXIT.
+    if(!ls_ua003 || ls_ua003.FLD05 === ""){
+      return;
+    }
+
+    //f4 help팝업을 load한경우.
+    if(typeof oAPP.fn.callF4HelpPopup !== "undefined"){
+      //f4 help 팝업 호출.
+      oAPP.fn.callF4HelpPopup(ls_ua003.FLD05,ls_ua003.FLD05,[],[],lf_returnDOC);
+      //하위 로직 skip처리를 위한 flag return.
+      return true;
+    }
+
+    //f4help 팝업을 load하지 못한경우.
+    oAPP.fn.getScript("callF4HelpPopup",function(){
+        //f4 help 팝업 function load 이후 팝업 호출.
+        oAPP.fn.callF4HelpPopup(ls_ua003.FLD05,ls_ua003.FLD05,[],[],lf_returnDOC);
+    });
+
+    //하위 로직 skip처리를 위한 flag return.
+    return true;
+
+  };  //DOCUMENT의 F4 HELP 호출 처리.
+
+
+
+
+  //color popup f4 help 호출 처리.
+  oAPP.fn.attrCallValueHelpColor = function(oEvent, is_attr){
+
+    //프로퍼티가 아닌경우, 바인딩처리한경우 exit.
+    if(is_attr.UIATY !== "1" || is_attr.ISBND === "X"){return;}
+
+    //enum정보가 구성된경우 exit.
+    if(typeof is_attr.T_DDLB !== "undefined" && is_attr.T_DDLB.length !== 0){return;}
+
+    //프로퍼티명에 COLOR가 포함안되는경우 exit.
+    if(is_attr.UIASN.indexOf('COLOR') === -1){return;}
+
+    jQuery.sap.require("sap.ui.unified.ColorPickerPopover");
+
+    //color picker 팝업 UI생성.
+    var oColPic = new sap.ui.unified.ColorPickerPopover();
+
+    //팝업에서 색상 선택 이벤트.
+    oColPic.attachChange(function(oEvent){
+
+      //선택 색상 매핑.
+      is_attr.UIATV = oEvent.getParameter('hex');
+
+      //모델 갱신 처리.
+      oAPP.attr.oModel.refresh();
+
+    });
+
+    //f4 help선택 위치에 color picker 팝업 open처리.
+    oColPic.openBy(oEvent.oSource);
+
+    //하위 로직 skip처리를 위한 flag return.
+    return true;
+
+  };  //color popup f4 help 호출 처리.
+
+
+
+
+  //icon 선택처리 팝업 호출.
+  oAPP.fn.attrCallValueHelpIcon = function(is_attr){
+
+    //icon popup의 callback function.
+    function lf_callback(sIcon){
+      //전달받은 아이콘명이 존재하지 않는경우 exit.
+      if(typeof sIcon === "undefined" || sIcon === null || sIcon === ""){return;}
+
+      //아이콘 매핑.
+      is_attr.UIATV = sIcon;
+
+      //모델 갱신 처리.
+      oAPP.attr.oModel.refresh();
+
+      //미리보기 화면 갱신 처리.
+      oAPP.fn.previewUIsetProp(is_attr);
+
+    } //icon popup의 callback function.
+
+    
+
+    //프로퍼티가 아닌경우, 바인딩처리한경우 exit.
+    if(is_attr.UIATY !== "1" || is_attr.ISBND === "X"){return;}
+
+    //enum정보가 구성된경우 exit.
+    if(typeof is_attr.T_DDLB !== "undefined" && is_attr.T_DDLB.length !== 0){return;}
+
+    //프로퍼티명에 COLOR가 포함안되는경우 exit.
+    if(is_attr.UIASN.indexOf('ICON') === -1){return;}
+
+
+    //icon list popup function이 존재하는 경우.
+    if(typeof oAPP.fn.callIconListPopup !== "undefined"){
+      //icon list popup 호출.
+      oAPP.fn.callIconListPopup(lf_callback);
+      //하위 로직 skip처리를 위한 flag return.
+      return true;
+    }
+
+    //icon list popup function이 존재하지 않는 경우.
+    oAPP.fn.getScript("callIconListPopup",function(){
+        //icon list popup function load 이후 팝업 호출.
+        oAPP.fn.callIconListPopup(lf_callback);
+    });
+
+
+    //하위 로직 skip처리를 위한 flag return.
+    return true;
+
+
+  };  //icon 선택처리 팝업 호출.
+
+
+
+
+  //프로퍼티 f4 help 호출 처리.
+  oAPP.fn.attrCallValueHelp = function(oEvent, is_attr){
+
+    //DOCUMENT의 f4 help 호출건인경우 하위 로직 skip.
+    if(oAPP.fn.attrCallValueHelpDOC(is_attr) === true){
+      return;
+    }
+  
+    //color popup f4 help 호출 처리.
+    if(oAPP.fn.attrCallValueHelpColor(oEvent, is_attr) === true){
+      return;
+    }
+
+    //icon popup 호출 처리.
+    if(oAPP.fn.attrCallValueHelpIcon(is_attr) === true){
+      return;
+    }
+
+      
+
+  };  //프로퍼티 f4 help 호출 처리.
+
+
+
+
+  //OBJID 입력건 처리.
+  oAPP.fn.attrChnageOBJID = function(){
+    
+    ls_uiinfo = oAPP.attr.oModel.getProperty("/uiinfo");
+
+    //대문자 변환 처리.
+    ls_uiinfo.OBJID = ls_uiinfo.OBJID.toUpperCase();
+
+    ls_uiinfo.OBJID_stat = "None";
+    ls_uiinfo.OBJID_stxt = "";
+
+    var l_sep = "";
+
+    //OBJID의 첫번째 문자가 숫자인경우 오류 처리.
+    if(isNaN(ls_uiinfo.OBJID.substr(0,1)) !== true){
+      ls_uiinfo.OBJID_stat = "Error";
+      ls_uiinfo.OBJID_stxt = "Object ID cannot start with a number.";
+      l_sep = "\r\n";
+    }
+
+    var reg = /[^A-Z0-9]/;
+
+    //특수문자가 입력된경우 오류 처리.
+    if(reg.test(ls_uiinfo.OBJID) === true){
+      ls_uiinfo.OBJID_stat = "Error";
+      ls_uiinfo.OBJID_stxt = ls_uiinfo.OBJID_stxt + l_sep + "Cannot enter special characters in the object ID.";
+      l_sep = "\r\n";
+    }
+
+    //동일 OBJID 존재여부 확인.
+    if(ls_uiinfo.OBJID !== ls_uiinfo.OBJID_bf){
+      var l_indx = oAPP.attr.oModel.oData.TREE.findIndex( a=> a.OBJID === ls_uiinfo.OBJID);
+
+      //동일 OBJID를 입력한 경우.
+      if(l_indx !== -1){
+        ls_uiinfo.OBJID_stat = "Error";
+        ls_uiinfo.OBJID_stxt = ls_uiinfo.OBJID_stxt + l_sep + "Duplicate object ID cannot be entered.";
+      }
+    }
+
+    //오류가 발생한 경우 exit.
+    if(ls_uiinfo.OBJID_stat === "Error"){
+      oAPP.attr.oModel.setProperty("/uiinfo", ls_uiinfo);
+      parent.showMessage(sap, 10, "E", ls_uiinfo.OBJID_stxt);
+      return;
+    }
+
+    //이전 UI OBJECT에 수집된 ATTR 정보가 존재하는경우.
+    if(oAPP.attr.prev[ls_uiinfo.OBJID_bf]._T_0015.length !== 0){
+      //ATTR의 OBJECT ID를 변경건으로 매핑.
+      for(var i=0, l= oAPP.attr.prev[ls_uiinfo.OBJID_bf]._T_0015.length; i<l; i++){
+        oAPP.attr.prev[ls_uiinfo.OBJID_bf]._T_0015[i].OBJID = ls_uiinfo.OBJID;
+      }
+
+    }
+
+    //변경된 이름으로 UI 수집 처리.
+    oAPP.attr.prev[ls_uiinfo.OBJID] = oAPP.attr.prev[ls_uiinfo.OBJID_bf];
+
+    //이전 이름의 UI 제거.
+    delete oAPP.attr.prev[ls_uiinfo.OBJID_bf];
+
+    //DESIGN영역의 변경전 OBJID에 해당하는건 검색.
+    var l_tree = oAPP.fn.getTreeData(ls_uiinfo.OBJID_bf);
+
+    //OBJID ID 변경건으로 매핑.
+    l_tree.OBJID = ls_uiinfo.OBJID;
+
+    //CHILD 정보가 존재하는 경우.
+    if(l_tree.zTREE.length !== 0){
+      //CHILD의 부모 OBJECT ID 를 변경 처리.
+      for(var i=0,l=l_tree.zTREE.length; i<l; i++){
+        l_tree.zTREE[i].POBID = ls_uiinfo.OBJID;
+      }
+    }
+
+    //이전 OBJID를 변경된 ID로 업데이트.
+    ls_uiinfo.OBJID_bf = ls_uiinfo.OBJID;
+
+    //MODEL 갱신 처리.
+    oAPP.attr.oModel.setProperty("/uiinfo", ls_uiinfo);
+    oAPP.attr.oModel.refresh();
+
+  };  //OBJID 입력건 처리.
+
+
+
+
+  //바인딩 팝업 Call Back 이벤트
+  oAPP.fn.attrBindCallBack = function(is_tree, is_attr, is_unbind){
+
+    //unbind 처리된경우.
+    if(is_unbind === true){
+      oAPP.fn.attrUnbindAttr(is_attr);
+      return;
+    }
+
+    //바인딩 팝업에서 선택한 PATH 정보.
+    is_attr.UIATV = is_tree.CHILD;
+
+    //바인딩됨 FLAG 처리.
+    is_attr.ISBND = "X";
+
+    //추가속성정의
+    is_attr.MPROP = "";
+
+    if(is_attr.UIATY === "1" && is_tree.MPROP !== ""){
+      is_attr.MPROP = is_tree.MPROP;
+    }
+
+    //이벤트가 아닌경우.
+    if(is_attr.UIATY !== "2"){
+      //화면 잠금 처리.
+      is_attr.edit = false;
+    }
+
+
+    //프로퍼티의 DDLB 항목에서 바인딩 처리한경우.
+    if(is_attr.UIATY === "1" && is_attr.T_DDLB){
+      //DDLB항목에 바인딩한 정보 추가.
+      is_attr.T_DDLB.push({KEY:is_attr.UIATV,TEXT:is_attr.UIATV});
+    }
+
+    //화면 갱신 처리.
+    oAPP.attr.oModel.refresh();
+
+    //미리보기 화면 갱신 처리.
+    oAPP.fn.previewUIsetProp(is_attr);
+
+    //attr 변경건이 수집됐는지 확인.
+    var l_indx = oAPP.attr.prev[is_attr.OBJID]._T_0015.findIndex( a => a.UIATK === is_attr.UIATK );
+
+    //수집된건이 존재하는경우.
+    if(l_indx !== -1){
+
+      oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].UIATV = is_tree.CHILD;
+      oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].ISBND = "X";
+      oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].MPROP = "";
+
+      if(is_attr.MPROP !== ""){
+        oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].MPROP = is_attr.MPROP;
+      }
+
+    }else{
+
+      //수집된건이 없는경우 신규 라인 생성 처리.
+      var ls_0015 = oAPP.fn.crtStru0015();
+
+      //attribute라인정보 MOVE-CORRESPONDING 처리.
+      oAPP.fn.moveCorresponding(is_attr, ls_0015);
+
+      //attr변경건 수집 처리.
+      oAPP.attr.prev[is_attr.OBJID]._T_0015.push(is_attr);
+
+    }
+
+    if(is_attr.UIATY === "1"){
+      //property에서 바인딩 처리 한 경우.
+
+      //n건 바인딩 처리건인경우 부모 UI에 현재 UI 매핑 처리.
+      oAPP.fn.setModelBind(oAPP.attr.prev[is_attr.OBJID]);
+
+    }else if(is_attr.UIATY === "3"){
+      //Aggregation에서 바인딩 처리 한 경우.
+
+      //자신 UI에 N건 바인딩 처리함 매핑.
+      oAPP.fn.setAggrBind(oAPP.attr.prev[is_attr.OBJID],is_attr.UIATT, is_attr.UIATV);
+    }
+
+  }; //바인딩 팝업 Call Back 이벤트
+
+
+
+
+  //바인딩 해제 처리 function.
+  oAPP.fn.attrUnbindAttr = function(is_attr){
+
+    //바인딩 해제 재귀호출.
+    function lf_unbindAttrRec(oUI, UIATT){
+
+      //n건 바인딩이 없는경우 exit.
+      if(oUI._BIND_AGGR[UIATT].length === 0){
+        return;
+      }
+
+
+      //N건 바인딩 설정한 하위 UI가 존재하는경우.
+      for(var i=0, l=oUI._BIND_AGGR[UIATT].length; i<l; i++){
+
+        //해당 UI로 파생된 N건 바인딩처리 UI가 존재하는경우.
+        if(jQuery.isEmptyObject(oUI._BIND_AGGR[UIATT][i]._BIND_AGGR) !== true){
+
+          //하위를 탐색하며 바인딩 해제 처리.
+          for(var j in oUI._BIND_AGGR[UIATT][i]._BIND_AGGR){
+            lf_unbindAttrRec(oUI._BIND_AGGR[UIATT][i], j);
+          }
+          continue;
+        }
+
+        //현재 UI에 설정된 N건 바인딩 해제 처리.
+        for(var j=oUI._BIND_AGGR[UIATT][i]._T_0015.length-1; j>=0; j--){
+
+          //바인딩된건이 아닌경우 SKIP.
+          if(oUI._BIND_AGGR[UIATT][i]._T_0015[j].ISBND !== "X"){continue;}
+
+          //바인딩건인경우 N건 바인딩 처리된 건인지 판단.
+          if(oAPP.fn.chkBindPath(is_attr.UIATV, oUI._BIND_AGGR[UIATT][i]._T_0015[j].UIATV) === true){
+            //N건 바인딩된 건인경우 바인딩 해제 처리.
+            oUI._BIND_AGGR[UIATT][i]._T_0015.splice(j,1);
+          }
+
+        }
+
+      }
+
+      //현재 UI에 설정된 N건 바인딩 해제 처리.
+      for(var i=oUI._T_0015.length-1; i>=0; i--){
+
+        //바인딩된건이 아닌경우 SKIP.
+        if(oUI._T_0015[i].ISBND !== "X"){continue;}
+
+        //바인딩건인경우 N건 바인딩 처리된 건인지 판단.
+        if(oAPP.fn.chkBindPath(is_attr.UIATV, oUI._T_0015[i].UIATV) === true){
+          //N건 바인딩된 건인경우 바인딩 해제 처리.
+          oUI._T_0015.splice(i,1);
+        }
+
+      }
+
+      if(oAPP.fn.chkBindPath(is_attr.UIATV, oUI._MODEL[UIATT]) !== true){
+        return;
+      }
+
+      //Aggregation에 n건 바인딩 처리 제거.
+      delete oUI._MODEL[UIATT];
+
+    } //바인딩 해제 재귀호출.
+
+
+
+    //DDLB로 출력된 프로퍼티의 이전값이 바인딩된 값인경우.
+    if(is_attr.UIATY === "1" && is_attr.ISBND === "X" && is_attr.T_DDLB){
+
+      var l_indx = is_attr.T_DDLB.findIndex( a => a.KEY === is_attr.UIATV );
+
+      if(l_indx !== -1){
+        //DDLB 항목에서 해당 라인 삭제 처리.
+        is_attr.T_DDLB.splice(l_indx, 1);
+
+      }
+
+    }
+
+    //Aggregation에서 unbind처리한 경우 자기 하위 ui를 탐색하면서 n건 바인딩 해제 처리.
+    if(is_attr.UIATY === "3"){
+      lf_unbindAttrRec(oAPP.attr.prev[is_attr.OBJID],is_attr.UIATT);
+    }
+
+    is_attr.UIATV = "";
+
+    //property 바인딩 해제건인경우.
+    if(is_attr.UIATY === "1" && is_attr.UIATK.substr(3) !== "EXT"){
+      //해당 property의 default 값 매핑.
+      is_attr.UIATV = oAPP.attr.prev[is_attr.OBJID].mProperties[is_attr.UIATT];
+    }
+
+
+    //Aggregation에서 호출되지 않은경우.
+    if(is_attr.UIATY !== "3"){
+      //값을 직접 입력 가능 처리.
+      is_attr.edit = true;
+    }
+
+    //바인딩 FLAG 초기화.
+    is_attr.ISBND = "";
+
+    //property의 바인딩 추가속성 정의 초기화.
+    is_attr.MPROP = "";
+
+    //attr 변경건이 수집됐는지 확인.
+    var l_indx = oAPP.attr.prev[is_attr.OBJID]._T_0015.findIndex( a => a.UIATK === is_attr.UIATK );
+
+    //수집된건이 존재하는경우.
+    if(l_indx !== -1){
+      //수집된건 제거 처리.
+      oAPP.attr.prev[is_attr.OBJID]._T_0015.splice(l_indx, 1);
+    }
+
+    //화면 갱신 처리.
+    oAPP.attr.oModel.refresh();
+
+    //미리보기 화면 갱신 처리.
+    oAPP.fn.previewUIsetProp(is_attr);
+
+    //ATTRIBUTE 영역 갱신 처리.
+    oAPP.fn.updateAttrList(is_attr.UIOBK, is_attr.OBJID);
+
+
+  }; //바인딩 해제 처리 function.
+
+
+
+
+  //프로퍼티의 입력필드 f4 help 설정 여부.
+  oAPP.fn.attrSetShowValueHelp = function(is_attr){
+    //deflaut f4 help 버튼 비활성 처리.
+    is_attr.showF4 = false;
+
+    //PROPERTY가 아닌경우, 바인딩처리된경우 EXIT. 
+    if(is_attr.UIATY !== "1" || is_attr.ISBND === "X"){return;}
+
+    //DDLB가 설정된 경우 EXIT.
+    if(typeof is_attr.T_DDLB !== "undefined" && is_attr.T_DDLB.length !== 0){return;}
+
+    //프로퍼티명에 COLOR, ICON이 없는경우 EXIT.
+    if(is_attr.UIASN.indexOf("COLOR") === -1 && is_attr.UIASN.indexOf("ICON") === -1){return;}
+
+    //f4 help 버튼 활성화.
+    is_attr.showF4 = true;
+
+  }
+
+
+
+  //바인딩 & 이벤트 팝업 호출 처리 function.
+  oAPP.fn.attrBindNEvtPopup = function(is_attr){
+
+    //Aggregation의 바인딩 팝업 버튼 선택시.
+    if(is_attr.UIATY === "3"){
+
+      var l_agrnm = oAPP.fn.getUIAttrFuncName(oAPP.attr.prev[is_attr.OBJID], is_attr.UIATY,is_attr.UIATT,'_sGetter');
+
+      //n건 바인딩시 Aggregation에 UI가 1개만 존재해야함.
+      if(oAPP.attr.prev[is_attr.OBJID][l_agrnm]().length > 2){
+        parent.showMessage(sap, 10, 'E', 'If you have one or more child objects, you can not specify a model.');
+        return;
+      }
+
+    } //바인딩 & 이벤트 팝업 호출 처리 function.
+
+
+
+    var l_func = "",l_title = "",f_callback;
+
+    //UI Attribute Type에 따른 분기.
+    switch(is_attr.UIATY){
+      case "1": //property
+        l_func = 'callBindPopup';
+        l_title = 'Property';
+        f_callback = oAPP.fn.attrBindCallBack;
+        break;
+
+      case "2": //event
+        l_func = 'createEventPopup';
+        f_callback = oAPP.fn.lf_eventCallBack;
+        break;
+
+      case "3": //Aggregation
+        l_func = 'callBindPopup';
+        l_title = 'Aggregation';
+        f_callback = oAPP.fn.attrBindCallBack;
+        break;
+
+      default:
+        return;
+
+    } //UI Attribute Type에 따른 분기.
+
+    //대상 function이 존재하는경우 호출 처리.
+    if(typeof oAPP.fn[l_func] !== "undefined"){
+      oAPP.fn[l_func](l_title, is_attr, f_callback);
+      return;
+    }
+
+    //대상 function이 존재하지 않는경우 script 호출.
+    oAPP.fn.getScript(l_func,function(){
+      oAPP.fn[l_func](l_title, is_attr, f_callback);
+    });
+
+  }; //바인딩 & 이벤트 팝업 호출 처리 function.
+
+
+
+
+  //이벤트 팝업 call back 이벤트
+  oAPP.fn.lf_eventCallBack = function(is_attr, evtnm){
+
+    is_attr.UIATV = evtnm;
+    //DDLB항목에 바인딩한 정보 추가.
+    //is_attr.T_DDLB.push({KEY:evtnm,TEXT:evtnm});
+
+    //화면 갱신 처리.
+    oAPP.attr.oModel.refresh();
+
+    //attr 변경건이 수집됐는지 확인.
+    var l_indx = oAPP.attr.prev[is_attr.OBJID]._T_0015.findIndex( a => a.UIATK === is_attr.UIATK );
+
+    //수집된건이 존재하는경우.
+    if(l_indx !== -1){
+
+      oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].UIATV = evtnm;
+
+    }else{
+
+      //수집된건이 없는경우 신규 라인 생성 처리.
+      var ls_0015 = oAPP.fn.crtStru0015();
+
+      //attribute라인정보 MOVE-CORRESPONDING 처리.
+      oAPP.fn.moveCorresponding(is_attr, ls_0015);
+
+      //attr변경건 수집 처리.
+      oAPP.attr.prev[is_attr.OBJID]._T_0015.push(is_attr);
+
+    }
+
+  }; //이벤트 팝업 call back 이벤트
+
+
+
+
+  //property, event, Aggregation 입력값 처리.
+  oAPP.fn.attrChgAttrVal = function(is_attr, uitp){
+
+    //화면에서 UI추가, 이동, 삭제 및 attr 변경시 변경 flag 처리.
+    oAPP.fn.setChangeFlag();
+
+    var l_val = is_attr.UIATV;
+    var l_dval = "";
+
+    //checkbox에서 발생한 이벤트인경우.
+    if(uitp === "CHECK"){
+      //checkbox를 선택한경우 abap_true로, 선택하지 않은경우 abap_false 처리.
+      l_val = is_attr.UIATV_c === true ? "X":"";
+    }
+
+    //미리보기 화면의 대상 ui의 프로퍼티 변경처리.
+    oAPP.fn.previewUIsetProp(is_attr);
+
+    //default 값 얻기.
+    if(is_attr.OBJID !== "ROOT"){
+      l_dval = oAPP.DATA.LIB.T_0023.find( a => a.UIATK === is_attr.UIATK ).DEFVL;
+
+    }
+
+    //프로퍼티 입력건 수집 항목에 현재 UI의 프로퍼티가 수집됐는지 확인.
+    var l_indx = oAPP.attr.prev[is_attr.OBJID]._T_0015.findIndex( a => a.OBJID === is_attr.OBJID && a.UIATT === is_attr.UIATT);
+
+    //default 값과 동일한 경우 수집항목이 존재하지 않는경우 exit.
+    if(l_dval === l_val && l_indx === -1){
+      return;
+    }
+
+    //default 값과 동일한 경우 수집항목이 존재하는경우 해당 라인 제거 후 exit.
+    if(l_dval === l_val && l_indx !== -1){
+      var l_indx = oAPP.attr.prev[is_attr.OBJID]._T_0015.splice(l_indx,1);
+      return;
+    }
+
+    //입렵값이 default값과 다른경우 수집한 항목이 존재시 해당 라인의 입력값 변경 처리.
+    if(l_indx !== -1){
+      oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].UIATV = l_val;
+      return;
+    }
+
+    //입력값 default값과 다른경우 해당 라인이 수집되지 않을시 신규라인 생성 처리.
+    var ls_0015 = oAPP.fn.crtStru0015();
+
+    oAPP.fn.moveCorresponding(is_attr, ls_0015);
+
+    ls_0015.APPID = oAPP.attr.appInfo.APPID;
+    ls_0015.GUINR = oAPP.attr.appInfo.GUINR;
+
+    ls_0015.UIATV = l_val;
+
+    oAPP.attr.prev[is_attr.OBJID]._T_0015.push(ls_0015);
+
+  }; //property, event, Aggregation 입력값 처리.
+
+
+
+  //appcontainer 호출 이벤트.
+  oAPP.fn.attrAppf4Popup = function(is_attr){
+    //appcontainer의 AppID 프로퍼티가 아닌경우 exit.
+    if(is_attr.UIATK !== "EXT00000030"){return;}
+
+    //appcontainer callback 이벤트.
+    function lf_appCallback(param){
+      is_attr.UIATV = param.APPID;
+
+      //AppID 입력값 변경 처리.
+      oAPP.fn.attrChgAttrVal(is_attr);
+
+      //AppDescript 프로퍼티 정보 얻기.
+      var l_find = oAPP.attr.oModel.oData.T_ATTR.find( a=> a.UIATK === "EXT00000031");
+      if(typeof l_find === "undefined"){return;}
+
+      //AppDescript 입력값 변경 처리.
+      oAPP.fn.attrChgAttrVal(l_find);
+
+      //model 갱신 처리.
+      oAPP.attr.oModel.refresh();
+
+    } //appcontainer callback 이벤트.
+
+    var l_opt = {autoSearch:true, initCond:{PACKG:"", APPID:"", APPNM:"", ERUSR:"", HITS:500}};
+
+    //application f4 help 팝업 호출.
+    if (typeof oAPP.fn.fnAppF4PopupOpen !== "undefined") {
+        oAPP.fn.fnAppF4PopupOpen(l_opt, lf_appCallback);
+        return;
+    }
+
+    //js load후 application f4 help 팝업 호출.
+    oAPP.loadJs("fnAppF4PopupOpen", function() {
+        oAPP.fn.fnAppF4PopupOpen(l_opt, lf_appCallback);
+    });
+
+    //하위로직 skip처리를 위한 flag return
+    return true;
+
+  };
+
+
+  //tree의 parent, child 바인딩시 점검.
+  oAPP.fn.attrChkTreeProp = function(is_attr){
+    var l_UIATK = "";
+
+    //attribute key에 따른 로직 분기.
+    switch(is_attr.UIATK){
+      case "EXT00001190":   //sap.m.Tree의 parent
+      case "EXT00001191":   //sap.m.Tree의 child
+
+        //items Aggregation의 attribute key 매핑.
+        l_UIATK = "AT000006260";
+        break;
+
+      case "EXT00001192":   //sap.ui.table.TreeTable의 parent
+      case "EXT00001193":   //sap.ui.table.TreeTable의 child
+
+        //rows Aggregation의 attribute key 매핑.
+        l_UIATK = "AT000013146";
+        break;
+
+      default:
+        //sap.m.Tree, sap.ui.table.TreeTable의 parent, child 프로퍼티가 아닌경우 exit.
+        return false;
+
+    }
+
+    //점검대상 Aggregation 검색.
+    var ls_attr = oAPP.attr.oModel.oData.T_ATTR.find( a=> a.UIATK === l_UIATK);
+
+    //해당 Aggregation에 N건 바인딩 처리를 하지 않은경우.
+    if(!ls_attr || ls_attr.UIATV === ""){
+
+      is_attr.valst = "Error";
+      is_attr.valtx = "Model information does not exist in Aggregation items.";
+      oAPP.attr.oModel.refresh();
+
+      //Model information does not exist in Aggregation items.
+      showMessage(sap, 20, "E", is_attr.valtx);
+
+      //하위로직 skip처리를 위한 flag return
+      return true;
+
+    }
+
+  };
+
+
+  //select option2의 F4HelpID 프로퍼티의 팝업 호출 처리.
+  oAPP.fn.attrSelOption2F4HelpID = function(is_attr){
+    
+    //selectOption2의 F4HelpID프로퍼티가 아닌경우 exit.
+    if(is_attr.UIATK !== "EXT00001188"){return;}
+    
+    //f4 help callback function.
+    function lf_returnDOC(a){
+      debugger;
+    } //f4 help callback function.
+
+    //f4 help팝업을 load한경우.
+    if(typeof oAPP.fn.callF4HelpPopup !== "undefined"){
+      //f4 help 팝업 호출.
+      oAPP.fn.callF4HelpPopup("DD_SHLP","DD_SHLP",[],[],lf_returnDOC);
+      return;
+    }
+
+    //f4help 팝업을 load하지 못한경우.
+    oAPP.fn.getScript("callF4HelpPopup",function(){
+        //f4 help 팝업 function load 이후 팝업 호출.
+        oAPP.fn.callF4HelpPopup("DD_SHLP","DD_SHLP",[],[],lf_returnDOC);
+    });
+
+    //하위로직 skip처리를 위한 flag return
+    return true;
+
+  };  //select option2의 F4HelpID 프로퍼티의 팝업 호출 처리.
+
+
+
+
   //visible, editable등의 attribute 처리 전용 바인딩 필드 생성 처리.
-  oAPP.fn.crtAttrBindField = function(is_0015){
+  oAPP.fn.attrCreateAttrBindField = function(is_0015){
 
     //아이콘 활성여부 필드.
     is_0015.icon1_visb = false;  //바인딩(서버이벤트) 아이콘 invisible
@@ -971,10 +1127,7 @@
 
     is_0015.btn_icon = undefined; //버튼 아이콘 필드.
 
-
     is_0015.UIATT_ICON = undefined; //attribute 아이콘.
-
-
 
     //attribute 표현 UI default 비활성처리 필드.
     is_0015.inp_visb = false; //input invisible
@@ -1033,7 +1186,7 @@
       var ls_0015 = oAPP.fn.crtStru0015();
 
       //attribute 화면제어 필드 생성.
-      oAPP.fn.crtAttrBindField(ls_0015);
+      oAPP.fn.attrCreateAttrBindField(ls_0015);
 
       //세팅된 DOCUMENT 정보 존재 여부 확인.
       var ls_temp = lt_0015.find( a => a.UIATK === lt_ua003[i].ITMCD);
@@ -1144,6 +1297,46 @@
 
 
 
+  
+  //attribute 항목의 DDLB 정보 구성.
+  oAPP.fn.attrSetDDLBList = function(VALKY, UIATY, DEFVL){
+    var lt_ddlb = [],
+        ls_ddlb = {};
+
+    //attribute가 이벤트건인경우.
+    if(UIATY === "2"){
+      //서버이벤트 항목 return.
+      return oAPP.attr.T_EVT;
+
+    }
+
+    //attribute가 프로퍼티건인경우 enum항목에서 검색.
+    var lt_0024 = oAPP.DATA.LIB.T_0024.filter( a => a.VALKY === VALKY);
+
+    //enum 항목에 존재하지 않는경우 return.
+    if(lt_0024.length === 0){return [];}
+
+    //default value가 없는경우 ddlb에 빈라인 추가.
+    if(DEFVL === ""){
+      lt_ddlb.push({KEY:"",TEXT:""});
+    }
+
+    //검색한 enum항목을 기준으로 ddlb 항목 구성.
+    for(var i=0, l=lt_0024.length; i<l; i++){
+      ls_ddlb.KEY = lt_0024[i].VALUE;
+      ls_ddlb.TEXT = lt_0024[i].VALUE;
+      lt_ddlb.push(ls_ddlb);
+      ls_ddlb = {};
+
+    }
+
+    //구성항 DDLB 항목 return
+    return lt_ddlb;
+
+  };  //attribute 항목의 DDLB 정보 구성.
+
+
+
 
   //선택한 UI에 해당하는 attribute 리스트 업데이트 처리.
   oAPP.fn.updateAttrList = function(UIOBK,OBJID){
@@ -1170,40 +1363,6 @@
 
     }
 
-    //ddlb 항목 구성.
-    function lf_setDDLBList(VALKY,UIATY, DEFVL){
-
-      var lt_ddlb = [],
-          ls_ddlb = {};
-
-
-      if(UIATY === "2"){
-        return oAPP.attr.T_EVT;
-
-      }
-
-      var lt_0024 = oAPP.DATA.LIB.T_0024.filter( a => a.VALKY === VALKY);
-
-      if(lt_0024.length === 0){return [];}
-
-      //default value가 없는경우 ddlb에 빈라인 추가.
-      if(DEFVL === ""){
-        lt_ddlb.push({KEY:"",TEXT:""});
-      }
-
-      for(var i=0, l=lt_0024.length; i<l; i++){
-        ls_ddlb.KEY = lt_0024[i].VALUE;
-        ls_ddlb.TEXT = lt_0024[i].VALUE;
-        lt_ddlb.push(ls_ddlb);
-        ls_ddlb = {};
-
-      }
-
-      return lt_ddlb;
-
-    } //ddlb 항목 구성.
-
-
 
     //UI에 해당하는 property, event, Aggregation 정보 얻기.
     var lt_0023 = oAPP.DATA.LIB.T_0023.filter( a => a.UIOBK === UIOBK && a.ISDEP !== "X" && a.UIATY !== "4");
@@ -1220,7 +1379,7 @@
       ls_0015.UIATV = lt_0023[i].DEFVL;
 
       //visible, editable등의 attribute 처리 전용 바인딩 필드 생성 처리.
-      oAPP.fn.crtAttrBindField(ls_0015);
+      oAPP.fn.attrCreateAttrBindField(ls_0015);
 
       //아이콘 활성여부 처리.
       ls_0015.bind_visb = true;  //바인딩 아이콘 visible
@@ -1233,7 +1392,7 @@
         ls_0015.sel_visb = true;
 
         //DDLB 항목 구성.
-        ls_0015.T_DDLB = lf_setDDLBList(lt_0023[i].VALKY, ls_0015.UIATY, lt_0023[i].DEFVL);
+        ls_0015.T_DDLB = oAPP.fn.attrSetDDLBList(lt_0023[i].VALKY, ls_0015.UIATY, lt_0023[i].DEFVL);
 
       }else if(lt_0023[i].ISLST === ""){
         //DDLB출력건이 아닌경우 input visible
@@ -1247,20 +1406,6 @@
         ls_0015.edit = true;
       }
 
-      //프로퍼티 OR 직접입력 가능한 Aggregation(title 등)인경우
-      if(ls_0015.UIATY === "1" && lt_0023[i].ISLST !== "X"){
-
-        //TEXT 유형인경우.
-        if(ls_0015.UIASN.indexOf("TITLE") !== -1 ||
-           ls_0015.UIASN.indexOf("TEXT") !== -1 ||
-           ls_0015.UIASN.indexOf("LABEL") !== -1 ||
-           ls_0015.UIASN.indexOf("TOOLTIP") !== -1 ){
-
-          ls_0015.icon3_src = "sap-icon://attachment-text-file";
-        }
-
-      }
-
       //UI 타입에 따른 로직 분기.
       switch(ls_0015.UIATY){
         case "1": //프로퍼티
@@ -1272,26 +1417,22 @@
           ls_0015.icon2_src = "sap-icon://sys-help";
           ls_0015.icon2_color = "#40baf3";  //바인딩(서버이벤트) 색상 필드
 
-          //
-          ls_0015.UIATT_ICON = "";
+          //프로퍼티 아이콘 처리.
+          ls_0015.UIATT_ICON = "sap-icon://customize";
 
           break;
 
         case "2": //이벤트
           //서버이벤트 아이콘 처리.
-          if(oAPP.attr.oModel.oData.IS_EDIT){
-            ls_0015.icon1_src = "sap-icon://developer-settings";
-            ls_0015.icon1_color = "#c9e088";  //바인딩(서버이벤트) 색상 필드
+          ls_0015.icon1_src = "sap-icon://developer-settings";
+          ls_0015.icon1_color = "#c9e088";  //바인딩(서버이벤트) 색상 필드
 
-            //클라이언트이벤트 아이콘 처리.
-            ls_0015.icon2_src = "sap-icon://syntax";
-            ls_0015.icon2_color = "#acaba7";  //바인딩(서버이벤트) 색상 필드
+          //클라이언트이벤트 아이콘 처리.
+          ls_0015.icon2_src = "sap-icon://syntax";
+          ls_0015.icon2_color = "#acaba7";  //바인딩(서버이벤트) 색상 필드
 
-            //
-            ls_0015.UIATT_ICON = "sap-icon://border";
-
-
-          }
+          //이벤트 아이콘 처리.
+          ls_0015.UIATT_ICON = "sap-icon://border";
 
           break;
 
@@ -1306,9 +1447,16 @@
           //help 아이콘 처리.
           ls_0015.icon2_src = "sap-icon://warning2";
 
-          //Aggregation ICON 처리.
-          ls_0015.UIATT_ICON = "sap-icon://border";
-
+          //직접 입력 가능한 Aggregation이 아닌경우 ICON 처리.
+          if(ls_0015.ISSTR !== "X"){
+            ls_0015.UIATT_ICON = "sap-icon://color-fill";
+          }
+        
+          //Aggregation cardinality 0:N건인경우.
+          if(ls_0015.ISMLB === "X"){
+            //N건 아이콘 처리.
+            ls_0015.UIATT_ICON = "sap-icon://dimension";
+          }
 
           break;
 
@@ -1339,6 +1487,9 @@
       ls_0015.icon2_src = "sap-icon://sys-help";
       ls_0015.icon2_color = "#40baf3";  //바인딩(서버이벤트) 색상 필드
 
+      //PROPERTY 아이콘 처리.
+      ls_0015.UIATT_ICON = "sap-icon://customize";
+
 
       oAPP.attr.oModel.oData.T_ATTR.push(ls_0015);
 
@@ -1351,12 +1502,15 @@
       oAPP.fn.moveCorresponding(oAPP.attr.prev[OBJID]._T_0015.find( a=> a.OBJID === OBJID && a.UIATY === "6"), ls_0015);
 
       //visible, editable등의 attribute 처리 전용 바인딩 필드 생성 처리.
-      oAPP.fn.crtAttrBindField(ls_0015);
+      oAPP.fn.attrCreateAttrBindField(ls_0015);
 
-      ls_0015.chk_visb = true; //checkbox visible
+      //checkbox visible
+      ls_0015.chk_visb = true;
 
-      ls_0015.UIATV_c = true;  //체크박스 선택 처리.
+      //체크박스 선택 처리.
+      ls_0015.UIATV_c = true;
 
+      //편집 불가 처리.
       ls_0015.edit = false;
 
       //embed Aggregation 정보 추가.
@@ -1370,7 +1524,7 @@
       //대상 UI에 해당하는 입력건 검색.
       var ls_0015 = oAPP.attr.prev[OBJID]._T_0015.find( a => a.UIATK === oAPP.attr.oModel.oData.T_ATTR[i].UIATK );
 
-      if(!ls_0015){continue;}
+      if(typeof ls_0015 === "undefined"){continue;}
 
       //입력값 매핑.
       oAPP.attr.oModel.oData.T_ATTR[i].UIATV = ls_0015.UIATV;
@@ -1391,6 +1545,9 @@
     //attr 입력 가능 여부 처리.
     for(var i=0, l=oAPP.attr.oModel.oData.T_ATTR.length; i<l; i++){
 
+      //F4 HELP 버튼 활성여부 처리.
+      oAPP.fn.attrSetShowValueHelp(oAPP.attr.oModel.oData.T_ATTR[i]);
+
       //입력필드 입력 가능여부 처리.
       oAPP.fn.setAttrEditable(oAPP.attr.oModel.oData.T_ATTR[i]);
 
@@ -1399,6 +1556,7 @@
 
     }
 
+    //모델 갱신 처리.
     oAPP.attr.oModel.refresh(true);
 
     //attribute 영역 그룹핑 처리.

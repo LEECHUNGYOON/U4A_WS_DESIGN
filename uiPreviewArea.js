@@ -9,7 +9,10 @@
     oMPage.addContent(oMfrm1);
 
 
-  };
+  };  //가운데 페이지(미리보기 영역) 구성
+
+
+  
 
   //미리보기 화면 UI의 프로퍼티 변경 처리.
   oAPP.fn.previewUIsetProp = function(is_attr){
@@ -71,7 +74,10 @@
 
     oAPP.attr.prev[is_attr.OBJID][l_propnm](l_prop);
 
-  };
+  };  //미리보기 화면 UI의 프로퍼티 변경 처리.
+
+
+
 
   //미리보기 UI styleClass 프로퍼티 처리.
   oAPP.fn.previewUIaddStyleClass = function(is_attr){
@@ -85,7 +91,10 @@
 
     l_ui.addStyleClass(is_attr.UIATV);
 
-  };
+  };  //미리보기 UI styleClass 프로퍼티 처리.
+
+
+
 
   //대상 UI instnace의 UIOBJ명 얻기.
   oAPP.fn.getUIOBJname = function(oUI){
@@ -98,7 +107,10 @@
 
     }
 
-  };
+  };  //대상 UI instnace의 UIOBJ명 얻기.
+
+
+
 
   //프로퍼티에 값 구성시 따옴표 처리 여부.
   oAPP.fn.setPropDoqu = function(UIADT){
@@ -120,6 +132,6 @@
 
     }
 
-  };
+  };  //프로퍼티에 값 구성시 따옴표 처리 여부.
 
 })();

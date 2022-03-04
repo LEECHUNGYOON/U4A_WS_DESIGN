@@ -139,6 +139,24 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
 
       l_model.oData.TREE = param.T_ATTR;
 
+      //바인딩 정보가 존재하지 않는경우.
+      if(l_model.oData.TREE.length === 0){
+        //tree 정보 공백 처리.
+        l_model.oData.zTREE = [];
+
+        //화면 잠금 해제 처리.
+        l_model.oData.busy = false;
+         
+        //모델 정보 바인딩 처리.
+        l_model.refresh(true);
+
+        //바인딩 필드가 존재하지 않음 메시지 처리.
+        parent.showMessage(sap, 10, "E", "Binding attributes dose not exist.");
+
+        return;
+
+      }
+
       //controller의 바인딩 가능 attribute 정보가 존재하는경우.
       if(l_model.oData.TREE.length !== 0){
 
@@ -792,9 +810,8 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
 
 
 
-    debugger;
     //이벤트 발생 UI 정보 얻기.
-    var l_ui = oAPP.fn.getUiInstanceDOM(oEvent.target);
+    var l_ui = oAPP.fn.getUiInstanceDOM(oEvent.target,sap.ui.getCore());
 
     //UI정보를 얻지 못한 경우 exit.
     if(!l_ui){return;}

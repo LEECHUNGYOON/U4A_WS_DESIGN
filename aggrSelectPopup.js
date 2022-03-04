@@ -54,8 +54,15 @@
 
     }
 
+    //선택가능 aggregation리스트가 존재하지 않는경우, drag, drop의 부모, aggregation이 동일한경우.
+    if(lt_sel.length === 0 && i_drag.POBID === i_drop.POBID && i_drag.UIATK === i_drop.UIATK ){
+      retfunc(undefined, i_drag, i_drop);
+      return;
+    }
+
     //선택가능 aggregation리스트가 존재하지 않는경우.
     if(lt_sel.length === 0){
+      //오류 메시지 출력.
       parent.showMessage(sap, 10, 'I', '이동 가능한 aggregation이 존재하지 않습니다.');
       return;
     }
@@ -84,11 +91,10 @@
 
     var oItm1 = new sap.ui.core.Item({key:"{UIATK}",text:"{UIATT}"});
     oSel1.bindAggregation("items",{path:"/T_SEL",template:oItm1});
-
+    
     oDlg1.addContent(oSel1);
 
     oSel1.setSelectedIndex(0);
-
 
 
     //확인버튼

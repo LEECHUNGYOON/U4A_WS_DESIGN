@@ -565,13 +565,13 @@
 
 
     //UI DOM을 기준으로 UI instance 정보 얻기.
-    oAPP.fn.getUiInstanceDOM = function(oDom){
+    oAPP.fn.getUiInstanceDOM = function(oDom,oCore){
 
       //DOM 정보가 존재하지 않는경우 exit.
       if(typeof oDom === "undefined"){return;}
 
       //DOM id로부터 UI정보 검색.
-      var l_ui = sap.ui.getCore().byId(oDom.id);
+      var l_ui = oCore.byId(oDom.id);
 
       //UI를 찾은경우 해당 UI정보 return
       if(typeof l_ui !== "undefined"){
@@ -579,7 +579,7 @@
       }
 
       //UI정보를 찾지못한 경우 상위 부모를 탐색하며 UI instance정보 검색.
-      return oAPP.fn.getUiInstanceDOM(oDom.parentElement);
+      return oAPP.fn.getUiInstanceDOM(oDom.parentElement, oCore);
 
 
     };  //UI DOM을 기준으로 UI instance 정보 얻기.
