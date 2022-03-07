@@ -242,7 +242,7 @@
     //help(script 이벤트) 아이콘 선택 이벤트
     oRIcon2.attachPress(function(oEvent){
 
-      oAPP.fn.attr
+      //oAPP.fn.attr
 
       //property help DOCUMENT 팝업 호출.
       function lf_helpProp(){
@@ -284,7 +284,24 @@
         var l_objid = ls_attr.OBJID + ls_attr.UIASN;
 
         //클라이언트 스크립트 호출 FUNCTION 호출.
-        oAPP.fn.fnClientEditorPopupOpener("JS", l_objid);
+        oAPP.fn.fnClientEditorPopupOpener("JS", l_objid,function(param){
+
+          //동일 이벤트 정보 얻기.
+          //var ls_0015 = oAPP.attr.prev[ls_attr.OBJID]._T_0015.find( a=> a.UIATK === ls_attr.UIATK);
+
+          //default 색상 처리.
+          ls_attr.icon2_color = "#acaba7";
+
+          //클라이언트 이벤트가 등록된경우.
+          if(param === "X"){
+            ls_attr.icon2_color = "red";
+
+          }
+
+          //모델 갱신 처리.
+          oAPP.attr.oModel.refresh();
+
+        });
         return;
 
       }
@@ -364,7 +381,7 @@
     }
 
     //f4help 팝업을 load하지 못한경우.
-    oAPP.fn.getScript("callF4HelpPopup",function(){
+    oAPP.fn.getScript("design/js/callF4HelpPopup",function(){
         //f4 help 팝업 function load 이후 팝업 호출.
         oAPP.fn.callF4HelpPopup(ls_ua003.FLD05,ls_ua003.FLD05,[],[],lf_returnDOC);
     });
@@ -456,7 +473,7 @@
     }
 
     //icon list popup function이 존재하지 않는 경우.
-    oAPP.fn.getScript("callIconListPopup",function(){
+    oAPP.fn.getScript("design/js/callIconListPopup",function(){
         //icon list popup function load 이후 팝업 호출.
         oAPP.fn.callIconListPopup(lf_callback);
     });
@@ -871,7 +888,7 @@
     }
 
     //대상 function이 존재하지 않는경우 script 호출.
-    oAPP.fn.getScript(l_func,function(){
+    oAPP.fn.getScript("design/js/" + l_func,function(){
       oAPP.fn[l_func](l_title, is_attr, f_callback);
     });
 
@@ -1085,7 +1102,7 @@
     }
 
     //f4help 팝업을 load하지 못한경우.
-    oAPP.fn.getScript("callF4HelpPopup",function(){
+    oAPP.fn.getScript("design/js/callF4HelpPopup",function(){
         //f4 help 팝업 function load 이후 팝업 호출.
         oAPP.fn.callF4HelpPopup("DD_SHLP","DD_SHLP",[],[],lf_returnDOC);
     });
@@ -1352,7 +1369,7 @@
     //대상 function이 존재하지 않는경우 script 호출.
     if(typeof oAPP.fn.getServerEventList === "undefined"){
 
-      oAPP.fn.getScript("createEventPopup",function(){
+      oAPP.fn.getScript("design/js/createEventPopup",function(){
         //서버 이벤트 항목 검색.
         oAPP.fn.getServerEventList();
       },true);
@@ -1429,7 +1446,7 @@
 
           //클라이언트이벤트 아이콘 처리.
           ls_0015.icon2_src = "sap-icon://syntax";
-          ls_0015.icon2_color = "#acaba7";  //바인딩(서버이벤트) 색상 필드
+          ls_0015.icon2_color = "#acaba7";  //바인딩(클라이언트 이벤트) 색상 필드
 
           //이벤트 아이콘 처리.
           ls_0015.UIATT_ICON = "sap-icon://border";
@@ -1481,11 +1498,11 @@
 
       //바인딩 아이콘 처리
       ls_0015.icon1_src = "sap-icon://fallback";
-      ls_0015.icon1_color = "#dec066";  //바인딩(서버이벤트) 색상 필드
+      ls_0015.icon1_color = "#dec066";  //바인딩 색상 필드
 
       //help 아이콘 처리.
       ls_0015.icon2_src = "sap-icon://sys-help";
-      ls_0015.icon2_color = "#40baf3";  //바인딩(서버이벤트) 색상 필드
+      ls_0015.icon2_color = "#40baf3";  //help 색상 필드
 
       //PROPERTY 아이콘 처리.
       ls_0015.UIATT_ICON = "sap-icon://customize";

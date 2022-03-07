@@ -616,15 +616,15 @@
 
 
     //ui design area(좌측 TREE 영역)
-    oAPP.fn.getScript("uiDesignArea",function(){oAPP.fn.uiDesignArea(oLPage);});
+    oAPP.fn.getScript("design/js/uiDesignArea",function(){oAPP.fn.uiDesignArea(oLPage);});
 
 
     //ui preview area(가운데 미리보기 영역)
-    oAPP.fn.getScript("uiPreviewArea",function(){oAPP.fn.uiPreviewArea(oMPage);});
+    oAPP.fn.getScript("design/js/uiPreviewArea",function(){oAPP.fn.uiPreviewArea(oMPage);});
 
 
     //ui attribute area(우측 ui 속성정보 영역)
-    oAPP.fn.getScript("uiAttributeArea",function(){oAPP.fn.uiAttributeArea(oRPage);});
+    oAPP.fn.getScript("design/js/uiAttributeArea",function(){oAPP.fn.uiAttributeArea(oRPage);});
 
 
   };  //미리보기 메인 function

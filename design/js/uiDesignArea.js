@@ -871,7 +871,7 @@
         return;
       }
 
-      oAPP.fn.getScript("aggrSelectPopup",function(){
+      oAPP.fn.getScript("design/js/aggrSelectPopup",function(){
         oAPP.fn.aggrSelectPopup(l_drag, l_drop, oAPP.fn.drop_cb);
       });
 
@@ -1270,7 +1270,7 @@
       var l_stru = oModel.getProperty("",oEvent.oSource.getBindingContext());
 
       if(typeof oAPP.fn.callUIInsertPopup === "undefined"){
-        oAPP.fn.getScript("insertUIPopop",function(){
+        oAPP.fn.getScript("design/js/insertUIPopop",function(){
           oAPP.fn.callUIInsertPopup(l_stru.UIOBK,lf_setChild);
         });
 
@@ -1482,7 +1482,7 @@
 
 
       if(typeof oAPP.fn.uiMovePosition === "undefined"){
-        oAPP.fn.getScript("uiMovePosition",function(){
+        oAPP.fn.getScript("design/js/uiMovePosition",function(){
           oAPP.fn.uiMovePosition(l_pos,l_parent.length,lf_callback);
         });
 
@@ -1701,7 +1701,7 @@
       }
 
       //aggregation 선택 팝업이 존재하지 않는경우 js load후 호출.
-      oAPP.fn.getScript("aggrSelectPopup",function(){
+      oAPP.fn.getScript("design/js/aggrSelectPopup",function(){
         oAPP.fn.aggrSelectPopup(l_paste[0].DATA, ls_tree, lf_paste_cb);
       });
 
