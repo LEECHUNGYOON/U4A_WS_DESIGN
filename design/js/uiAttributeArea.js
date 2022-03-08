@@ -163,7 +163,7 @@
       //해당 라인의 바인딩 정보 얻기.
       var ls_0015 = this.getBindingContext().getProperty();
 
-      switch(ls_0015.UIATT){
+      switch(ls_0015.UIATK){
         case "DH001022":
           //CSS Link Add
           oAPP.fn.fnCssJsLinkAddPopupOpener("CSS");
