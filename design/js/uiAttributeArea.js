@@ -233,96 +233,189 @@
     }); //바인딩(서버 이벤트) 아이콘 선택 이벤트
 
 
-    
 
     //help(script 이벤트) 아이콘
     var oRIcon2 = new sap.ui.core.Icon({src:"{icon2_src}",color:"{icon2_color}"});
-    oRListItem1.addCell(oRIcon2);    
+    oRListItem1.addCell(oRIcon2);
 
     //help(script 이벤트) 아이콘 선택 이벤트
     oRIcon2.attachPress(function(oEvent){
-
-      //oAPP.fn.attr
-
-      //property help DOCUMENT 팝업 호출.
-      function lf_helpProp(){
-
-        //선택한 라인이 프로퍼티건이 아닌경우 EXIT.
-        if(ls_attr.UIATY !== "1"){return;}
-
-        var l_url = "/ZU4A_ACS/U4A_API_DOCUMENT";
-
-        //UI5 bootstrap 라이브러리 관리 정보(MIME PATH) 얻기.
-        var ls_ua025 = oAPP.DATA.LIB.T_9011.find( a => a.CATCD === "UA025" &&
-          a.FLD01 === "APP" && a.FLD06 === "X" );
-
-        if(!ls_ua025){return;}
-
-        //version.
-        l_url = l_url + "?VER=" + ls_ua025.FLD07;
-
-        var ls_tree = oAPP.attr.oModel.oData.TREE.find( a => a.OBJID === ls_attr.OBJID );
-        if(!ls_tree){return;}
-
-        //UI 라이브러리 명, PROPERTY 구분, 프로퍼티명, UI OBJECT KEY
-        l_url = l_url + "&CLSNM=" + ls_tree.UILIB + "&GUBUN=1&PROPID=" + ls_attr.UIATT + "&UIOBK=" + ls_attr.UIOBK;
-
-        //HELP 팝업 호출.
-        fn_PropHelpPopup(l_url);
-
-      } //property help DOCUMENT 팝업 호출.
-
-
-
-      var l_ctxt = this.getBindingContext();
-      var ls_attr = l_ctxt.getProperty();
+      
+      //attribute 라인 정보 얻기.
+      var ls_attr = this.getBindingContext().getProperty();
 
       //선택한 라인이 이벤트인경우.
-      if(ls_attr.UIATY === "2"){
-
-        //OBJID + 이벤트명 대문자 로 client이벤트 script ID 구성.
-        var l_objid = ls_attr.OBJID + ls_attr.UIASN;
-
-        //클라이언트 스크립트 호출 FUNCTION 호출.
-        oAPP.fn.fnClientEditorPopupOpener("JS", l_objid,function(param){
-
-          //동일 이벤트 정보 얻기.
-          //var ls_0015 = oAPP.attr.prev[ls_attr.OBJID]._T_0015.find( a=> a.UIATK === ls_attr.UIATK);
-
-          //default 색상 처리.
-          ls_attr.icon2_color = "#acaba7";
-
-          //클라이언트 이벤트가 등록된경우.
-          if(param === "X"){
-            ls_attr.icon2_color = "red";
-
-          }
-
-          //모델 갱신 처리.
-          oAPP.attr.oModel.refresh();
-
-        });
+      if(oAPP.fn.attrClientEventPopup(ls_attr) === true){
         return;
-
       }
 
-      //Aggregation에서 아이콘 선택한 경우 exit.
-      if(ls_attr.UIATY === "3"){
+      //sap.ui.core.HTML UI의 content 프로퍼티의 icon선택시 HTML source 팝업 호출.
+      if(oAPP.fn.attrHTMLConentPopup(ls_attr) === true){
         return;
       }
 
       //property help DOCUMENT 팝업 호출.
-      lf_helpProp();
-
+      if(oAPP.fn.attrPropHelpPopup(ls_attr) === true){
+        return;
+      }
 
     }); //help(script 이벤트) 아이콘 선택 이벤트
-    
+
 
 
     //attribute출력 tab에 바인딩 처리.
     oRTab1.bindAggregation("items",{path:"/T_ATTR",template:oRListItem1});
 
   };  //우측 페이지(attribute 영역) 구성
+
+
+
+  //sap.ui.core.HTML UI의 content 프로퍼티에서 바인딩, editor 호출전 점검.
+  oAPP.fn.attrChkHTMLContent = function(is_attr, bFlag, fnCallback){
+
+    //HTML UI의 content 프로퍼티가 아닌경우 exit.
+    if(is_attr.UIATK !== "AT000011858"){return;}
+
+    var l_chk = false,
+        l_msg = "";
+
+    //바인딩 팝업전 호출한 경우.
+    if(bFlag === true){
+
+      //UI명 + 프로퍼티명으로 OBJID 구성.
+      var l_objid = is_attr.OBJID + is_attr.UIASN;
+
+      //HTML editor 입력건 존재여부 확인.
+      l_chk = oAPP.DATA.APPDATA.T_CEVT.findIndex( a => a.OBJTY === "HM" && a.OBJID === l_objid) !== -1 ? true : false;
+
+      l_msg = 'HTML Editor에 입력한 정보가 존재합니다. 바인딩 처리를 진행하시겠습니까?';
+
+    //HTML editor 팝업전 호출한 경우.
+    }else if(bFlag === false){
+
+      //바인딩건이 존재하는경우.
+      if(is_attr.ISBND === "X" && is_attr.UIATV !== ""){
+        l_chk = true;
+      }
+
+      l_msg = '바인딩 정보가 존재합니다. HTML Source 입력처리를 진행하시겠습니까?';
+
+    }
+
+    //확인 불필요상태면 exit.
+    if(l_chk !== true){return;}
+
+    //확인이 필요한경우 메시지 팝업 호출.
+    parent.showMessage(sap, 30, "I", l_msg, function(param){
+
+    });
+
+
+  };  //sap.ui.core.HTML UI의 content 프로퍼티에서 바인딩, editor 호출전 점검.
+
+
+
+
+  //sap.ui.core.HTML UI의 content 프로퍼티의 icon선택시 HTML source 팝업 호출.
+  oAPP.fn.attrHTMLConentPopup = function(is_attr){
+
+    //HTML UI의 content 프로퍼티가 아닌경우 exit.
+    if(is_attr.UIATK !== "AT000011858"){return;}
+
+    //UI명 + 프로퍼티명으로 OBJID 구성.
+    var l_objid = is_attr.OBJID + is_attr.UIASN;
+
+    //클라이언트 스크립트 호출 FUNCTION 호출.
+    oAPP.fn.fnClientEditorPopupOpener("HM", l_objid,function(param){
+
+      //동일 이벤트 정보 얻기.
+      //var ls_0015 = oAPP.attr.prev[ls_attr.OBJID]._T_0015.find( a=> a.UIATK === ls_attr.UIATK);
+
+      //default 색상 처리.
+      is_attr.icon2_color = "#acaba7";
+
+      //클라이언트 이벤트가 등록된경우.
+      if(param === "X"){
+        is_attr.icon2_color = "red";
+
+      }
+
+      //모델 갱신 처리.
+      oAPP.attr.oModel.refresh();
+
+    });
+
+
+    //function 사용처의 하위로직 skip을 위한 flag return.
+    return true;
+
+  };  //sap.ui.core.HTML UI의 content 프로퍼티의 icon선택시 HTML source 팝업 호출.
+
+
+
+
+  //property help DOCUMENT 팝업 호출.
+  oAPP.fn.attrPropHelpPopup = function(is_attr){
+
+    //선택한 라인이 프로퍼티건이 아닌경우 EXIT.
+    if(is_attr.UIATY !== "1"){return;}
+
+    //UI5 bootstrap 라이브러리 관리 정보(MIME PATH) 얻기.
+    var ls_ua025 = oAPP.DATA.LIB.T_9011.find( a => a.CATCD === "UA025" &&
+      a.FLD01 === "APP" && a.FLD06 === "X" );
+
+    if(typeof ls_ua025 === "undefined"){return;}
+
+    //version.
+    l_url = l_url + "?VER=" + ls_ua025.FLD07;
+
+    //ATTRIBUTE의 UI DESIGN 영역 정보 얻기.
+    var ls_tree = oAPP.fn.getTreeData(is_attr.OBJID);
+    if(typeof ls_tree === "undefined"){return;}
+
+    //UI 라이브러리 명, PROPERTY 구분, 프로퍼티명, UI OBJECT KEY
+    l_url = l_url + "&CLSNM=" + ls_tree.UILIB + "&GUBUN=1&PROPID=" + is_attr.UIATT + "&UIOBK=" + is_attr.UIOBK;
+
+    //HELP 팝업 호출.
+    fn_PropHelpPopup(l_url);
+
+    //function 사용처의 하위로직 skip을 위한 flag return.
+    return true;
+
+  };  //property help DOCUMENT 팝업 호출.
+
+
+  //client event popup 호출처리.
+  oAPP.fn.attrClientEventPopup = function(is_attr){
+
+    //이벤트건이 아닌경우 exit.
+    if(is_attr.UIATY !== "2"){return;}
+
+    //OBJID + 이벤트명 대문자 로 client이벤트 script ID 구성.
+    var l_objid = is_attr.OBJID + is_attr.UIASN;
+
+    //클라이언트 스크립트 호출 FUNCTION 호출.
+    oAPP.fn.fnClientEditorPopupOpener("JS", l_objid,function(param){
+
+      //동일 이벤트 정보 얻기.
+      //var ls_0015 = oAPP.attr.prev[ls_attr.OBJID]._T_0015.find( a=> a.UIATK === ls_attr.UIATK);
+
+      //default 색상 처리.
+      is_attr.icon2_color = "#acaba7";
+
+      //클라이언트 이벤트가 등록된경우.
+      if(param === "X"){
+        is_attr.icon2_color = "red";
+
+      }
+
+      //모델 갱신 처리.
+      oAPP.attr.oModel.refresh();
+
+    });
+
+
+  }; //client event popup 호출처리.
 
 
 
