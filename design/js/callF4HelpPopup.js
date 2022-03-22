@@ -219,7 +219,7 @@ oAPP.fn.callF4HelpPopup = function(I_SHLPNAME, I_SHLP_DEF, IT_SHLP, IT_FIELDDESC
           var Ltxt = param.TEXT[0].VALUE;
 
           //~Message 처리
-          showMessage(sap, 10, 'E', Ltxt);
+          parent.showMessage(sap, 10, 'E', Ltxt);
         }
 
         oTable.setBusy(false);

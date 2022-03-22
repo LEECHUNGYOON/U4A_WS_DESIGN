@@ -1,808 +1,4 @@
 (function(){
-
-  //visible, editable등의 tree 처리 전용 바인딩 필드 생성 처리.
-  oAPP.fn.crtTreeBindField = function(is_0014){
-
-    is_0014.drag_enable = true;  //tree item drag 가능여부 필드
-    is_0014.drop_enable = oAPP.attr.oModel.oData.IS_EDIT;  //tree item drop 가능여부 필드
-
-    is_0014.sel = false; //tree item 선택처리 필드
-
-    is_0014.chk_visible = oAPP.attr.oModel.oData.IS_EDIT;  //chkbox 활성여부 필드.
-
-    is_0014.chk = false; //chkbox checked 바인딩 필드.
-
-    if(typeof is_0014.zTREE === "undefined"){
-      is_0014.zTREE = []; //하위 TREE 정보
-    }
-
-  };  //visible, editable등의 tree 처리 전용 바인딩 필드 생성 처리.
-
-
-
-
-  //체크박스 활성여부 처리.
-  oAPP.fn.setTreeChkBoxEnable = function(is_tree){
-
-    //default checkbox 비활성 처리.
-    is_tree.chk_visible = false;
-
-
-    //편집 모드인경우 checkbox 활성 처리.
-    if(oAPP.attr.appInfo.IS_EDIT === "X"){
-      is_tree.chk_visible = true;
-    }
-
-    //root, APP는 체크박스 비활성 처리.
-    if(is_tree.OBJID === "ROOT" || is_tree.OBJID === "APP"){
-      is_tree.chk_visible = false;
-
-    }
-
-    //하위 UI가 존재하지 않는경우 exit.
-    if(!is_tree.zTREE || is_tree.zTREE.length === 0){return;}
-
-    //하위 UI가 존재하는경우 재귀호출을 통해 checkbox 활성여부 처리.
-    for(var i=0, l=is_tree.zTREE.length; i<l; i++){
-      oAPP.fn.setTreeChkBoxEnable(is_tree.zTREE[i]);
-    }
-
-  };
-
-
-
-  //tree drag & drop 가능여부 처리.
-  oAPP.fn.setTreeDnDEnable = function(is_tree){
-
-    //drag는 default 가능처리(display 상태일때도, runtime class navigator 기능 때문)
-    is_tree.drag_enable = true;
-
-    //drop는 현재 편집 가능상태일때만 drop 가능 처리.
-    is_tree.drop_enable = oAPP.attr.oModel.oData.IS_EDIT;
-
-    //root는 drag & drop 불가.
-    if(is_tree.OBJID === "ROOT"){
-      is_tree.drag_enable = false;
-      is_tree.drop_enable = false;
-
-    }
-
-    //하위 UI가 존재하지 않는경우 exit.
-    if(!is_tree.zTREE || is_tree.zTREE.length === 0){return;}
-
-    //하위 UI가 존재하는경우 재귀호출을 통해 drag & drop 가능여부 처리.
-    for(var i=0, l=is_tree.zTREE.length; i<l; i++){
-      oAPP.fn.setTreeDnDEnable(is_tree.zTREE[i]);
-    }
-
-  };  //tree drag & drop 가능여부 처리.
-
-
-
-  
-  //tree 정보에서 UI명에 해당하는건 검색.
-  oAPP.fn.getTreeData = function(OBJID, is_tree){
-    //최초 호출상태인경우.
-    if(typeof is_tree === "undefined"){
-      //ROOT를 매핑.
-      is_tree = oAPP.attr.oModel.oData.zTREE[0];
-    }
-
-    //현재 TREE가 검색대상건인경우 해당 TREE정보 RETURN.
-    if(is_tree.OBJID === OBJID){
-      return is_tree;
-    }
-
-    //child가 존재하지 않는경우 exit.
-    if(!is_tree.zTREE || is_tree.zTREE.length === 0){return;}
-
-    //현재 TREE가 검색대상이 아닌경우 CHILD를 탐색하며 OBJID에 해당하는 TREE정보 검색.
-    for(var i=0, l=is_tree.zTREE.length; i<l; i++){
-      
-      var ls_tree = oAPP.fn.getTreeData(OBJID, is_tree.zTREE[i]);
-      if(typeof ls_tree  !== "undefined"){
-        return ls_tree;
-      }
-
-    }    
-
-  };  //tree 정보에서 UI명에 해당하는건 검색.
-
-
-
-
-  // OBJID의 라인 위치(index) 찾기.
-  oAPP.fn.getItemIndex = function(OBJID){
-
-    function lf_findItem(it_tree){
-
-      //TREE에 값이 없는경우 EXIT.
-      if(it_tree.length === 0){return;}
-
-      //TREE 정보중 입력 OBJID건 존재여부 확인.
-      for(var i=0, l=it_tree.length; i<l; i++){
-
-        //현재 정보가 입력 OBJID와 동일한경우.
-        if(it_tree[i].OBJID === OBJID){
-          //해당 INDEX 정보 RETURN.
-          return i;
-        }
-
-        //재귀호출을 통해 입력 OBJID에 해당하는 INDEX 정보 검색.
-        var l_index = lf_findItem(it_tree[i].zTREE);
-
-        //INDEX 정보를 찾은경우 RETURN.
-        if(typeof l_index !== "undefined"){return l_index;}
-
-      }
-
-    }
-
-
-    //TREE를 탐색하며 입력 OJBID의 INDEX 정보 찾기.
-    return lf_findItem(oAPP.attr.oModel.oData.zTREE);
-
-
-  };  // OBJID의 라인 위치(index) 찾기.
-
-
-
-  //tree item 펼침 처리.
-  oAPP.fn.expandTreeItem = function(){
-
-    //선택한 라인을 기준으로 하위를 탐색하며 펼침 처리.
-    function lf_expand(){
-
-      //처리대상 라인의 node 정보 얻기.
-      var l_node = l_bind.getNodeByIndex(l_indx);
-
-      //node를 찾지 못한 경우 exit(모든 node 탐색).
-      if(typeof l_node === "undefined"){return;}
-
-      //선택한 라인에서 파생된건이 아닌경우 exit.
-      if(l_group !== l_node.groupID.substr(0,l_group.length)){return;}
-      
-      //현재 node의 child가 존재, 해당 node가 펼쳐져있지 않다면.
-      if(l_node.isLeaf === false && l_node.nodeState.expanded === false){
-        //해당위치 펼침 처리.
-        oAPP.attr.ui.oLTree1.expand(l_indx);
-
-      }
-
-      //다음 라인 정보 구성.
-      l_indx += 1;
-
-      //하위를 탐색하며 tree 펼첨 처리.
-      lf_expand();
-      
-    } //선택한 라인을 기준으로 하위를 탐색하며 펼침 처리.
-
-
-    //선택한 라인 index 얻기.
-    var l_indx = oAPP.attr.ui.oLTree1.getSelectedIndex();
-
-    //선택한 라인이 없는경우 exit.
-    if(l_indx === -1){return;}
-
-    //tree 바인딩 정보 얻기.
-    var l_bind = oAPP.attr.ui.oLTree1.getBinding();
-
-    //선택한 라인의 바인딩 정보 얻기.
-    var l_group = l_bind.getNodeByIndex(l_indx).groupID;
-
-    //선택한 라인을 기준으로 하위를 탐색하며 펼침 처리.
-    lf_expand();
-
-
-  };  //tree item 펼침 처리.
-
-
-
-
-  //삭제 대상 UI의 클라이언트 이벤트 및 sap.ui.core.HTML의 content 수집 정보 삭제 처리.
-  oAPP.fn.delUIClientEvent = function(is_tree){
-
-    //클라이언트 이벤트가 존재하지 않는경우 exit.
-    if(oAPP.DATA.APPDATA.T_CEVT.length === 0){return;}
-
-    //프로퍼티 설정건이 존재하지 않는경우 EXIT.
-    if(oAPP.attr.prev[is_tree.OBJID]._T_0015.length === 0){return;}
-
-
-    //sap.ui.core.HTML UI인경우.
-    if(is_tree.UIFND === "SAP.UI.CORE.HTML"){
-      //content 프로퍼티에 직접 입력한 내용이 존재하는지 확인.
-      var l_findx = oAPP.DATA.APPDATA.T_CEVT.findIndex( a => a.OBJID === is_tree.OBJID + 'CONTENT' && a.OBJTY === "HM");
-
-      if(l_findx !== -1){
-        //해당 HTML 삭제 처리.
-        oAPP.DATA.APPDATA.T_CEVT.splice(l_findx, 1);
-      }
-
-    }
-
-    //이벤트 설정건 존재여부 확인.
-    var lt_evt = oAPP.attr.prev[is_tree.OBJID]._T_0015.filter( a => a.UIATY === '2' );
-
-    //이벤트 설정건이 없는경우 exit.
-    if(lt_evt.length === 0){return;}
-
-    for(var i=0, l=lt_evt.length; i<l; i++){
-
-      //클라이언트 이벤트 설정건 존재여부 확인.
-      var l_findx = oAPP.DATA.APPDATA.T_CEVT.findIndex( a => a.OBJID === is_tree.OBJID + lt_evt[i].UIASN && a.OBJTY === "JS");
-
-      //설정건이 없는경우 continue
-      if(l_findx === -1){continue;}
-
-      //클라이언트 이벤트가 존재하는경우 해당 이벤트 삭제 처리.
-      oAPP.DATA.APPDATA.T_CEVT.splice(l_findx, 1);
-
-    }
-
-  };  //삭제 대상 UI의 클라이언트 이벤트 및 sap.ui.core.HTML의 content 수집 정보 삭제 처리.
-
-
-
-
-  //클라이언트 이벤트, HTML정보 복사 처리.
-  oAPP.fn.copyUIClientEvent = function(OBJID, is_tree){
-
-    //클라이언트 이벤트, HTML정보가 한건도 없는경우 exit.
-    if(oAPP.DATA.APPDATA.T_CEVT.length === 0){return;}
-
-    //원본 UI의 HTML정보, 클라이언트 이벤트 존재여부 확인.
-    var lt_event = oAPP.attr.prev[OBJID]._T_0015.filter( a=> a.ADDSC !== "");
-
-    //원본 UI의 HTML정보, 클라이언트 이벤트가 없는경우 exit.
-    if(lt_event.length === 0){return;}
-
-    var ls_copy = {},
-        l_objid = "";
-
-    //원본 UI의 HTML정보, 클라이언트 이벤트 기준으로 복사처리.
-    for(var i=0, l=lt_event.length; i<l; i++){
-
-      //HTML정보, 클라이언트 이벤트 정보 검색.
-      var ls_cevt = oAPP.DATA.APPDATA.T_CEVT.find( a=> a.OBJID === lt_event[i].OBJID + lt_event[i].UIASN );
-
-      //HTML정보, 클라이언트 이벤트 정보가 없는경우 skip.
-      if(typeof ls_cevt === "undefined"){continue;}
-
-      //복사할 UI명 + attribute 대문자명.
-      ls_copy.OBJID = is_tree.OBJID + lt_event[i].UIASN;
-
-      //유형(HM:HTML, CS:CSS, JS:javascript)
-      ls_copy.OBJTY = ls_cevt.OBJTY;
-
-      //HTML정보, 클라이언트 이벤트 SCRIPT.
-      ls_copy.DATA = ls_cevt.DATA;
-
-      oAPP.DATA.APPDATA.T_CEVT.push(ls_copy);
-      ls_copy = {};
-
-    }
-
-
-  };  //클라이언트 이벤트, HTML정보 복사 처리.
-
-
-
-
-  //tree item 선택 처리
-  oAPP.fn.setSelectTreeItem = function(OBJID, UIATK){
-    
-    //tree를 탐색하며 ROOT로부터 입력 OBJID 까지의 PATH 정보 구성
-    function lf_getTreePath(it_tree){
-
-      //tree 정보가 존재하지 않는경우 exit.
-      if(jQuery.isArray(it_tree) !== true || it_tree.length === 0){
-        return;
-      }
-
-      //tree 정보를 탐색하며 입력 OBJID와 동일건 검색.
-      for(var i=0, l=it_tree.length, l_find; i<l; i++){
-
-        //검색대상 OBJID에 해당하는경우 찾음 FLAG return.
-        if(it_tree[i].OBJID === OBJID){
-          //PATH를 수집.
-          lt_path.unshift(it_tree[i].OBJID);
-          return true;
-        }
-
-        //하위를 탐색하며 검색대상 OBJID에 해당하는건 검색.
-        l_find = lf_getTreePath(it_tree[i].zTREE);
-
-        //OBJID에 해당하는건을 찾은경우.
-        if(l_find === true){
-          //PATH를 수집.
-          lt_path.unshift(it_tree[i].OBJID);
-          return true;
-        }
-      }
-
-    } //tree를 탐색하며 ROOT로부터 입력 OBJID 까지의 PATH 정보 구성
-
-    
-
-    //수집된 경로를 기준으로 child 정보 새로 검색.
-    function lf_getNode(){
-
-      //tree bind정보 새로 검색.
-      var oBind = oAPP.attr.ui.oLTree1.getBinding();
-
-      //start 경로 매핑.
-      var lt_child = oBind._oRootNode;
-
-      //수집된 경로를 기준으로 child를 다시 검색.
-      for(var i=0, l=lt_route.length; i<l; i++){
-        lt_child = lt_child.children[lt_route[i]];
-      }
-
-      //검색된 child return.
-      return lt_child;
-
-    } //수집된 경로를 기준으로 child 정보 새로 검색.
-
-    
-
-    //수집된 path를 기준으로 child를 탐색하며 펼침 처리.
-    function lf_expand(is_child){
-
-      //펼침 처리 대상 child의 OBJID 정보 검색.
-      var l_objid = is_child.context.getProperty("OBJID");
-
-      //현재 CHILD가 펼침 처리 대상건인경우.
-      if(l_objid === lt_path[0]){
-        
-        //해당 라인이 펼쳐져 있지 않다면.
-        if(is_child.nodeState.expanded === false){
-          //TREE 펼첨 처리.
-          oAPP.attr.ui.oLTree1.expand(l_cnt);
-        }
-
-        //입력UI와 동일건인경우. 선택 처리.
-        if(OBJID === lt_path[0]){
-          oAPP.attr.ui.oLTree1.setSelectedIndex(l_cnt);
-          oAPP.fn.designTreeItemPress(is_child.context.getProperty(),l_cnt);
-
-          //attribute 영역 선택처리(UIATK가 입력된경우 선택처리)
-          oAPP.fn.setAttrFocus(UIATK);
-          
-          return;
-        }
-
-        //수집건에서 삭제.
-        lt_path.splice(0,1);
-
-        //현재 탐색중인 child의 경로 정보 수집.
-        lt_route.push(is_child.positionInParent);
-
-        //수집된 경로를 기준으로 child 정보 새로 검색.
-        is_child = lf_getNode();        
-
-      }
-
-      //expand 위치를 위한 counting.
-      l_cnt += 1;
-
-      //새로 검색된 child를 기준으로 하위를 탐색하며 expand 처리.
-      for(var i=0, l=is_child.children.length; i<l; i++){
-        lf_expand(is_child.children[i]);
-
-      }
-
-    } //수집된 path를 기준으로 child를 탐색하며 펼침 처리.
-
-
-
-    var lt_route = [], lt_path = [], l_cnt = 0;
-
-    //입력 UI명으로 부터 부모까지의 PATH 정보 검색.
-    lf_getTreePath(oAPP.attr.oModel.oData.zTREE);
-
-    //path 정보를 수집하지 않은경우 exit.
-    if(lt_path.length === 0){return;}
-
-    var l_bind = oAPP.attr.ui.oLTree1.getBinding();
-        
-    //수집한 path를 기준으로 tree 펼첨 처리.
-    lf_expand(l_bind._oRootNode.children[0]);
-
-
-  };  //tree item 선택 처리
-
-
-
-
-  //생성한 UI명 채번
-  oAPP.fn.setOBJID = function(objid){
-
-    var l_cnt = 1;
-      var l_upper = objid.toUpperCase();
-      var l_objid = l_upper + l_cnt;
-
-      var l_found = false,
-          l_stru;
-
-      while(l_found !== true){
-
-        //구성한 objid와 동일건 존재여부 확인.
-        l_indx = oAPP.attr.oModel.oData.TREE.findIndex( a => a.OBJID === l_objid );
-        if(l_indx === -1){
-          l_found = true;
-          return l_objid;
-        }
-
-        l_cnt += 1;
-        l_objid = l_upper + l_cnt;
-
-      }
-
-  };  //생성한 UI명 채번
-
-
-
-  //drop callback 이벤트.
-  oAPP.fn.drop_cb = function(param, i_drag, i_drop){
-
-    //선택가능 aggregation리스트가 존재하지 않는경우, drag, drop의 부모, aggregation이 동일한경우.
-    if(typeof param === "undefined" && i_drag.POBID === i_drop.POBID && i_drag.UIATK === i_drop.UIATK){
-      //drag UI와 dropUI의 위치를 변경 처리함.
-
-      //drop 위치의 부모 정보 검색.
-      var l_parent = oAPP.fn.getTreeData(i_drop.POBID);
-
-      //drag UI의 index 얻기.
-      var l_dragIndex = l_parent.zTREE.findIndex( a=> a.OBJID === i_drag.OBJID);
-
-      //drop UI의 index 얻기.
-      var l_dropIndex = l_parent.zTREE.findIndex( a=> a.OBJID === i_drop.OBJID);
-
-      //drag index가 drop index보다 큰경우.
-      if(l_dragIndex > l_dropIndex){
-
-        //부모에서 drag 위치 삭제.
-        l_parent.zTREE.splice(l_dragIndex,1);
-
-        //부모에서 drop 위치 삭제.
-        l_parent.zTREE.splice(l_dropIndex,1);          
-
-        //drag건을 drop위치에 추가.
-        l_parent.zTREE.splice(l_dropIndex,0,i_drag);
-
-        //drop건을 drag위치에 추가.
-        l_parent.zTREE.splice(l_dragIndex,0,i_drop);
-
-        //drag건 미리보기 위치이동.
-        oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drag.OBJID, i_drag.POBID, i_drag.UIATT,l_dropIndex);
-
-        //drop건 미리보기 위치이동.
-        oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drop.OBJID, i_drop.POBID, i_drop.UIATT,l_dragIndex);
-
-        //drop index가 drag index보다 큰경우.
-      }else{
-        
-        //부모에서 drop 위치 삭제.
-        l_parent.zTREE.splice(l_dropIndex,1);
-          
-        //부모에서 drag 위치 삭제.
-        l_parent.zTREE.splice(l_dragIndex,1);
-        
-        //drop건을 drag위치에 추가.
-        l_parent.zTREE.splice(l_dragIndex,0,i_drop);
-
-        //drag건을 drop위치에 추가.
-        l_parent.zTREE.splice(l_dropIndex,0,i_drag);
-
-        //drop건 미리보기 위치이동.
-        oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drop.OBJID, i_drop.POBID, i_drop.UIATT,l_dragIndex);
-
-        //drag건 미리보기 위치이동.
-        oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drag.OBJID, i_drag.POBID, i_drag.UIATT,l_dropIndex);
-
-      }      
-
-      //MODEL 갱신 처리.
-      oAPP.attr.oModel.refresh();
-
-      //drag한 UI 선택 처리.
-      oAPP.fn.setSelectTreeItem(i_drag.OBJID);
-
-      //변경 FLAG 처리.
-      oAPP.fn.setChangeFlag();
-      
-      return;
-
-    } //선택가능 aggregation리스트가 존재하지 않는경우, drag, drop의 부모, aggregation이 동일한경우.
-
-
-    //drag UI의 부모 UI 정보 검색.
-    var l_parent = oAPP.fn.getTreeData(i_drag.POBID);
-
-    //drag UI의 부모 UI를 찾지 못한 경우 EXIT.
-    if(typeof l_parent === "undefined"){return;}
-
-    //DRAG한 UI의 부모에서 DRAG UI의 INDEX 얻기.
-    var l_indx = l_parent.zTREE.findIndex( a=> a.OBJID === i_drag.OBJID);
-
-    //INDEX정보를 찾지 못한 경우 EXIT.
-    if(l_indx === -1){return;}
-
-    //DRAG UI의 부모에서 DRAG UI정보 제거.
-    l_parent.zTREE.splice(l_indx, 1);
-
-    if(typeof i_drop.zTREE === "undefined"){
-      i_drop.zTREE = [];
-    }
-
-    //drop의 CHILD 영역에 DRAG UI를 추가.
-    i_drop.zTREE.push(i_drag);
-
-    //DRAG UI의 부모정보 변경.
-    i_drag.POBID = i_drop.OBJID;
-    i_drag.PUIOK = i_drop.UIOBK;
-
-    //DRAG UI의 부모 AGGREGATION정보 변경.
-    i_drag.UIATK = param.UIATK;
-    i_drag.UIATT = param.UIATT;
-    i_drag.UIASN = param.UIASN;
-    i_drag.UIATY = param.UIATY;
-    i_drag.UIADT = param.UIADT;
-    i_drag.UIADS = param.UIADS;
-    i_drag.ISMLB = param.ISMLB;
-    i_drag.PUIATK = param.UIATK;
-
-    //DRAG UI에서 EMBEDDED AGGREGATION 정보 찾기.
-    var ls_embed = oAPP.attr.prev[i_drag.OBJID]._T_0015.find( a=> a.UIATY === "6");
-
-    //drop UI의 aggregation 정보 매핑.
-    oAPP.fn.moveCorresponding(param, ls_embed);
-    ls_embed.UIATY = "6";
-
-    //MODEL 갱신 처리.
-    oAPP.attr.oModel.refresh();
-
-    //미리보기 갱신 처리.
-    oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drag.OBJID, i_drag.POBID, i_drag.UIATT, l_parent.zTREE.length, i_drag.ISMLB);
-
-    //drag한 UI 선택 처리.
-    oAPP.fn.setSelectTreeItem(i_drag.OBJID);
-
-    //변경 FLAG 처리.
-    oAPP.fn.setChangeFlag();
-
-  }; //drop callback 이벤트.
-
-
-
-
-  //UI design tree 라인 선택 이벤트.
-  oAPP.fn.designTreeItemPress = function(is_tree, iIndex){
-
-
-    //동일한 라인을 선택한 경우 exit.
-    if(oAPP.attr.oModel.oData.uiinfo && oAPP.attr.oModel.oData.uiinfo.OBJID === is_tree.OBJID){
-      return;
-    }
-
-    //UI Info 영역 갱신 처리.
-    oAPP.fn.setUIInfo(is_tree);
-
-
-    //선택한 ui에 해당하는 attr로 갱신 처리.
-    oAPP.fn.updateAttrList(is_tree.UIOBK, is_tree.OBJID);
-
-
-    //미리보기 화면 갱신 처리.
-    oAPP.attr.ui.frame.contentWindow.refreshPreview(is_tree);
-
-
-    //팝업 호출건 강제 종료 처리.
-    oAPP.attr.ui.frame.contentWindow.closePopup();
-
-
-    //미리보기 ui 선택 처리
-    oAPP.attr.ui.frame.contentWindow.selPreviewUI(is_tree.OBJID);
-
-    if(typeof iIndex === "undefined"){return;}
-
-    //해당 아이템으로 focus 처리.
-    oAPP.attr.ui.oLTree1.setFirstVisibleRow(iIndex);
-
-
-  };  //UI design tree 라인 선택 이벤트.
-
-
-
-
-  //design tree의 checkbox 선택 이벤트.
-  oAPP.fn.designTreeSelChkbox = function(is_tree){
-
-    //현재 UI의 하위를 전부 체크선택, 체크해제 처리
-    function lf_setCheckAllChild(is_tree, bChecked){
-
-      //현재 라인의 체크박스 선택/해제 처리.
-      is_tree.chk = bChecked;
-
-      //child 정보가 없는경우 exit.
-      if(!is_tree.zTREE || is_tree.zTREE.length === 0){return;}
-
-      //child정보가 있는경우 하위를 탐색하며 체크박스 선택/해제 처리.
-      for(var i=0, l=is_tree.zTREE.length; i<l; i++){
-        lf_setCheckAllChild(is_tree.zTREE[i], bChecked);
-      }
-
-    } //현재 UI의 하위를 전부 체크선택, 체크해제 처리
-
-
-
-    //현재 UI의 부모를 탐색하면서 체크박스 해제 처리.
-    function lf_setCheckParent(oItem){
-
-      if(!oItem){return;}
-      var l_ctxt = oItem.getBindingContext();
-      if(!l_ctxt){return;}
-
-      var ls_parent = l_ctxt.getProperty();
-
-      if(ls_parent.OBJID === "ROOT" || ls_parent.OBJID === "APP"){
-        return;
-      }
-
-      ls_parent.chk = false;
-
-      //부모를 탐색하면서 체크 해제 처리.
-      lf_setCheckParent(oItem.getParentNode());
-
-
-    } //현재 UI의 부모를 탐색하면서 체크박스 해제 처리.
-
-    
-
-    //이벤트 발생 라인부터 하위를 탐색하며 체크박스 선택/해제 처리.
-    lf_setCheckAllChild(is_tree, is_tree.chk);
-
-    //현재 이벤트가 발생한 라인의 체크박스가 해제된경우.
-    if(ls_0015.chk === false){
-      //부모를 탐색하면서 체크박스 해제 처리.
-      //lf_setCheckParent(this.oParent.oParent.oParent);
-    }
-
-    //화면 갱신 처리.
-    oAPP.attr.oModel.refresh();
-
-  };  //design tree의 checkbox 선택 이벤트.
-
-
-
-
-  //design tree item drag 시작 이벤트.
-  oAPP.fn.designTreeDragStart = function(oEvent){
-
-    //drag& drop 가능 처리 default 설정.
-    oAPP.fn.setTreeDnDEnable(oAPP.attr.oModel.oData.zTREE[0]);
-
-    //drag UI가 DOCUMENET, APP인경우 EXIT.
-    if(oLTree1.indexOfItem(oEvent.mParameters.target) === 0){
-      oEvent.preventDefault();
-      return;
-    }
-
-
-    //drag한 위치의 바인딩 정보 얻기.
-    var ls_drag = oModel.getProperty("",oEvent.mParameters.target.getBindingContext());
-
-
-    event.dataTransfer.setData("text/plain", ls_drag.OBJID);
-
-    var oDragSession = oEvent.getParameter("dragSession");
-    oDragSession.setData("RTMCLS", ls_drag.UILIB);
-
-    //drag한 위치의 바인딩 path 정보 얻기.
-    var l_dragPath = oEvent.mParameters.target.getBindingContextPath();
-
-    var lt_0027 = oAPP.DATA.LIB.T_0027.filter( a => a.TGOBJ === ls_drag.UIOBK && a.TOBTY === "3");
-
-    //drag UI 기준으로 drop 가능한 UI에 대한 활성여부 처리.
-    var lt_item = oLTree1.getItems();
-    var lt_0022,l_ctxt,ls_tree,lt_0023,lt_0027,l_upper,ls_0022,l_found,l_path;
-
-    //DOCUMENT는 drop false 처리.
-    lt_item[0].mAggregations.dragDropConfig[1].setEnabled(false);
-    lt_item[0].addStyleClass("disableTreeDrop");
-
-    //ui design영역에 출력된 tree item기준으로 drop 가능 여부 설정.
-    for(var i=1, l=lt_item.length; i<l;i++){
-
-      l_path = lt_item[i].getBindingContextPath();
-
-      //drag UI의 child에 해당하는 UI인경우.
-      if(l_dragPath === l_path.substr(0,l_dragPath.length)){
-        lt_item[i].mAggregations.dragDropConfig[1].setEnabled(false);
-        lt_item[i].addStyleClass("disableTreeDrop");
-        continue;
-      }
-
-      l_ctxt = lt_item[i].getBindingContext();
-      ls_tree = oModel.getProperty("",l_ctxt);
-
-
-      //aggregation 정보 얻기.
-      lt_0023 = oAPP.DATA.LIB.T_0023.filter(a => a.UIOBK === ls_tree.UIOBK && a.UIATY === "3");
-
-      //aggregation 정보가 존재하지 않는경우 drop 비활성 처리.
-      if(!lt_0023){
-        lt_item[i].mAggregations.dragDropConfig[1].setEnabled(false);
-        lt_item[i].addStyleClass("disableTreeDrop");
-        continue;
-      }
-
-      l_found = false;
-      for(var j=0, l2 = lt_0023.length; j<l2; j++){
-        l_upper = lt_0023[j].UIADT.toUpperCase();
-
-        ls_0022 = oAPP.DATA.LIB.T_0022.find( a => a.UIFND === l_upper);
-        if(!ls_0022){continue;}
-
-        ls_0027 = oAPP.DATA.LIB.T_0027.find( a => a.SGOBJ === ls_0022.UIOBK && a.TGOBJ === ls_drag.UIOBK );
-
-        if(!ls_0027){continue;}
-
-        l_found = true;
-        break;
-
-      }
-
-      if(!l_found){
-        lt_item[i].mAggregations.dragDropConfig[1].setEnabled(false);
-        lt_item[i].addStyleClass("disableTreeDrop");
-      }
-
-    } //ui design영역에 출력된 tree item기준으로 drop 가능 여부 설정.
-
-
-  };  //design tree item drag 시작 이벤트.
-
-
-
-
-  //drop 처리 function.
-  oAPP.fn.UIDrop = function(oEvent, i_OBJID){
-
-    if(!i_OBJID){return;}
-
-    //미리보기 영역에서 drag처리한 UI명 얻기.
-    var l_objid = oEvent.mParameters.browserEvent.dataTransfer.getData("text/plain");
-
-
-    //ui 구성정보에서 직접 검색.
-    l_drag = oAPP.fn.getTreeData(l_objid);
-    if(!l_drag){return;}
-
-    //drop한 UI의 라인정보 얻기.
-    var l_drop = oAPP.fn.getTreeData(i_OBJID);
-    if(!l_drop){return;}
-
-    //dragUI명과 dropUI명이 같은경우 exit.
-    if(l_drag.OBJID === l_drop.OBJID){
-      return;
-    }
-
-    if(typeof oAPP.fn.aggrSelectPopup !== "undefined"){
-      oAPP.fn.aggrSelectPopup(l_drag, l_drop, oAPP.fn.drop_cb);
-      return;
-    }
-
-    oAPP.fn.getScript("design/js/aggrSelectPopup",function(){
-      oAPP.fn.aggrSelectPopup(l_drag, l_drop, oAPP.fn.drop_cb);
-    });
-
-  };  //drop 처리 function.
-
-
-
-
   //좌측 페이지(UI Design 영역) 구성.
   oAPP.fn.uiDesignArea = function(oLPage){
 
@@ -851,7 +47,7 @@
       var ls_tree = this.getBindingContext().getProperty();
       
       //design 영역의 체크박스 선택에 따른 
-      oAPP.fn.designTreeSelChkbox(ls_tree);     
+      oAPP.fn.designTreeSelChkbox(ls_tree);
 
     }); //checkbox 선택 이벤트.
 
@@ -1058,124 +254,8 @@
     //삭제버튼 선택 이벤트
     oLBtn3.attachPress(function(oEvent){
 
-      //선택건 존재여부 확인 펑션.
-      function lf_chkSelLine(is_tree){
-
-        //선택 라인 정보가 존재하는 경우.
-        if(is_tree.chk === true){
-          //찾음 flag return
-          return true;
-        }
-
-        //child정보가 존재하지 않는경우 exit.
-        if(!is_tree.zTREE || is_tree.zTREE.length === 0){return;}
-
-        //child를 탐색하며 선택건 존재여부 확인.
-        for(var i=0, l=is_tree.zTREE.length; i<l; i++){
-          var l_chk = lf_chkSelLine(is_tree.zTREE[i]);
-
-          //선택건이 존재하는 경우 찾음 flag return
-          if(l_chk === true){return true;}
-        }
-
-      } //선택건 존재여부 확인 펑션.
-
-
-
-      //선택라인 삭제처리.
-      function lf_delSelLine(it_tree){
-
-        if(it_tree.length === 0){return;}
-
-        for(var i=it_tree.length-1; i>=0; i--){
-
-          //재귀호출하며 선택한 라인정보 삭제 처리.
-          lf_delSelLine(it_tree[i].zTREE);
-
-
-          //체크박스가 선택된 경우.
-          if(it_tree[i].chk === true){
-
-            //클라이언트 이벤트 및 sap.ui.core.HTML의 프로퍼티 입력건 제거 처리.
-            oAPP.fn.delUIClientEvent(it_tree[i]);
-
-            //Description 정보 삭제.
-            oAPP.fn.deltDesc(it_tree[i].OBJID);
-
-            //미리보기에 해당 UI삭제 처리.
-            oAPP.attr.ui.frame.contentWindow.delUIObjPreView(it_tree[i].OBJID, it_tree[i].POBID, it_tree[i].UIATT, it_tree[i].ISMLB);
-
-            //UI수집건에 해당 UI 제거 처리.
-            delete oAPP.attr.prev[it_tree[i].OBJID];
-
-            //해당 라인 삭제.
-            it_tree.splice(i,1);
-
-          }
-
-        }
-
-      } //선택라인 삭제처리.
-
-
-
-      //라인선택한 item을 기준으로 부모를 탐색하며, checkbox를 선택하지 않은 정보 검색.
-      function lf_getSelItemOBJID(oItem){
-
-        //item정보가 존재하지 않는경우.
-        if(!oItem){return;}
-
-        var l_ctxt = oItem.getBindingContext();
-        if(!l_ctxt){return;}
-
-        var l_item = l_ctxt.getProperty();
-
-        //선택이 안된건인경우.
-        if(l_item.chk !== true){
-          //해당 아이템의 UI명 return.
-          return l_item;
-        }
-
-        //선택된경우 상위 부모를 탐색하며 선택 안된건 검색.
-        return lf_getSelItemOBJID(oItem.getParentNode());
-
-      } //라인선택한 item을 기준으로 부모를 탐색하며, checkbox를 선택하지 않은 정보 검색.
-
-
-
-      //체크박스 선택건 존재여부 확인.
-      if(lf_chkSelLine(oAPP.attr.oModel.oData.zTREE[0]) !== true){
-        //존재하지 않는경우 오류 메시지 처리.
-        parent.showMessage(sap, 20, 'I', '체크박스 선택건이 존재하지 않습니다.');
-        return;
-
-      }
-
-
-
-      //라인선택한 item을 기준으로 부모를 탐색하며, checkbox를 선택하지 않은 정보 검색.
-      var ls_selItem = lf_getSelItemOBJID(oAPP.attr.ui.oLTree1.getSelectedItem());
-
-
-      //삭제전 확인팝업 호출.
-      parent.showMessage(sap, 30, 'I', '선택한 라인을 삭제하시겠습니까?.',function(oEvent){
-
-        //YES를 선택하지 않은경우 EXIT.
-        if(oEvent !== "YES"){return;}
-
-        //선택 라인 삭제 처리.
-        lf_delSelLine(oAPP.attr.oModel.oData.zTREE);
-
-        //모델 갱신 처리.
-        oAPP.attr.oModel.refresh();
-
-        //메뉴 선택 tree 위치 펼침 처리.
-        oAPP.fn.setSelectTreeItem(ls_selItem.OBJID);
-
-        //변경 FLAG 처리.
-        oAPP.fn.setChangeFlag();
-
-      });
+      //멀티 삭제 처리.
+      oAPP.fn.designTreeMultiDeleteItem();
 
     });
 
@@ -1726,6 +806,982 @@
 
     oLTree1.bindAggregation('rows',{path:"/zTREE",template:new sap.ui.table.Row(),parameters:{arrayNames:["zTREE"]}});
 
+
+  };
+
+  
+  //visible, editable등의 tree 처리 전용 바인딩 필드 생성 처리.
+  oAPP.fn.crtTreeBindField = function(is_0014){
+
+    is_0014.drag_enable = true;  //tree item drag 가능여부 필드
+    is_0014.drop_enable = oAPP.attr.oModel.oData.IS_EDIT;  //tree item drop 가능여부 필드
+
+    is_0014.sel = false; //tree item 선택처리 필드
+
+    is_0014.chk_visible = oAPP.attr.oModel.oData.IS_EDIT;  //chkbox 활성여부 필드.
+
+    is_0014.chk = false; //chkbox checked 바인딩 필드.
+
+    if(typeof is_0014.zTREE === "undefined"){
+      is_0014.zTREE = []; //하위 TREE 정보
+    }
+
+  };  //visible, editable등의 tree 처리 전용 바인딩 필드 생성 처리.
+
+
+
+
+  //체크박스 활성여부 처리.
+  oAPP.fn.setTreeChkBoxEnable = function(is_tree){
+
+    //default checkbox 비활성 처리.
+    is_tree.chk_visible = false;
+
+
+    //편집 모드인경우 checkbox 활성 처리.
+    if(oAPP.attr.appInfo.IS_EDIT === "X"){
+      is_tree.chk_visible = true;
+    }
+
+    //root, APP는 체크박스 비활성 처리.
+    if(is_tree.OBJID === "ROOT" || is_tree.OBJID === "APP"){
+      is_tree.chk_visible = false;
+
+    }
+
+    //하위 UI가 존재하지 않는경우 exit.
+    if(!is_tree.zTREE || is_tree.zTREE.length === 0){return;}
+
+    //하위 UI가 존재하는경우 재귀호출을 통해 checkbox 활성여부 처리.
+    for(var i=0, l=is_tree.zTREE.length; i<l; i++){
+      oAPP.fn.setTreeChkBoxEnable(is_tree.zTREE[i]);
+    }
+
+  };
+
+
+
+  //tree drag & drop 가능여부 처리.
+  oAPP.fn.setTreeDnDEnable = function(is_tree){
+
+    //drag는 default 가능처리(display 상태일때도, runtime class navigator 기능 때문)
+    is_tree.drag_enable = true;
+
+    //drop는 현재 편집 가능상태일때만 drop 가능 처리.
+    is_tree.drop_enable = oAPP.attr.oModel.oData.IS_EDIT;
+
+    //root는 drag & drop 불가.
+    if(is_tree.OBJID === "ROOT"){
+      is_tree.drag_enable = false;
+      is_tree.drop_enable = false;
+
+    }
+
+    //하위 UI가 존재하지 않는경우 exit.
+    if(!is_tree.zTREE || is_tree.zTREE.length === 0){return;}
+
+    //하위 UI가 존재하는경우 재귀호출을 통해 drag & drop 가능여부 처리.
+    for(var i=0, l=is_tree.zTREE.length; i<l; i++){
+      oAPP.fn.setTreeDnDEnable(is_tree.zTREE[i]);
+    }
+
+  };  //tree drag & drop 가능여부 처리.
+
+
+
+  
+  //tree 정보에서 UI명에 해당하는건 검색.
+  oAPP.fn.getTreeData = function(OBJID, is_tree){
+    //최초 호출상태인경우.
+    if(typeof is_tree === "undefined"){
+      //ROOT를 매핑.
+      is_tree = oAPP.attr.oModel.oData.zTREE[0];
+    }
+
+    //현재 TREE가 검색대상건인경우 해당 TREE정보 RETURN.
+    if(is_tree.OBJID === OBJID){
+      return is_tree;
+    }
+
+    //child가 존재하지 않는경우 exit.
+    if(!is_tree.zTREE || is_tree.zTREE.length === 0){return;}
+
+    //현재 TREE가 검색대상이 아닌경우 CHILD를 탐색하며 OBJID에 해당하는 TREE정보 검색.
+    for(var i=0, l=is_tree.zTREE.length; i<l; i++){
+      
+      var ls_tree = oAPP.fn.getTreeData(OBJID, is_tree.zTREE[i]);
+      if(typeof ls_tree  !== "undefined"){
+        return ls_tree;
+      }
+
+    }    
+
+  };  //tree 정보에서 UI명에 해당하는건 검색.
+
+
+
+
+  //입력 OBJID가 부모의 몇번째 INDEX인지 확인.
+  oAPP.fn.getTreeIndexOfChild = function(OBJID){
+
+    //child를 탐색하며 OBJID의 위치 정보 확인.
+    function lf_findItem(it_tree){
+
+      //TREE에 값이 없는경우 EXIT.
+      if(it_tree.length === 0){return;}
+
+      //TREE 정보중 입력 OBJID건 존재여부 확인.
+      for(var i=0, l=it_tree.length; i<l; i++){
+
+        //현재 정보가 입력 OBJID와 동일한경우.
+        if(it_tree[i].OBJID === OBJID){
+          //해당 INDEX 정보 RETURN.
+          return i;
+        }
+
+        //재귀호출을 통해 입력 OBJID에 해당하는 INDEX 정보 검색.
+        var l_index = lf_findItem(it_tree[i].zTREE);
+
+        //INDEX 정보를 찾은경우 RETURN.
+        if(typeof l_index !== "undefined"){return l_index;}
+
+      }
+
+    } //child를 탐색하며 OBJID의 위치 정보 확인.
+
+
+    //TREE를 탐색하며 입력 OJBID의 INDEX 정보 찾기.
+    return lf_findItem(oAPP.attr.oModel.oData.zTREE);
+
+
+  };  //입력 OBJID가 부모의 몇번째 INDEX인지 확인.
+
+
+
+  //tree item 펼침 처리.
+  oAPP.fn.expandTreeItem = function(){
+
+    //선택한 라인을 기준으로 하위를 탐색하며 펼침 처리.
+    function lf_expand(){
+
+      //처리대상 라인의 node 정보 얻기.
+      var l_node = l_bind.getNodeByIndex(l_indx);
+
+      //node를 찾지 못한 경우 exit(모든 node 탐색).
+      if(typeof l_node === "undefined"){return;}
+
+      //선택한 라인에서 파생된건이 아닌경우 exit.
+      if(l_group !== l_node.groupID.substr(0,l_group.length)){return;}
+      
+      //현재 node의 child가 존재, 해당 node가 펼쳐져있지 않다면.
+      if(l_node.isLeaf === false && l_node.nodeState.expanded === false){
+        //해당위치 펼침 처리.
+        oAPP.attr.ui.oLTree1.expand(l_indx);
+
+      }
+
+      //다음 라인 정보 구성.
+      l_indx += 1;
+
+      //하위를 탐색하며 tree 펼첨 처리.
+      lf_expand();
+      
+    } //선택한 라인을 기준으로 하위를 탐색하며 펼침 처리.
+
+
+    //선택한 라인 index 얻기.
+    var l_indx = oAPP.attr.ui.oLTree1.getSelectedIndex();
+
+    //선택한 라인이 없는경우 exit.
+    if(l_indx === -1){return;}
+
+    //tree 바인딩 정보 얻기.
+    var l_bind = oAPP.attr.ui.oLTree1.getBinding();
+
+    //선택한 라인의 바인딩 정보 얻기.
+    var l_group = l_bind.getNodeByIndex(l_indx).groupID;
+
+    //선택한 라인을 기준으로 하위를 탐색하며 펼침 처리.
+    lf_expand();
+
+
+  };  //tree item 펼침 처리.
+
+
+
+
+  //삭제 대상 UI의 클라이언트 이벤트 및 sap.ui.core.HTML의 content 수집 정보 삭제 처리.
+  oAPP.fn.delUIClientEvent = function(is_tree){
+
+    //클라이언트 이벤트가 존재하지 않는경우 exit.
+    if(oAPP.DATA.APPDATA.T_CEVT.length === 0){return;}
+
+    //프로퍼티 설정건이 존재하지 않는경우 EXIT.
+    if(oAPP.attr.prev[is_tree.OBJID]._T_0015.length === 0){return;}
+
+
+    //sap.ui.core.HTML UI인경우.
+    if(is_tree.UIFND === "SAP.UI.CORE.HTML"){
+      //content 프로퍼티에 직접 입력한 내용이 존재하는지 확인.
+      var l_findx = oAPP.DATA.APPDATA.T_CEVT.findIndex( a => a.OBJID === is_tree.OBJID + 'CONTENT' && a.OBJTY === "HM");
+
+      if(l_findx !== -1){
+        //해당 HTML 삭제 처리.
+        oAPP.DATA.APPDATA.T_CEVT.splice(l_findx, 1);
+      }
+
+    }
+
+    //이벤트 설정건 존재여부 확인.
+    var lt_evt = oAPP.attr.prev[is_tree.OBJID]._T_0015.filter( a => a.UIATY === '2' );
+
+    //이벤트 설정건이 없는경우 exit.
+    if(lt_evt.length === 0){return;}
+
+    for(var i=0, l=lt_evt.length; i<l; i++){
+
+      //클라이언트 이벤트 설정건 존재여부 확인.
+      var l_findx = oAPP.DATA.APPDATA.T_CEVT.findIndex( a => a.OBJID === is_tree.OBJID + lt_evt[i].UIASN && a.OBJTY === "JS");
+
+      //설정건이 없는경우 continue
+      if(l_findx === -1){continue;}
+
+      //클라이언트 이벤트가 존재하는경우 해당 이벤트 삭제 처리.
+      oAPP.DATA.APPDATA.T_CEVT.splice(l_findx, 1);
+
+    }
+
+  };  //삭제 대상 UI의 클라이언트 이벤트 및 sap.ui.core.HTML의 content 수집 정보 삭제 처리.
+
+
+
+
+  //클라이언트 이벤트, HTML정보 복사 처리.
+  oAPP.fn.copyUIClientEvent = function(OBJID, is_tree){
+
+    //클라이언트 이벤트, HTML정보가 한건도 없는경우 exit.
+    if(oAPP.DATA.APPDATA.T_CEVT.length === 0){return;}
+
+    //원본 UI의 HTML정보, 클라이언트 이벤트 존재여부 확인.
+    var lt_event = oAPP.attr.prev[OBJID]._T_0015.filter( a=> a.ADDSC !== "");
+
+    //원본 UI의 HTML정보, 클라이언트 이벤트가 없는경우 exit.
+    if(lt_event.length === 0){return;}
+
+    var ls_copy = {},
+        l_objid = "";
+
+    //원본 UI의 HTML정보, 클라이언트 이벤트 기준으로 복사처리.
+    for(var i=0, l=lt_event.length; i<l; i++){
+
+      //HTML정보, 클라이언트 이벤트 정보 검색.
+      var ls_cevt = oAPP.DATA.APPDATA.T_CEVT.find( a=> a.OBJID === lt_event[i].OBJID + lt_event[i].UIASN );
+
+      //HTML정보, 클라이언트 이벤트 정보가 없는경우 skip.
+      if(typeof ls_cevt === "undefined"){continue;}
+
+      //복사할 UI명 + attribute 대문자명.
+      ls_copy.OBJID = is_tree.OBJID + lt_event[i].UIASN;
+
+      //유형(HM:HTML, CS:CSS, JS:javascript)
+      ls_copy.OBJTY = ls_cevt.OBJTY;
+
+      //HTML정보, 클라이언트 이벤트 SCRIPT.
+      ls_copy.DATA = ls_cevt.DATA;
+
+      oAPP.DATA.APPDATA.T_CEVT.push(ls_copy);
+      ls_copy = {};
+
+    }
+
+
+  };  //클라이언트 이벤트, HTML정보 복사 처리.
+
+
+
+
+  //tree item 선택 처리
+  oAPP.fn.setSelectTreeItem = function(OBJID, UIATK){
+    
+    //tree를 탐색하며 ROOT로부터 입력 OBJID 까지의 PATH 정보 구성
+    function lf_getTreePath(it_tree){
+
+      //tree 정보가 존재하지 않는경우 exit.
+      if(jQuery.isArray(it_tree) !== true || it_tree.length === 0){
+        return;
+      }
+
+      //tree 정보를 탐색하며 입력 OBJID와 동일건 검색.
+      for(var i=0, l=it_tree.length, l_find; i<l; i++){
+
+        //검색대상 OBJID에 해당하는경우 찾음 FLAG return.
+        if(it_tree[i].OBJID === OBJID){
+          //PATH를 수집.
+          lt_path.unshift(it_tree[i].OBJID);
+          return true;
+        }
+
+        //하위를 탐색하며 검색대상 OBJID에 해당하는건 검색.
+        l_find = lf_getTreePath(it_tree[i].zTREE);
+
+        //OBJID에 해당하는건을 찾은경우.
+        if(l_find === true){
+          //PATH를 수집.
+          lt_path.unshift(it_tree[i].OBJID);
+          return true;
+        }
+      }
+
+    } //tree를 탐색하며 ROOT로부터 입력 OBJID 까지의 PATH 정보 구성
+
+    
+
+    //수집된 경로를 기준으로 child 정보 새로 검색.
+    function lf_getNode(){
+
+      //tree bind정보 새로 검색.
+      var oBind = oAPP.attr.ui.oLTree1.getBinding();
+
+      //start 경로 매핑.
+      var lt_child = oBind._oRootNode;
+
+      //수집된 경로를 기준으로 child를 다시 검색.
+      for(var i=0, l=lt_route.length; i<l; i++){
+        lt_child = lt_child.children[lt_route[i]];
+      }
+
+      //검색된 child return.
+      return lt_child;
+
+    } //수집된 경로를 기준으로 child 정보 새로 검색.
+
+    
+
+    //수집된 path를 기준으로 child를 탐색하며 펼침 처리.
+    function lf_expand(is_child){
+
+      //펼침 처리 대상 child의 OBJID 정보 검색.
+      var l_objid = is_child.context.getProperty("OBJID");
+
+      if(typeof l_objid === "undefined"){return;}
+
+      //현재 CHILD가 펼침 처리 대상건인경우.
+      if(l_objid === lt_path[0]){
+        
+        //해당 라인이 펼쳐져 있지 않다면.
+        if(is_child.nodeState.expanded === false){
+          //TREE 펼첨 처리.
+          oAPP.attr.ui.oLTree1.expand(l_cnt);
+        }
+
+        //입력UI와 동일건인경우. 선택 처리.
+        if(OBJID === lt_path[0]){
+          oAPP.attr.ui.oLTree1.setSelectedIndex(l_cnt);
+          oAPP.fn.designTreeItemPress(is_child.context.getProperty(),l_cnt);
+
+          //attribute 영역 선택처리(UIATK가 입력된경우 선택처리)
+          oAPP.fn.setAttrFocus(UIATK);
+          
+          return;
+        }
+
+        //수집건에서 삭제.
+        lt_path.splice(0,1);
+
+        //현재 탐색중인 child의 경로 정보 수집.
+        lt_route.push(is_child.positionInParent);
+
+        //수집된 경로를 기준으로 child 정보 새로 검색.
+        is_child = lf_getNode();        
+
+      }
+
+      //expand 위치를 위한 counting.
+      l_cnt += 1;
+
+      //새로 검색된 child를 기준으로 하위를 탐색하며 expand 처리.
+      for(var i=0, l=is_child.children.length; i<l; i++){
+        lf_expand(is_child.children[i]);
+
+      }
+
+    } //수집된 path를 기준으로 child를 탐색하며 펼침 처리.
+
+    //OBJID가 존재하지 않는경우 EXIT.
+    if(typeof OBJID === "undefined" || OBJID === null || OBJID === ""){return;}
+
+    var lt_route = [], lt_path = [], l_cnt = 0;
+
+    //입력 UI명으로 부터 부모까지의 PATH 정보 검색.
+    lf_getTreePath(oAPP.attr.oModel.oData.zTREE);
+
+    //path 정보를 수집하지 않은경우 exit.
+    if(lt_path.length === 0){return;}
+
+    var l_bind = oAPP.attr.ui.oLTree1.getBinding();
+        
+    //수집한 path를 기준으로 tree 펼첨 처리.
+    lf_expand(l_bind._oRootNode.children[0]);
+
+
+  };  //tree item 선택 처리
+
+
+
+
+  //생성한 UI명 채번
+  oAPP.fn.setOBJID = function(objid){
+
+    var l_cnt = 1;
+      var l_upper = objid.toUpperCase();
+      var l_objid = l_upper + l_cnt;
+
+      var l_found = false,
+          l_stru;
+
+      while(l_found !== true){
+
+        //구성한 objid와 동일건 존재여부 확인.
+        l_indx = oAPP.attr.oModel.oData.TREE.findIndex( a => a.OBJID === l_objid );
+        if(l_indx === -1){
+          l_found = true;
+          return l_objid;
+        }
+
+        l_cnt += 1;
+        l_objid = l_upper + l_cnt;
+
+      }
+
+  };  //생성한 UI명 채번
+
+
+
+  //drop callback 이벤트.
+  oAPP.fn.drop_cb = function(param, i_drag, i_drop){
+
+    //선택가능 aggregation리스트가 존재하지 않는경우, drag, drop의 부모, aggregation이 동일한경우.
+    if(typeof param === "undefined" && i_drag.POBID === i_drop.POBID && i_drag.UIATK === i_drop.UIATK){
+      //drag UI와 dropUI의 위치를 변경 처리함.
+
+      //drop 위치의 부모 정보 검색.
+      var l_parent = oAPP.fn.getTreeData(i_drop.POBID);
+
+      //drag UI의 index 얻기.
+      var l_dragIndex = l_parent.zTREE.findIndex( a=> a.OBJID === i_drag.OBJID);
+
+      //drop UI의 index 얻기.
+      var l_dropIndex = l_parent.zTREE.findIndex( a=> a.OBJID === i_drop.OBJID);
+
+      //drag index가 drop index보다 큰경우.
+      if(l_dragIndex > l_dropIndex){
+
+        //부모에서 drag 위치 삭제.
+        l_parent.zTREE.splice(l_dragIndex,1);
+
+        //부모에서 drop 위치 삭제.
+        l_parent.zTREE.splice(l_dropIndex,1);          
+
+        //drag건을 drop위치에 추가.
+        l_parent.zTREE.splice(l_dropIndex,0,i_drag);
+
+        //drop건을 drag위치에 추가.
+        l_parent.zTREE.splice(l_dragIndex,0,i_drop);
+
+        //drag건 미리보기 위치이동.
+        oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drag.OBJID, i_drag.POBID, i_drag.UIATT,l_dropIndex);
+
+        //drop건 미리보기 위치이동.
+        oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drop.OBJID, i_drop.POBID, i_drop.UIATT,l_dragIndex);
+
+        //drop index가 drag index보다 큰경우.
+      }else{
+        
+        //부모에서 drop 위치 삭제.
+        l_parent.zTREE.splice(l_dropIndex,1);
+          
+        //부모에서 drag 위치 삭제.
+        l_parent.zTREE.splice(l_dragIndex,1);
+        
+        //drop건을 drag위치에 추가.
+        l_parent.zTREE.splice(l_dragIndex,0,i_drop);
+
+        //drag건을 drop위치에 추가.
+        l_parent.zTREE.splice(l_dropIndex,0,i_drag);
+
+        //drop건 미리보기 위치이동.
+        oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drop.OBJID, i_drop.POBID, i_drop.UIATT,l_dragIndex);
+
+        //drag건 미리보기 위치이동.
+        oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drag.OBJID, i_drag.POBID, i_drag.UIATT,l_dropIndex);
+
+      }      
+
+      //MODEL 갱신 처리.
+      oAPP.attr.oModel.refresh();
+
+      //drag한 UI 선택 처리.
+      oAPP.fn.setSelectTreeItem(i_drag.OBJID);
+
+      //변경 FLAG 처리.
+      oAPP.fn.setChangeFlag();
+      
+      return;
+
+    } //선택가능 aggregation리스트가 존재하지 않는경우, drag, drop의 부모, aggregation이 동일한경우.
+
+
+    //drag UI의 부모 UI 정보 검색.
+    var l_parent = oAPP.fn.getTreeData(i_drag.POBID);
+
+    //drag UI의 부모 UI를 찾지 못한 경우 EXIT.
+    if(typeof l_parent === "undefined"){return;}
+
+    //DRAG한 UI의 부모에서 DRAG UI의 INDEX 얻기.
+    var l_indx = l_parent.zTREE.findIndex( a=> a.OBJID === i_drag.OBJID);
+
+    //INDEX정보를 찾지 못한 경우 EXIT.
+    if(l_indx === -1){return;}
+
+    //DRAG UI의 부모에서 DRAG UI정보 제거.
+    l_parent.zTREE.splice(l_indx, 1);
+
+    if(typeof i_drop.zTREE === "undefined"){
+      i_drop.zTREE = [];
+    }
+
+    //drop의 CHILD 영역에 DRAG UI를 추가.
+    i_drop.zTREE.push(i_drag);
+
+    //DRAG UI의 부모정보 변경.
+    i_drag.POBID = i_drop.OBJID;
+    i_drag.PUIOK = i_drop.UIOBK;
+
+    //DRAG UI의 부모 AGGREGATION정보 변경.
+    i_drag.UIATK = param.UIATK;
+    i_drag.UIATT = param.UIATT;
+    i_drag.UIASN = param.UIASN;
+    i_drag.UIATY = param.UIATY;
+    i_drag.UIADT = param.UIADT;
+    i_drag.UIADS = param.UIADS;
+    i_drag.ISMLB = param.ISMLB;
+    i_drag.PUIATK = param.UIATK;
+
+    //DRAG UI에서 EMBEDDED AGGREGATION 정보 찾기.
+    var ls_embed = oAPP.attr.prev[i_drag.OBJID]._T_0015.find( a=> a.UIATY === "6");
+
+    //drop UI의 aggregation 정보 매핑.
+    oAPP.fn.moveCorresponding(param, ls_embed);
+    ls_embed.UIATY = "6";
+
+    //MODEL 갱신 처리.
+    oAPP.attr.oModel.refresh();
+
+    //미리보기 갱신 처리.
+    oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drag.OBJID, i_drag.POBID, i_drag.UIATT, l_parent.zTREE.length, i_drag.ISMLB);
+
+    //drag한 UI 선택 처리.
+    oAPP.fn.setSelectTreeItem(i_drag.OBJID);
+
+    //변경 FLAG 처리.
+    oAPP.fn.setChangeFlag();
+
+  }; //drop callback 이벤트.
+
+
+
+
+  //UI design tree 라인 선택 이벤트.
+  oAPP.fn.designTreeItemPress = function(is_tree, iIndex){
+
+
+    //동일한 라인을 선택한 경우 exit.
+    if(oAPP.attr.oModel.oData.uiinfo && oAPP.attr.oModel.oData.uiinfo.OBJID === is_tree.OBJID){
+      return;
+    }
+
+    //UI Info 영역 갱신 처리.
+    oAPP.fn.setUIInfo(is_tree);
+
+
+    //선택한 ui에 해당하는 attr로 갱신 처리.
+    oAPP.fn.updateAttrList(is_tree.UIOBK, is_tree.OBJID);
+
+
+    //미리보기 화면 갱신 처리.
+    oAPP.attr.ui.frame.contentWindow.refreshPreview(is_tree);
+
+
+    //팝업 호출건 강제 종료 처리.
+    oAPP.attr.ui.frame.contentWindow.closePopup();
+
+
+    //미리보기 ui 선택 처리
+    oAPP.attr.ui.frame.contentWindow.selPreviewUI(is_tree.OBJID);
+
+    if(typeof iIndex === "undefined"){return;}
+
+    //해당 아이템으로 focus 처리.
+    oAPP.attr.ui.oLTree1.setFirstVisibleRow(iIndex);
+
+
+  };  //UI design tree 라인 선택 이벤트.
+
+
+
+
+  //design tree의 checkbox 선택 이벤트.
+  oAPP.fn.designTreeSelChkbox = function(is_tree){
+
+    //현재 UI의 하위를 전부 체크선택, 체크해제 처리
+    function lf_setCheckAllChild(is_tree, bChecked){
+
+      //현재 라인의 체크박스 선택/해제 처리.
+      is_tree.chk = bChecked;
+
+      //child 정보가 없는경우 exit.
+      if(!is_tree.zTREE || is_tree.zTREE.length === 0){return;}
+
+      //child정보가 있는경우 하위를 탐색하며 체크박스 선택/해제 처리.
+      for(var i=0, l=is_tree.zTREE.length; i<l; i++){
+        lf_setCheckAllChild(is_tree.zTREE[i], bChecked);
+      }
+
+    } //현재 UI의 하위를 전부 체크선택, 체크해제 처리
+
+
+
+    //현재 UI의 부모를 탐색하면서 체크박스 해제 처리.
+    function lf_setCheckParent(oNode){
+      //NODE 정보가 존재하지 않는경우 EXIT.
+      if(typeof oNode === "undefined" || oNode === null || 
+        typeof oNode.context === "undefined" ||
+        oNode.context === null){
+          return;
+      }
+
+      //찾은 부모의 체크박스 해제 처리.
+      oAPP.attr.oModel.setProperty('chk', false, oNode.context);
+
+      //부모를 탐색하면서 체크 해제 처리.
+      lf_setCheckParent(oNode.parent);
+
+    } //현재 UI의 부모를 탐색하면서 체크박스 해제 처리.
+
+    
+
+    //이벤트 발생 라인부터 하위를 탐색하며 체크박스 선택/해제 처리.
+    lf_setCheckAllChild(is_tree, is_tree.chk);
+
+    //선택해제건이 아닌경우 exit.
+    if(is_tree.chk !== false){
+      //화면 갱신 처리.
+      oAPP.attr.oModel.refresh();
+      return;
+
+    }
+
+    //현재 이벤트가 발생한 라인의 체크박스가 해제된경우.
+    
+    //TREE의 바인딩 정보 얻기.
+    var l_bind = oAPP.attr.ui.oLTree1.getBinding();
+
+    //바인딩 정보를 얻지 못한 경우 EXIT.
+    if(typeof l_bind === "undefined" || 
+      Array.isArray(l_bind._aRowIndexMap) !== true || 
+      l_bind._aRowIndexMap.length === 0){
+        return;
+    }
+
+
+    for(var i=0, l_OBJID, l=l_bind._aRowIndexMap.length; i<l; i++){
+      
+      //CONTEXT 정보가 없으면 SKIP.
+      if(typeof l_bind._aRowIndexMap[i] === "undefined" || l_bind._aRowIndexMap[i].context === null){continue;}
+
+      //해당 라인의 OBJID 정보 얻기.
+      l_OBJID = l_bind._aRowIndexMap[i].context.getProperty("OBJID");
+      
+      //체크박스 선택 라인의 OBJID와 다른경우 SKIP.
+      if(l_OBJID !== is_tree.OBJID){continue;}
+
+      //체크박스 선택 라인위치를 찾은경우 부모를 탐색하며 체크박스 해제 처리.
+      lf_setCheckParent(l_bind._aRowIndexMap[i]);
+
+      break;
+
+    }
+
+  };  //design tree의 checkbox 선택 이벤트.
+
+
+
+
+  //design tree item drag 시작 이벤트.
+  oAPP.fn.designTreeDragStart = function(oEvent){
+
+    //drag& drop 가능 처리 default 설정.
+    oAPP.fn.setTreeDnDEnable(oAPP.attr.oModel.oData.zTREE[0]);
+
+    //drag UI가 DOCUMENET, APP인경우 EXIT.
+    if(oLTree1.indexOfItem(oEvent.mParameters.target) === 0){
+      oEvent.preventDefault();
+      return;
+    }
+
+
+    //drag한 위치의 바인딩 정보 얻기.
+    var ls_drag = oModel.getProperty("",oEvent.mParameters.target.getBindingContext());
+
+
+    event.dataTransfer.setData("text/plain", ls_drag.OBJID);
+
+    var oDragSession = oEvent.getParameter("dragSession");
+    oDragSession.setData("RTMCLS", ls_drag.UILIB);
+
+    //drag한 위치의 바인딩 path 정보 얻기.
+    var l_dragPath = oEvent.mParameters.target.getBindingContextPath();
+
+    var lt_0027 = oAPP.DATA.LIB.T_0027.filter( a => a.TGOBJ === ls_drag.UIOBK && a.TOBTY === "3");
+
+    //drag UI 기준으로 drop 가능한 UI에 대한 활성여부 처리.
+    var lt_item = oLTree1.getItems();
+    var lt_0022,l_ctxt,ls_tree,lt_0023,lt_0027,l_upper,ls_0022,l_found,l_path;
+
+    //DOCUMENT는 drop false 처리.
+    lt_item[0].mAggregations.dragDropConfig[1].setEnabled(false);
+    lt_item[0].addStyleClass("disableTreeDrop");
+
+    //ui design영역에 출력된 tree item기준으로 drop 가능 여부 설정.
+    for(var i=1, l=lt_item.length; i<l;i++){
+
+      l_path = lt_item[i].getBindingContextPath();
+
+      //drag UI의 child에 해당하는 UI인경우.
+      if(l_dragPath === l_path.substr(0,l_dragPath.length)){
+        lt_item[i].mAggregations.dragDropConfig[1].setEnabled(false);
+        lt_item[i].addStyleClass("disableTreeDrop");
+        continue;
+      }
+
+      l_ctxt = lt_item[i].getBindingContext();
+      ls_tree = oModel.getProperty("",l_ctxt);
+
+
+      //aggregation 정보 얻기.
+      lt_0023 = oAPP.DATA.LIB.T_0023.filter(a => a.UIOBK === ls_tree.UIOBK && a.UIATY === "3");
+
+      //aggregation 정보가 존재하지 않는경우 drop 비활성 처리.
+      if(!lt_0023){
+        lt_item[i].mAggregations.dragDropConfig[1].setEnabled(false);
+        lt_item[i].addStyleClass("disableTreeDrop");
+        continue;
+      }
+
+      l_found = false;
+      for(var j=0, l2 = lt_0023.length; j<l2; j++){
+        l_upper = lt_0023[j].UIADT.toUpperCase();
+
+        ls_0022 = oAPP.DATA.LIB.T_0022.find( a => a.UIFND === l_upper);
+        if(!ls_0022){continue;}
+
+        ls_0027 = oAPP.DATA.LIB.T_0027.find( a => a.SGOBJ === ls_0022.UIOBK && a.TGOBJ === ls_drag.UIOBK );
+
+        if(!ls_0027){continue;}
+
+        l_found = true;
+        break;
+
+      }
+
+      if(!l_found){
+        lt_item[i].mAggregations.dragDropConfig[1].setEnabled(false);
+        lt_item[i].addStyleClass("disableTreeDrop");
+      }
+
+    } //ui design영역에 출력된 tree item기준으로 drop 가능 여부 설정.
+
+
+  };  //design tree item drag 시작 이벤트.
+
+
+
+
+  //drop 처리 function.
+  oAPP.fn.UIDrop = function(oEvent, i_OBJID){
+
+    if(!i_OBJID){return;}
+
+    //미리보기 영역에서 drag처리한 UI명 얻기.
+    var l_objid = oEvent.mParameters.browserEvent.dataTransfer.getData("text/plain");
+
+
+    //ui 구성정보에서 직접 검색.
+    l_drag = oAPP.fn.getTreeData(l_objid);
+    if(!l_drag){return;}
+
+    //drop한 UI의 라인정보 얻기.
+    var l_drop = oAPP.fn.getTreeData(i_OBJID);
+    if(!l_drop){return;}
+
+    //dragUI명과 dropUI명이 같은경우 exit.
+    if(l_drag.OBJID === l_drop.OBJID){
+      return;
+    }
+
+    if(typeof oAPP.fn.aggrSelectPopup !== "undefined"){
+      oAPP.fn.aggrSelectPopup(l_drag, l_drop, oAPP.fn.drop_cb);
+      return;
+    }
+
+    oAPP.fn.getScript("design/js/aggrSelectPopup",function(){
+      oAPP.fn.aggrSelectPopup(l_drag, l_drop, oAPP.fn.drop_cb);
+    });
+
+  };  //drop 처리 function.
+
+
+  
+  
+  //멀티 삭제 처리.
+  oAPP.fn.designTreeMultiDeleteItem = function(){
+    //선택건 존재여부 확인 펑션.
+    function lf_chkSelLine(is_tree){
+
+      //선택 라인 정보가 존재하는 경우.
+      if(is_tree.chk === true){
+        //찾음 flag return
+        return true;
+      }
+
+      //child정보가 존재하지 않는경우 exit.
+      if(!is_tree.zTREE || is_tree.zTREE.length === 0){return;}
+
+      //child를 탐색하며 선택건 존재여부 확인.
+      for(var i=0, l=is_tree.zTREE.length; i<l; i++){
+        var l_chk = lf_chkSelLine(is_tree.zTREE[i]);
+
+        //선택건이 존재하는 경우 찾음 flag return
+        if(l_chk === true){return true;}
+      }
+
+    } //선택건 존재여부 확인 펑션.
+
+
+
+    //선택라인 삭제처리.
+    function lf_delSelLine(it_tree){
+
+      if(it_tree.length === 0){return;}
+
+      for(var i=it_tree.length-1; i>=0; i--){
+
+        //재귀호출하며 선택한 라인정보 삭제 처리.
+        lf_delSelLine(it_tree[i].zTREE);
+
+
+        //체크박스가 선택된 경우.
+        if(it_tree[i].chk === true){
+
+          //클라이언트 이벤트 및 sap.ui.core.HTML의 프로퍼티 입력건 제거 처리.
+          oAPP.fn.delUIClientEvent(it_tree[i]);
+
+          //Description 정보 삭제.
+          oAPP.fn.deltDesc(it_tree[i].OBJID);
+
+          //미리보기에 해당 UI삭제 처리.
+          oAPP.attr.ui.frame.contentWindow.delUIObjPreView(it_tree[i].OBJID, it_tree[i].POBID, it_tree[i].UIATT, it_tree[i].ISMLB);
+
+          //UI수집건에 해당 UI 제거 처리.
+          delete oAPP.attr.prev[it_tree[i].OBJID];
+
+          //해당 라인 삭제.
+          it_tree.splice(i,1);
+
+        }
+
+      }
+
+    } //선택라인 삭제처리.
+
+
+
+    //선택 라인으로부터 가장 직전의 선택하지 않은 라인 정보 얻기.
+    function lf_getSelItemOBJID(is_tree){
+      
+      var l_bind = oAPP.attr.ui.oLTree1.getBinding(),
+          l_ctxt, ls_tree, ls_before;
+
+      //현재 화면에 출력됐던 라인 정보를 기준으로 선택 안된 라인 판단.
+      for(var i=0, l=oAPP.attr.ui.oLTree1._iBindingLength; i<l; i++){
+
+        //context 정보 얻기.
+        l_ctxt = l_bind.getContextByIndex(i);
+        if(!l_ctxt){continue;}
+
+        //해당 라인 정보 얻기.
+        ls_tree = l_ctxt.getProperty();
+
+        //선택된건이 아닌경우.
+        if(ls_tree.chk != true){
+          //선택되지 않은건 정보 매핑.
+          ls_before = ls_tree;
+        }
+
+        //현재 UI INFO에 출력되고 있는 UI명과 동일건 까지 탐색한 경우.
+        if(is_tree.OBJID === ls_tree.OBJID){
+          //선택되지 않은 가장 직전의 라인 정보 RETURN.
+          return ls_before;
+        }
+
+      }
+
+
+    } //선택 라인으로부터 가장 직전의 선택하지 않은 라인 정보 얻기.
+
+
+
+    //체크박스 선택건 존재여부 확인.
+    if(lf_chkSelLine(oAPP.attr.oModel.oData.zTREE[0]) !== true){
+      //존재하지 않는경우 오류 메시지 처리.
+      parent.showMessage(sap, 20, 'I', '체크박스 선택건이 존재하지 않습니다.');
+      return;
+
+    }
+
+
+    debugger;
+
+    //현재 우측에 출력한 UI의 TREE 정보 얻기.
+    var ls_tree = oAPP.fn.getTreeData(oAPP.attr.oModel.oData.uiinfo.OBJID);
+        
+    //해당 라인의 삭제를 위해 선택된경우.
+    if(ls_tree.chk === true){
+      //선택 라인으로부터 가장 직전의 선택하지 않은 라인 정보 얻기.    
+      ls_tree = lf_getSelItemOBJID(ls_tree);
+
+    }
+
+
+    //삭제전 확인팝업 호출.
+    parent.showMessage(sap, 30, 'I', '선택한 라인을 삭제하시겠습니까?.',function(oEvent){
+
+      //YES를 선택하지 않은경우 EXIT.
+      if(oEvent !== "YES"){return;}
+
+      //선택 라인 삭제 처리.
+      lf_delSelLine(oAPP.attr.oModel.oData.zTREE);
+
+      //모델 갱신 처리.
+      oAPP.attr.oModel.refresh();
+
+      //메뉴 선택 tree 위치 펼침 처리.
+      oAPP.fn.setSelectTreeItem(ls_tree.OBJID);
+
+      //변경 FLAG 처리.
+      oAPP.fn.setChangeFlag();
+
+    });
 
   };
 

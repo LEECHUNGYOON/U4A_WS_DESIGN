@@ -66,7 +66,7 @@
     var oRElm3 = new sap.ui.layout.form.FormElement();
     oRCtn2.addFormElement(oRElm3);
 
-    var oRTab1 = new sap.m.Table({mode:"None",alternateRowColors:true});
+    var oRTab1 = new sap.m.Table({mode:"SingleSelectMaster",alternateRowColors:true});
     oRElm3.addField(oRTab1);
     oAPP.attr.ui.oRTab1 = oRTab1;
 
@@ -1178,7 +1178,7 @@
       oAPP.attr.oModel.refresh();
 
       //Model information does not exist in Aggregation items.
-      showMessage(sap, 20, "E", is_attr.valtx);
+      parent.showMessage(sap, 20, "E", is_attr.valtx);
 
       //하위로직 skip처리를 위한 flag return
       return true;
@@ -2235,13 +2235,41 @@
       if(typeof l_ctxt === "undefined"){continue;}
 
       //UIATK 값 얻기.
-      var l_UIATK = l_ctxt.getProperty("UIATK");
+      var l_attr = l_ctxt.getProperty();
 
       //focus 대상 UIATK가 아닌경우 다음건 확인.
-      if(l_UIATK !== UIATK){continue;}
+      if(l_attr.UIATK !== UIATK){continue;}
 
       //focus 처리대상건인경우 해당 라인 focus 처리 후 exit.
-      lt_item[i].focus();
+      oAPP.attr.ui.oRTab1.setSelectedItem(lt_item[i]);
+
+      var l_pos;
+
+      //활성화된 ui에 따른 ui 위치 값 매핑.
+      switch(true){
+        case l_attr.inp_visb: //input이 활성화된경우.
+          l_pos = 0;
+          break;
+
+        case l_attr.sel_visb: //ddlb가 활성화된경우.
+          l_pos = 1;
+          break;
+
+        case l_attr.btn_visb: //button이 활성화된경우.
+          l_pos = 2;
+          break;
+
+        case l_attr.chk_visb: //checkbox가 활성화된경우.
+          l_pos = 3;
+          break;
+
+        default:
+          return;
+      }
+      
+      //해당 라인의 활성화된 입력필드에 focus 처리.
+      lt_item[i].mAggregations.cells[1].mAggregations.items[l_pos].focus();
+
       break;
 
     }
