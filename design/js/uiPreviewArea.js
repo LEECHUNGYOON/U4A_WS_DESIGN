@@ -9,7 +9,10 @@
     oMPage.addContent(oMfrm1);
 
 
-  };
+  };  //가운데 페이지(미리보기 영역) 구성
+
+
+  
 
   //미리보기 화면 UI의 프로퍼티 변경 처리.
   oAPP.fn.previewUIsetProp = function(is_attr){
@@ -71,7 +74,10 @@
 
     oAPP.attr.prev[is_attr.OBJID][l_propnm](l_prop);
 
-  };
+  };  //미리보기 화면 UI의 프로퍼티 변경 처리.
+
+
+
 
   //미리보기 UI styleClass 프로퍼티 처리.
   oAPP.fn.previewUIaddStyleClass = function(is_attr){
@@ -85,7 +91,10 @@
 
     l_ui.addStyleClass(is_attr.UIATV);
 
-  };
+  };  //미리보기 UI styleClass 프로퍼티 처리.
+
+
+
 
   //대상 UI instnace의 UIOBJ명 얻기.
   oAPP.fn.getUIOBJname = function(oUI){
@@ -98,7 +107,10 @@
 
     }
 
-  };
+  };  //대상 UI instnace의 UIOBJ명 얻기.
+
+
+
 
   //프로퍼티에 값 구성시 따옴표 처리 여부.
   oAPP.fn.setPropDoqu = function(UIADT){
@@ -120,6 +132,31 @@
 
     }
 
-  };
+  };  //프로퍼티에 값 구성시 따옴표 처리 여부.
+
+
+
+
+  //sap.ui.core.HTML UI의 content 프로퍼티 입력건 검색.
+  oAPP.fn.setHTMLContentProp = function(is_0015){
+    
+    //sap.ui.core.HTML UI의 content 프로퍼티가 아닌경우 exit.
+    if(is_0015.UIATK !== "AT000011858"){return;}
+
+    //HTML, script 구성건이 존재하지 않는경우 exit.
+    if(oAPP.DATA.APPDATA.T_CEVT.length === 0){return;}
+
+    //sap.ui.core.HTML UI의 content 프로퍼티 입력건에 해당하는 정보 검색.
+    var l_find = oAPP.DATA.APPDATA.T_CEVT.find( a=> a.OBJTY === "HM" && a.OBJID === is_0015.OBJID + is_0015.UIASN);
+
+    //찾지못한경우 exit.
+    if(typeof l_find === "undefined"){return;}
+    debugger;
+    //HTML content에 입력한 정보가 존재하는경우 return.
+    l_find = JSON.stringify(l_find.DATA);
+
+    return l_find.substr(1,l_find.length-2);
+
+  };  //sap.ui.core.HTML UI의 content 프로퍼티 입력건 검색.
 
 })();

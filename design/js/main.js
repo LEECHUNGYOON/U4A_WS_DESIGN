@@ -554,10 +554,16 @@
         lt_0015 = lt_0015.concat(oAPP.attr.prev[i]._T_0015);
       }
 
-      return {"TU4A0010":ls_0010,"YU4A0014":oAPP.attr.oModel.oData.TREE,
-        "YU4A0015":lt_0015,"T_EDIT":oAPP.DATA.APPDATA.T_EDIT,"S_ERHTML":oAPP.DATA.APPDATA.S_ERHTML,
-        "T_CEVT":oAPP.DATA.APPDATA.T_CEVT,
-        "T_JSLK":oAPP.DATA.APPDATA.T_JSLK,"T_CSLK":oAPP.DATA.APPDATA.T_CSLK, "T_DESC":oAPP.DATA.APPDATA.T_DESC};
+      return {"TU4A0010":ls_0010,
+              "YU4A0014":oAPP.attr.oModel.oData.TREE,
+              "YU4A0015":lt_0015,
+              "T_EDIT":oAPP.DATA.APPDATA.T_EDIT,
+              "S_ERHTML":oAPP.DATA.APPDATA.S_ERHTML,
+              "T_CEVT":oAPP.DATA.APPDATA.T_CEVT,
+              "T_JSLK":oAPP.DATA.APPDATA.T_JSLK,
+              "T_CSLK":oAPP.DATA.APPDATA.T_CSLK,
+              "T_DESC":oAPP.DATA.APPDATA.T_DESC, 
+              "S_WSO": oAPP.DATA.APPDATA.S_WSO};
 
     };  //UI 저장 정보 구성.
 
@@ -565,13 +571,13 @@
 
 
     //UI DOM을 기준으로 UI instance 정보 얻기.
-    oAPP.fn.getUiInstanceDOM = function(oDom){
+    oAPP.fn.getUiInstanceDOM = function(oDom,oCore){
 
       //DOM 정보가 존재하지 않는경우 exit.
       if(typeof oDom === "undefined"){return;}
 
       //DOM id로부터 UI정보 검색.
-      var l_ui = sap.ui.getCore().byId(oDom.id);
+      var l_ui = oCore.byId(oDom.id);
 
       //UI를 찾은경우 해당 UI정보 return
       if(typeof l_ui !== "undefined"){
@@ -579,7 +585,7 @@
       }
 
       //UI정보를 찾지못한 경우 상위 부모를 탐색하며 UI instance정보 검색.
-      return oAPP.fn.getUiInstanceDOM(oDom.parentElement);
+      return oAPP.fn.getUiInstanceDOM(oDom.parentElement, oCore);
 
 
     };  //UI DOM을 기준으로 UI instance 정보 얻기.
@@ -616,15 +622,15 @@
 
 
     //ui design area(좌측 TREE 영역)
-    oAPP.fn.getScript("uiDesignArea",function(){oAPP.fn.uiDesignArea(oLPage);});
+    oAPP.fn.getScript("design/js/uiDesignArea",function(){oAPP.fn.uiDesignArea(oLPage);});
 
 
     //ui preview area(가운데 미리보기 영역)
-    oAPP.fn.getScript("uiPreviewArea",function(){oAPP.fn.uiPreviewArea(oMPage);});
+    oAPP.fn.getScript("design/js/uiPreviewArea",function(){oAPP.fn.uiPreviewArea(oMPage);});
 
 
     //ui attribute area(우측 ui 속성정보 영역)
-    oAPP.fn.getScript("uiAttributeArea",function(){oAPP.fn.uiAttributeArea(oRPage);});
+    oAPP.fn.getScript("design/js/uiAttributeArea",function(){oAPP.fn.uiAttributeArea(oRPage);});
 
 
   };  //미리보기 메인 function

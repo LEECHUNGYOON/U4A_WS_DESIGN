@@ -93,6 +93,7 @@
       //Generated Cnt 입력필드 활성여부 설정.
       oFrmElem2.setVisible(l_vis01);
 
+      //default UI생성 갯수 1건 으로 설정.
       if(l_vis01 === false){
         oInp1.setValue(1);
       }
@@ -120,6 +121,8 @@
 
       oMdl.setData({"T_LIST":lt_0022},true);
 
+      //UI명 검색필드로 FOCUS처리.
+      oInp2.focus();
 
     }); //Aggregation Name DDLB 선택 이벤트.
 
@@ -134,12 +137,16 @@
     var oLab2 = new sap.m.Label({design: "Bold",text: "Generated Cnt"});
     oFrmElem2.setLabel(oLab2);
 
+    //UI 추가 건수 입력필드.
     var oInp1 = new sap.m.Input({type:"Number",maxLength:2,value:1});
     oFrmElem2.addField(oInp1);
 
+    //UI 추가 건수 입력필드 변경 이벤트.
     oInp1.attachChange(function(){
+      //입력값 얻기.
       var l_val = this.getValue();
 
+      //입력값이 공백인경우 DEFAULT 1로 설정 후 EXIT.
       if(l_val === ""){
         oInp1.setValue(1);
         return;
@@ -148,15 +155,21 @@
       //문자 제거.
       l_val = l_val.replace(/[^0-9.]/g, '');
 
+      //숫자로 변환 처리.
       l_val = parseInt(l_val);
 
+      //10건이상을 입력했다면 MAX 10으로 설정.
       if(l_val > 10){
         l_val = 10;
       }
 
+      //세팅된 값을 재 매핑 처리.
       oInp1.setValue(l_val);
 
-    });
+    }); //UI 추가 건수 입력필드 변경 이벤트.
+
+
+
 
     var oFrmElem3 = new sap.ui.layout.form.FormElement();
     oFrmCont1.addFormElement(oFrmElem3);
@@ -181,11 +194,59 @@
 
         l_bind.filter(l_filter);
 
-    });
+    }); //ui 검색 이벤트.
 
 
+
+
+    //결과 테이블
     var oTab1 = new sap.ui.table.Table({selectionMode: "Single",selectionBehavior:"Row",
       visibleRowCountMode:"Auto",layoutData:new sap.m.FlexItemData({growFactor:1})});
+
+    //table 더블클릭 이벤트.
+    oTab1.attachBrowserEvent('dblclick',function(oEvent){
+
+      //이벤트 발생 라인으로부터 sap.ui.table.Row UI 검색.
+      function lf_getRowUI(oUI){
+        if(!oUI){return;}
+
+        if(oUI.getMetadata()._sClassName == "sap.ui.table.Row"){
+          return oUI;
+        }
+
+        lf_getRowUI(oUI.oParent);
+
+      } //이벤트 발생 라인으로부터 sap.ui.table.Row UI 검색.
+
+
+
+      //이벤트 발생 UI 정보 얻기.
+      var l_ui = oAPP.fn.getUiInstanceDOM(oEvent.target,sap.ui.getCore());
+
+      //UI정보를 얻지 못한 경우 exit.
+      if(!l_ui){return;}
+
+      //바인딩정보 얻기.
+      var l_ctxt = l_ui.getBindingContext();
+
+      //바인딩 정보를 얻지 못한 경우 exit.
+      if(!l_ctxt){return;}
+
+      //이벤트 발생 라인으로부터 sap.ui.table.Row UI 검색.
+      var l_row = lf_getRowUI(l_ui);
+
+      //sap.ui.table.Row UI를 찾지 못한 경우 exit.
+      if(!l_row){return;}
+
+      //row UI가 존재하는 index위치를 선택 처리.
+      oTab1.setSelectedIndex(oTab1.indexOfRow(l_row));
+
+      //UI 추가 이벤트 처리.
+      oBtn1.firePress();
+
+    }); //tree 더블클릭 이벤트.
+
+
     oVbox1.addItem(oTab1);
 
     var oCol1 = new sap.ui.table.Column({hAlign:"Center",width:"80px"});
