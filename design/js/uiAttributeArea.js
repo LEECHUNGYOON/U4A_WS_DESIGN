@@ -68,7 +68,7 @@
 
     var oRTab1 = new sap.m.Table({mode:"None",alternateRowColors:true});
     oRElm3.addField(oRTab1);
-    oAPP.attr.oRTab1 = oRTab1;
+    oAPP.attr.ui.oRTab1 = oRTab1;
 
     //attribute명 컬럼.
     var oRCol1 = new sap.m.Column({width:"30%"});
@@ -227,6 +227,11 @@
         return;
       }
 
+      //HTML UI의 content 프로퍼티에 바인딩 처리시 점검.
+      if(oAPP.fn.attrChkHTMLContent(ls_attr, true, oAPP.fn.attrBindNEvtPopup) === true){
+        return;
+      }
+
       //바인딩 & 이벤트 팝업 호출 처리 function.
       oAPP.fn.attrBindNEvtPopup(ls_attr);
 
@@ -276,8 +281,7 @@
     //HTML UI의 content 프로퍼티가 아닌경우 exit.
     if(is_attr.UIATK !== "AT000011858"){return;}
 
-    var l_chk = false,
-        l_msg = "";
+    var l_chk = false, l_msg = "";
 
     //바인딩 팝업전 호출한 경우.
     if(bFlag === true){
@@ -367,7 +371,7 @@
     if(typeof ls_ua025 === "undefined"){return;}
 
     //version.
-    l_url = l_url + "?VER=" + ls_ua025.FLD07;
+    var l_url = ls_ua025.FLD04 + "?VER=" + ls_ua025.FLD07;
 
     //ATTRIBUTE의 UI DESIGN 영역 정보 얻기.
     var ls_tree = oAPP.fn.getTreeData(is_attr.OBJID);
@@ -926,7 +930,7 @@
     //f4 help 버튼 활성화.
     is_attr.showF4 = true;
 
-  }
+  };  //프로퍼티의 입력필드 f4 help 설정 여부.
 
 
 
@@ -936,16 +940,24 @@
     //Aggregation의 바인딩 팝업 버튼 선택시.
     if(is_attr.UIATY === "3"){
 
-      var l_agrnm = oAPP.fn.getUIAttrFuncName(oAPP.attr.prev[is_attr.OBJID], is_attr.UIATY,is_attr.UIATT,'_sGetter');
+      //현재 ui의 tree 정보 얻기.
+      var l_tree = oAPP.fn.getTreeData(is_attr.OBJID);
 
-      //n건 바인딩시 Aggregation에 UI가 1개만 존재해야함.
-      if(oAPP.attr.prev[is_attr.OBJID][l_agrnm]().length > 2){
-        parent.showMessage(sap, 10, 'E', 'If you have one or more child objects, you can not specify a model.');
-        return;
+      //CHILD 정보가 존재하는경우.
+      if(l_tree.zTREE.length !== 0){
+
+        //현재 바인딩 아이콘을 선택한 AGGREGATION에 추가된 UI정보 얻기.
+        var lt_filter = l_tree.zTREE.filter( a => a.UIATK === is_attr.UIATK);
+
+        //현재 aggregation에 2개 이상의 UI가 추가된경우.
+        if(lt_filter.length >= 2){
+          parent.showMessage(sap, 10, 'E', 'If you have one or more child objects, you can not specify a model.');
+          return;
+        }
+
       }
 
-    } //바인딩 & 이벤트 팝업 호출 처리 function.
-
+    } //Aggregation의 바인딩 팝업 버튼 선택시.
 
 
     var l_func = "",l_title = "",f_callback;
@@ -1680,7 +1692,7 @@
   //attribute 영역 그룹핑 처리.
   oAPP.fn.setAttrModelSort = function(){
 
-    var l_bind = oAPP.attr.oRTab1.getBinding('items');
+    var l_bind = oAPP.attr.ui.oRTab1.getBinding('items');
 
     //attribute 영역 그룹핑 처리.
     l_bind.sort([new sap.ui.model.Sorter("UIATY",false,function(oContext){
@@ -1714,12 +1726,9 @@
 
 
   //UI Info 영역 정보 구성.
-  oAPP.fn.setUIInfo = function(is_tree, i_treePath){
+  oAPP.fn.setUIInfo = function(is_tree){
 
     var ls_uiinfo = {};
-
-    //ui 디자인영역에서 선택한 tree item의 바인딩 path 정보 매핑
-    ls_uiinfo.treePath = i_treePath;
 
     //UI명.
     ls_uiinfo.OBJID_bf = ls_uiinfo.OBJID = is_tree.OBJID;
@@ -2203,6 +2212,41 @@
     is_attr.edit = true;
 
   };
+
+
+
+
+  //ATTRIBUTE FOCUS 처리.
+  oAPP.fn.setAttrFocus = function(UIATK){
+    
+    //UI Attribute Internal Key가 입력안된경우 exit.
+    if(typeof UIATK === "undefined"){return;}
+
+    //attribute 정보 얻기.
+    var lt_item = oAPP.attr.ui.oRTab1.getItems();
+
+    //attribute 정보가 없는경우 exit.
+    if(lt_item.length === 0){return;}
+
+    
+    for(var i=0, l=lt_item.length; i<l; i++){
+      //대상 라인의 바인딩 정보 얻기.
+      var l_ctxt = lt_item[i].getBindingContext();
+      if(typeof l_ctxt === "undefined"){continue;}
+
+      //UIATK 값 얻기.
+      var l_UIATK = l_ctxt.getProperty("UIATK");
+
+      //focus 대상 UIATK가 아닌경우 다음건 확인.
+      if(l_UIATK !== UIATK){continue;}
+
+      //focus 처리대상건인경우 해당 라인 focus 처리 후 exit.
+      lt_item[i].focus();
+      break;
+
+    }
+
+  };  //ATTRIBUTE FOCUS 처리.
 
 
 })();

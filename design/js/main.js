@@ -554,10 +554,16 @@
         lt_0015 = lt_0015.concat(oAPP.attr.prev[i]._T_0015);
       }
 
-      return {"TU4A0010":ls_0010,"YU4A0014":oAPP.attr.oModel.oData.TREE,
-        "YU4A0015":lt_0015,"T_EDIT":oAPP.DATA.APPDATA.T_EDIT,"S_ERHTML":oAPP.DATA.APPDATA.S_ERHTML,
-        "T_CEVT":oAPP.DATA.APPDATA.T_CEVT,
-        "T_JSLK":oAPP.DATA.APPDATA.T_JSLK,"T_CSLK":oAPP.DATA.APPDATA.T_CSLK, "T_DESC":oAPP.DATA.APPDATA.T_DESC};
+      return {"TU4A0010":ls_0010,
+              "YU4A0014":oAPP.attr.oModel.oData.TREE,
+              "YU4A0015":lt_0015,
+              "T_EDIT":oAPP.DATA.APPDATA.T_EDIT,
+              "S_ERHTML":oAPP.DATA.APPDATA.S_ERHTML,
+              "T_CEVT":oAPP.DATA.APPDATA.T_CEVT,
+              "T_JSLK":oAPP.DATA.APPDATA.T_JSLK,
+              "T_CSLK":oAPP.DATA.APPDATA.T_CSLK,
+              "T_DESC":oAPP.DATA.APPDATA.T_DESC, 
+              "S_WSO": oAPP.DATA.APPDATA.S_WSO};
 
     };  //UI 저장 정보 구성.
 
