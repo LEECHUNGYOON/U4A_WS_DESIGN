@@ -1750,8 +1750,6 @@
     }
 
 
-    debugger;
-
     //현재 우측에 출력한 UI의 TREE 정보 얻기.
     var ls_tree = oAPP.fn.getTreeData(oAPP.attr.oModel.oData.uiinfo.OBJID);
         

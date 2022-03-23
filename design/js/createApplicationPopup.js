@@ -265,10 +265,12 @@ oAPP.fn.createApplicationPopup = function(appid){
     
     //Request No f4 help 이벤트.
     oInpReqNo.attachValueHelpRequest(function(){
-      
+      var oModel = this.getModel();
       //Request No 팝업 호출.
       oAPP.fn.fnCtsPopupOpener(function(param){
-        oInpReqNo.setValue(param.CHILD);
+        //return받은 Request No 반영.
+        oModel.setProperty("/CREATE/REQNR", param.CHILD,undefined,true);
+
       });
 
     });
@@ -359,6 +361,10 @@ oAPP.fn.createApplicationPopup = function(appid){
         if(ret.RETCD === "E"){
           //오류 메시지 출력.
           parent.showMessage(sap, 20, 'E', ret.RTMSG);
+
+          //wait off 처리.
+          parent.setBusy('');
+
           return;
         }
 
