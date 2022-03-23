@@ -269,7 +269,7 @@ oAPP.fn.createApplicationPopup = function(appid){
       //Request No 팝업 호출.
       oAPP.fn.fnCtsPopupOpener(function(param){
         //return받은 Request No 반영.
-        oModel.setProperty("/CREATE/REQNR", param.CHILD,undefined,true);
+        oModel.setProperty("/CREATE/REQNR", param.CHILD);
 
       });
 
