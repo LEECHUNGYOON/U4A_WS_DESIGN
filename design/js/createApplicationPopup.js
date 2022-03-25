@@ -281,220 +281,245 @@
           //return받은 Request Desc 반영.
           oModel.setProperty("/CREATE/REQTX", param.AS4TEXT);
 
+
         });
 
+      //로컬 PACKAGE를 입력하지 않은경우 Y,Z으로 입력한 PACKAGE의 정합성 점검.
+      lf_chkPackage(l_create);
+
+    });
+
+    //Request No. Input Field
+    var oInpReqNo = new sap.m.Input({
+      value:"{/CREATE/REQNR}",
+      valueState:"{/CREATE/REQNR_stat}",
+      required:"{/CREATE/REQNR_requ}",
+      editable:"{/CREATE/REQNR_edit}",
+      showValueHelp:true,valueHelpOnly:true
+    });
+
+    
+    //Request No f4 help 이벤트.
+    oInpReqNo.attachValueHelpRequest(function(){
+      var oModel = this.getModel();
+      //Request No 팝업 호출.
+      oAPP.fn.fnCtsPopupOpener(function(param){
+        //return받은 Request No 반영.
+        oModel.setProperty("/CREATE/REQNR", param.TRKORR);
+        oModel.setProperty("/CREATE/REQTX", param.AS4TEXT);
+
       });
+    });
+
+    //Request Desc. Input Field
+    var oInpReqTx = new sap.m.Input({
+      value:"{/CREATE/REQTX}",
+      editable:false
+    });
 
 
-      //Request Desc. Input Field
-      var oInpReqTx = new sap.m.Input({
-        value:"{/CREATE/REQTX}",
-        editable:false
-      });
-
-
-      var oCreateDialogForm = new sap.ui.layout.form.Form({
-        editable: true,
-        layout : new sap.ui.layout.form.ResponsiveGridLayout({
-          labelSpanXL: 2,
-          labelSpanL: 3,
-          labelSpanM: 3,
-          labelSpanS: 12,
-          singleContainerFullSize: false
+    var oCreateDialogForm = new sap.ui.layout.form.Form({
+      editable: true,
+      layout : new sap.ui.layout.form.ResponsiveGridLayout({
+        labelSpanXL: 2,
+        labelSpanL: 3,
+        labelSpanM: 3,
+        labelSpanS: 12,
+        singleContainerFullSize: false
+      }),
+      formContainers: [
+        new sap.ui.layout.form.FormContainer({
+          formElements : [
+            new sap.ui.layout.form.FormElement({
+              label : new sap.m.Label({
+                required: true,
+                design: "Bold",
+                text: "Web Application Name"
+              }),
+              fields : oInpDesc
+            }),
+            new sap.ui.layout.form.FormElement({
+              label : new sap.m.Label({
+                design: "Bold",
+                text: "Language Key"
+              }),
+              fields : oInpLang
+            }),
+            new sap.ui.layout.form.FormElement({
+              label : new sap.m.Label({
+                design: "Bold",
+                text: "Character Format"
+              }),
+              fields : oSelFormat
+            }),
+            new sap.ui.layout.form.FormElement({
+              label : new sap.m.Label({
+                design: "Bold",
+                text: "UI5 UI Theme",
+              }),
+              fields : oSelTheme
+            }),
+            new sap.ui.layout.form.FormElement({
+              label : new sap.m.Label({
+                required: true,
+                design: "Bold",
+                text: "Package",
+              }),
+              fields : oInpPack
+            }),
+            new sap.ui.layout.form.FormElement({
+              label : new sap.m.Label({
+                design: "Bold",
+                text: "Request No.",
+              }),
+              fields : oInpReqNo
+            }),
+            new sap.ui.layout.form.FormElement({
+              label : new sap.m.Label({
+                design: "Bold",
+                text: "Request Desc.",
+              }),
+              fields : oInpReqTx
+            })
+          ]
         }),
-        formContainers: [
-          new sap.ui.layout.form.FormContainer({
-            formElements : [
-              new sap.ui.layout.form.FormElement({
-                label : new sap.m.Label({
-                  required: true,
-                  design: "Bold",
-                  text: "Web Application Name"
-                }),
-                fields : oInpDesc
-              }),
-              new sap.ui.layout.form.FormElement({
-                label : new sap.m.Label({
-                  design: "Bold",
-                  text: "Language Key"
-                }),
-                fields : oInpLang
-              }),
-              new sap.ui.layout.form.FormElement({
-                label : new sap.m.Label({
-                  design: "Bold",
-                  text: "Character Format"
-                }),
-                fields : oSelFormat
-              }),
-              new sap.ui.layout.form.FormElement({
-                label : new sap.m.Label({
-                  design: "Bold",
-                  text: "UI5 UI Theme",
-                }),
-                fields : oSelTheme
-              }),
-              new sap.ui.layout.form.FormElement({
-                label : new sap.m.Label({
-                  required: true,
-                  design: "Bold",
-                  text: "Package",
-                }),
-                fields : oInpPack
-              }),
-              new sap.ui.layout.form.FormElement({
-                label : new sap.m.Label({
-                  design: "Bold",
-                  text: "Request No.",
-                }),
-                fields : oInpReqNo
-              }),
-              new sap.ui.layout.form.FormElement({
-                label : new sap.m.Label({
-                  design: "Bold",
-                  text: "Request Desc.",
-                }),
-                fields : oInpReqTx
-              })
-            ]
-          }),
-        ]
-      });
+      ]
+    });
 
-      //application 생성처리를 위한 서버 호출.
-      function lf_createAppData(){
-        var l_create = oModel.getProperty('/CREATE');
-        var l_appdata = {};
-        l_appdata.APPID = appid;
-        l_appdata.APPNM = l_create.APPNM;
-        l_appdata.LANGU = l_create.LANGU;
-        l_appdata.CODPG = l_create.CODPG;
-        l_appdata.UITHM = l_create.UITHM;
-        l_appdata.PACKG = l_create.PACKG;
-        l_appdata.REQNR = l_create.REQNR;
+    //application 생성처리를 위한 서버 호출.
+    function lf_createAppData(){
+      var l_create = oModel.getProperty('/CREATE');
+      var l_appdata = {};
+      l_appdata.APPID = appid;
+      l_appdata.APPNM = l_create.APPNM;
+      l_appdata.LANGU = l_create.LANGU;
+      l_appdata.CODPG = l_create.CODPG;
+      l_appdata.UITHM = l_create.UITHM;
+      l_appdata.PACKG = l_create.PACKG;
+      l_appdata.REQNR = l_create.REQNR;
 
 
-        //application명 서버전송 데이터 구성.
-        var oFormData = new FormData();
-        oFormData.append("APPDATA", JSON.stringify(l_appdata));
+      //application명 서버전송 데이터 구성.
+      var oFormData = new FormData();
+      oFormData.append("APPDATA", JSON.stringify(l_appdata));
 
-        //application 생성을 위한 서버 호출.
-        sendAjax(parent.getServerPath() + '/createAppData',oFormData, function(ret){
-          
-          //application 생성중 오류가 발생한 경우.
-          if(ret.RETCD === "E"){
-            //오류 메시지 출력.
-            parent.showMessage(sap, 20, 'E', ret.RTMSG);
-
-            //wait off 처리.
-            parent.setBusy('');
-
-            return;
-          }
-
-          //생성 처리 성공 이후 work space UI editor 화면으로 이동 처리.
-          onAppCrAndChgMode(appid);
-
-          //dialog 종료 처리.
-          lf_closeDialog();
-
-        });
-
-      } //application 생성처리를 위한 서버 호출.
-
-      
-
-      function lf_chkPackage(is_create){
-        //application명 서버전송 데이터 구성.
-        debugger;
-        var oFormData = new FormData();
-        oFormData.append("PACKG", is_create.PACKG);
-
-        sendAjax(parent.getServerPath() + '/chkPackage',oFormData, function(ret){
-
-          //잘못된 PACKAGE를 입력한 경우.
-          if(ret.ERFLG === "X"){
-            is_create.PACKG_stat = 'Error'; 
-            is_create.PACKG_stxt = ret.ERMSG;
-            oModel.setProperty('/CREATE', is_create);
-
-            //오류 메시지 처리.
-            parent.showMessage(sap, 20, 'E', ret.ERMSG);
-
-            //wait off 처리.
-            parent.setBusy('');
-            
-            return;
-          }
-
-          //로컬 PACKAGE를 입력한 경우.
-          if(ret.ISLOCAL === "X"){
-            is_create.REQNR_edit = false; //Request No. 잠금 처리.
-            is_create.REQNR_requ = false; //Request No. 필수입력 false 처리
-            is_create.REQNR = "";   //기존 입력 Request No. 초기화.
-            is_create.REQTX = "";   //기존 입력 Request Desc. 초기화.
-            
-          //로컬 package가 아닌경우.
-          }else if(ret.ISLOCAL === ""){
-
-            is_create.REQNR_edit = true; //Request No. edit 처리.
-            is_create.REQNR_requ = true; //Request No. 필수입력 처리
-          }
-
-          //모델 갱신 처리.
-          oModel.setProperty('/CREATE', is_create);
+      //application 생성을 위한 서버 호출.
+      sendAjax(parent.getServerPath() + '/createAppData',oFormData, function(ret){
+        
+        //application 생성중 오류가 발생한 경우.
+        if(ret.RETCD === "E"){
+          //오류 메시지 출력.
+          parent.showMessage(sap, 20, 'E', ret.RTMSG);
 
           //wait off 처리.
           parent.setBusy('');
 
-        });
+          return;
+        }
 
-      }
+        //생성 처리 성공 이후 work space UI editor 화면으로 이동 처리.
+        onAppCrAndChgMode(appid);
 
-      // Application 생성 Dialog
-      var oCreateDialog = new sap.m.Dialog({
-        draggable: true,
-        resizable: true,
-        contentWidth: "50%",
-        title: "UI5 Application Create Option Selection",
-        titleAlignment: "Center",
-        icon: "sap-icon://document",
-        buttons: [
-          new sap.m.Button({
-            type: "Accept",
-            icon: "sap-icon://accept",
-            press : function(){
-
-              //application 생성 처리전 입력값 점검.
-              if( lf_chkValue() === true){
-                return;
-              }
-
-              //application 생성 처리.
-              lf_createAppData();
-
-            }
-          }),
-          new sap.m.Button({
-            type: "Reject",
-            icon: "sap-icon://decline",
-            press: lf_closeDialog
-          }),
-        ],
-
-        content: [
-          oCreateDialogForm
-        ]
+        //dialog 종료 처리.
+        lf_closeDialog();
 
       });
 
-      var oModel = new sap.ui.model.json.JSONModel();
-      oCreateDialog.setModel(oModel);
+    } //application 생성처리를 위한 서버 호출.
 
-      //default 정보 바인딩.
-      lf_setDefaultVal();
+      
 
-      oCreateDialog.open();
+    function lf_chkPackage(is_create){
+      //application명 서버전송 데이터 구성.
+      debugger;
+      var oFormData = new FormData();
+      oFormData.append("PACKG", is_create.PACKG);
+
+      sendAjax(parent.getServerPath() + '/chkPackage',oFormData, function(ret){
+
+        //잘못된 PACKAGE를 입력한 경우.
+        if(ret.ERFLG === "X"){
+          is_create.PACKG_stat = 'Error'; 
+          is_create.PACKG_stxt = ret.ERMSG;
+          oModel.setProperty('/CREATE', is_create);
+
+          //오류 메시지 처리.
+          parent.showMessage(sap, 20, 'E', ret.ERMSG);
+
+          //wait off 처리.
+          parent.setBusy('');
+          
+          return;
+        }
+
+        //로컬 PACKAGE를 입력한 경우.
+        if(ret.ISLOCAL === "X"){
+          is_create.REQNR_edit = false; //Request No. 잠금 처리.
+          is_create.REQNR_requ = false; //Request No. 필수입력 false 처리
+          is_create.REQNR = "";   //기존 입력 Request No. 초기화.
+          is_create.REQTX = "";   //기존 입력 Request Desc. 초기화.
+          
+        //로컬 package가 아닌경우.
+        }else if(ret.ISLOCAL === ""){
+
+          is_create.REQNR_edit = true; //Request No. edit 처리.
+          is_create.REQNR_requ = true; //Request No. 필수입력 처리
+        }
+
+        //모델 갱신 처리.
+        oModel.setProperty('/CREATE', is_create);
+
+        //wait off 처리.
+        parent.setBusy('');
+
+      });
+
+    }
+
+    // Application 생성 Dialog
+    var oCreateDialog = new sap.m.Dialog({
+      draggable: true,
+      resizable: true,
+      contentWidth: "50%",
+      title: "UI5 Application Create Option Selection",
+      titleAlignment: "Center",
+      icon: "sap-icon://document",
+      buttons: [
+        new sap.m.Button({
+          type: "Accept",
+          icon: "sap-icon://accept",
+          press : function(){
+
+            //application 생성 처리전 입력값 점검.
+            if( lf_chkValue() === true){
+              return;
+            }
+
+            //application 생성 처리.
+            lf_createAppData();
+
+          }
+        }),
+        new sap.m.Button({
+          type: "Reject",
+          icon: "sap-icon://decline",
+          press: lf_closeDialog
+        }),
+      ],
+
+      content: [
+        oCreateDialogForm
+      ]
+
+    });
+
+    var oModel = new sap.ui.model.json.JSONModel();
+    oCreateDialog.setModel(oModel);
+
+    //default 정보 바인딩.
+    lf_setDefaultVal();
+
+    oCreateDialog.open();
 
   };
 })();
