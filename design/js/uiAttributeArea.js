@@ -641,10 +641,9 @@
 
     //동일 OBJID 존재여부 확인.
     if(ls_uiinfo.OBJID !== ls_uiinfo.OBJID_bf){
-      var l_indx = oAPP.attr.oModel.oData.TREE.findIndex( a=> a.OBJID === ls_uiinfo.OBJID);
-
-      //동일 OBJID를 입력한 경우.
-      if(l_indx !== -1){
+      
+      //tree design영역에 중복된 OBJID건 존재하는경우.
+      if(typeof oAPP.fn.getTreeData(ls_uiinfo.OBJID) !== "undefined"){
         ls_uiinfo.OBJID_stat = "Error";
         ls_uiinfo.OBJID_stxt = ls_uiinfo.OBJID_stxt + l_sep + "Duplicate object ID cannot be entered.";
       }

@@ -1,5 +1,5 @@
 //UI move Position 메뉴 선택시 팝업 UI
-oAPP.fn.uiMovePosition = function(pos,max,f_callBack){
+oAPP.fn.uiMovePosition = function(pos, max, f_callBack){
 
   //dialog 종료.
   function lf_close(){
@@ -9,23 +9,28 @@ oAPP.fn.uiMovePosition = function(pos,max,f_callBack){
 
   }
 
+  //ui 위치이동 dialog UI 생성.
   sap.ui.getCore().loadLibrary('sap.m');
-  var oDlg = new sap.m.Dialog({draggable:true,title:"move Position"});
+  var oDlg = new sap.m.Dialog({draggable:true, title:"move Position"});
 
+  //MODEL 생성.
   var oMdl = new sap.ui.model.json.JSONModel();
   oDlg.setModel(oMdl);
 
-  var oLab1 = new sap.m.Label({text:"Max " + max ,design:"Bold"});
+  //최대 이동 위치 label.
+  var oLab1 = new sap.m.Label({text:"Max " + max , design:"Bold"});
   oDlg.addContent(oLab1);
 
-  var oStepInp = new sap.m.StepInput({min:1,max:"{/move/max}",value:"{/move/pos}"});
+  //이동위치 입력필드.
+  var oStepInp = new sap.m.StepInput({min:1, max:"{/move/max}", value:"{/move/pos}"});
   oDlg.addContent(oStepInp);
 
-  var oSlide = new sap.m.Slider({min:1,max:"{/move/max}",value:"{/move/pos}",enableTickmarks:true});
+  //이동위치 slider.
+  var oSlide = new sap.m.Slider({min:1, max:"{/move/max}", value:"{/move/pos}", enableTickmarks:true});
   oDlg.addContent(oSlide);
 
   //확인 버튼
-  var oBtn1 = new sap.m.Button({icon:"sap-icon://accept",type:"Accept"});
+  var oBtn1 = new sap.m.Button({icon:"sap-icon://accept", type:"Accept"});
   oDlg.addButton(oBtn1);
 
   //확인 버튼 선택 이벤트.
@@ -59,4 +64,4 @@ oAPP.fn.uiMovePosition = function(pos,max,f_callBack){
   oDlg.open();
 
 
-};
+};  //UI move Position 메뉴 선택시 팝업 UI

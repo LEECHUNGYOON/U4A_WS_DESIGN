@@ -504,14 +504,12 @@
         //TREE 디자인 영역의 같은 레벨 기준으로 순번 설정.
         for(var i=0, l=it_tree.length; i<l; i++){
 
-          //저장데이터(ZYU4A0014)에서 현재 UI에 해당하는건 검색.
-          var l_tree = oAPP.attr.oModel.oData.TREE.find( a=> a.OBJID === it_tree[i].OBJID);
-
           //순번 + 1
           l_pos += 1;
 
           //순번정보 매핑.
-          l_tree.POSIT = l_pos;
+          it_tree[i].POSIT = l_pos;
+
 
         } //TREE 디자인 영역의 같은 레벨 기준으로 순번 설정.
 
@@ -523,13 +521,15 @@
 
       } //순번 정보(POSIT) 재정의 재귀호출 function
 
-
-
       var l_pos = 0;
 
       //UI POSTION 정보 재매핑 처리.
       lf_setUIPos(oAPP.attr.oModel.oData.zTREE);
 
+      
+      //design tree 정보를 기준으로 ZY04A0014 저장 정보 구성.
+      var lt_0014 = oAPP.fn.parseTree2Tab(oAPP.attr.oModel.oData.zTREE);
+      
 
       //어플리케이션 정보 테이블 구조 생성.
       var ls_0010 = oAPP.fn.crtStru0010();
@@ -555,7 +555,7 @@
       }
 
       return {"TU4A0010":ls_0010,
-              "YU4A0014":oAPP.attr.oModel.oData.TREE,
+              "YU4A0014":lt_0014,
               "YU4A0015":lt_0015,
               "T_EDIT":oAPP.DATA.APPDATA.T_EDIT,
               "S_ERHTML":oAPP.DATA.APPDATA.S_ERHTML,
@@ -611,7 +611,7 @@
     oSApp.setModel(oAPP.attr.oModel);
 
     //좌측 페이지(UI Design 영역)
-    var oLPage = new sap.m.Page({showHeader:false,layoutData:new sap.ui.layout.SplitterLayoutData({size:"20%",minSize:200})});
+    var oLPage = new sap.m.Page({showHeader:false,layoutData:new sap.ui.layout.SplitterLayoutData({size:"25%",minSize:200})});
     oSApp.addContentArea(oLPage);
 
     //가운데 페이지(미리보기 영역)
