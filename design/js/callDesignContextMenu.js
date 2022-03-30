@@ -109,9 +109,11 @@
                 break;
             
             case "M06": //copy 메뉴.
+                oAPP.fn.contextMenuUiCopy();
                 break;
 
             case "M07": //paste 메뉴.
+                oAPP.fn.contextMenuUiPaste();
                 break;                                                                                                        
 
         }
@@ -243,66 +245,66 @@
             //UI 반복 횟수만큼 그리기.
             for(var i=0; i<l_cnt; i++){
 
-            //14번 저장 구조 생성.
-            var l_14 = oAPP.fn.crtStru0014();
+                //14번 저장 구조 생성.
+                var l_14 = oAPP.fn.crtStru0014();
 
-            //바인딩 처리 필드 생성.
-            oAPP.fn.crtTreeBindField(l_14);
-
-
-            l_14.APPID = oAPP.attr.appInfo.APPID;
-            l_14.GUINR = oAPP.attr.appInfo.GUINR;
-
-            //UI명 구성.
-            l_14.OBJID = oAPP.fn.setOBJID(a.E_UIOBJ.UIOBJ);
-            l_14.POBID = ls_tree.OBJID;
-            l_14.UIOBK = a.E_UIOBJ.UIOBK;
-            l_14.PUIOK = ls_tree.UIOBK;
-
-            l_14.UIATK = a.E_EMB_AGGR.UIATK;
-            l_14.UIATT = a.E_EMB_AGGR.UIATT;
-            l_14.UIASN = a.E_EMB_AGGR.UIASN;
-            l_14.UIATY = a.E_EMB_AGGR.UIATY;
-            l_14.UIADT = a.E_EMB_AGGR.UIADT;
-            l_14.UIADS = a.E_EMB_AGGR.UIADS;
-            l_14.ISMLB = a.E_EMB_AGGR.ISMLB;
-
-            l_14.UIFND = a.E_UIOBJ.UIFND;
-            l_14.PUIATK = a.E_EMB_AGGR.UIATK;
-            l_14.UILIB = a.E_UIOBJ.LIBNM;
-            l_14.ISEXT = a.E_UIOBJ.ISEXT;
-            l_14.TGLIB = a.E_UIOBJ.TGLIB;
-            l_14.LIBNM = a.E_UIOBJ.LIBNM;
-
-            //context menu 호출 라인의 child에 추가한 UI정보 수집.
-            ls_tree.zTREE.push(l_14);
-
-            var ls_0015 = oAPP.fn.crtStru0015();
-            
-            //embed aggregation 정보 구성.
-            ls_0015.APPID = oAPP.attr.appInfo.APPID;
-            ls_0015.GUINR = oAPP.attr.appInfo.GUINR;
-            ls_0015.OBJID = l_14.OBJID;
-            ls_0015.UIOBK = a.E_UIOBJ.UIOBK;
-            ls_0015.UIATK = a.E_EMB_AGGR.UIATK;
-            ls_0015.UILIK = a.E_UIOBJ.UILIK;
-            ls_0015.UIATT = a.E_EMB_AGGR.UIATT;
-            ls_0015.UIASN = a.E_EMB_AGGR.UIASN;
-            ls_0015.UIADT = a.E_EMB_AGGR.UIADT;
-            ls_0015.UIATY = "6";
-            ls_0015.ISMLB = a.E_EMB_AGGR.ISMLB;
-            ls_0015.ISEMB = "X";
+                //바인딩 처리 필드 생성.
+                oAPP.fn.crtTreeBindField(l_14);
 
 
-            //미리보기 UI 추가
-            oAPP.attr.ui.frame.contentWindow.addUIObjPreView(l_14.OBJID, l_14.UIOBK, l_14.LIBNM, l_14.UIFND, l_14.POBID, a.E_EMB_AGGR.UIATT);
+                l_14.APPID = oAPP.attr.appInfo.APPID;
+                l_14.GUINR = oAPP.attr.appInfo.GUINR;
+
+                //UI명 구성.
+                l_14.OBJID = oAPP.fn.setOBJID(a.E_UIOBJ.UIOBJ);
+                l_14.POBID = ls_tree.OBJID;
+                l_14.UIOBK = a.E_UIOBJ.UIOBK;
+                l_14.PUIOK = ls_tree.UIOBK;
+
+                l_14.UIATK = a.E_EMB_AGGR.UIATK;
+                l_14.UIATT = a.E_EMB_AGGR.UIATT;
+                l_14.UIASN = a.E_EMB_AGGR.UIASN;
+                l_14.UIATY = a.E_EMB_AGGR.UIATY;
+                l_14.UIADT = a.E_EMB_AGGR.UIADT;
+                l_14.UIADS = a.E_EMB_AGGR.UIADS;
+                l_14.ISMLB = a.E_EMB_AGGR.ISMLB;
+
+                l_14.UIFND = a.E_UIOBJ.UIFND;
+                l_14.PUIATK = a.E_EMB_AGGR.UIATK;
+                l_14.UILIB = a.E_UIOBJ.LIBNM;
+                l_14.ISEXT = a.E_UIOBJ.ISEXT;
+                l_14.TGLIB = a.E_UIOBJ.TGLIB;
+                l_14.LIBNM = a.E_UIOBJ.LIBNM;
+
+                //context menu 호출 라인의 child에 추가한 UI정보 수집.
+                ls_tree.zTREE.push(l_14);
+
+                var ls_0015 = oAPP.fn.crtStru0015();
+                
+                //embed aggregation 정보 구성.
+                ls_0015.APPID = oAPP.attr.appInfo.APPID;
+                ls_0015.GUINR = oAPP.attr.appInfo.GUINR;
+                ls_0015.OBJID = l_14.OBJID;
+                ls_0015.UIOBK = a.E_UIOBJ.UIOBK;
+                ls_0015.UIATK = a.E_EMB_AGGR.UIATK;
+                ls_0015.UILIK = a.E_UIOBJ.UILIK;
+                ls_0015.UIATT = a.E_EMB_AGGR.UIATT;
+                ls_0015.UIASN = a.E_EMB_AGGR.UIASN;
+                ls_0015.UIADT = a.E_EMB_AGGR.UIADT;
+                ls_0015.UIATY = "6";
+                ls_0015.ISMLB = a.E_EMB_AGGR.ISMLB;
+                ls_0015.ISEMB = "X";
 
 
-            //UI 생성건 수집 처리.
-            oAPP.attr.prev[l_14.OBJID]._T_0015 = [];
-            oAPP.attr.prev[l_14.OBJID]._T_0015.push(ls_0015);
+                //미리보기 UI 추가
+                oAPP.attr.ui.frame.contentWindow.addUIObjPreView(l_14.OBJID, l_14.UIOBK, l_14.LIBNM, l_14.UIFND, l_14.POBID, a.E_EMB_AGGR.UIATT);
 
-            ls_0015 = {};
+
+                //UI 생성건 수집 처리.
+                oAPP.attr.prev[l_14.OBJID]._T_0015 = [];
+                oAPP.attr.prev[l_14.OBJID]._T_0015.push(ls_0015);
+
+                ls_0015 = {};
 
             } //UI 반복 횟수만큼 그리기.
   
@@ -313,8 +315,11 @@
             var l_bind = oAPP.attr.ui.oLTree1.getBinding();
             l_bind._buildTree(0,oAPP.fn.designGetTreeItemCount());
 
+            //신규로 생성된 UI의 미리보기에서 UI 선택 처리를 위한 FLAG 처리.
+            oAPP.attr.prev[l_14.OBJID].__isnew = "X";
+
             //메뉴 선택 tree 위치 펼침 처리.
-            oAPP.fn.setSelectTreeItem(l_14.OBJID);
+            oAPP.fn.setSelectTreeItem(l_14.OBJID);            
 
             //변경 FLAG 처리.
             oAPP.fn.setChangeFlag();
@@ -364,10 +369,10 @@
             }
 
             //클라이언트 이벤트 및 sap.ui.core.HTML의 프로퍼티 입력건 제거 처리.
-            oAPP.fn.delUIClientEvent(is_tree);
+            oAPP.fn.delUiClientEvent(is_tree);
 
             //Description 삭제.
-            oAPP.fn.deltDesc(is_tree.OBJID);
+            oAPP.fn.delDesc(is_tree.OBJID);
 
             //미리보기 UI 수집항목에서 해당 OBJID건 삭제.
             delete oAPP.attr.prev[is_tree.OBJID];
@@ -376,7 +381,7 @@
   
   
   
-        //UI삭제전 확인 팝업 호출.
+        //UI삭제전 확인 팝업 호출. 메시지!!
         parent.showMessage(sap, 30, "I", "선택한 라인을 삭제하시겠습니까?.",function(oEvent){
             
             //확인 팝업에서 YES를 선택한 경우 하위 로직 수행.
@@ -427,7 +432,7 @@
 
     //ui 이동처리 function
     oAPP.fn.contextMenuUiMove = function(sign, pos){
-        debugger;
+
         //context menu를 호출한 라인의 OBJID 얻기.
         var l_OBJID = oAPP.attr.oModel.getProperty("/lcmenu/OBJID");
 
@@ -539,5 +544,342 @@
         });
 
     };  //UI 위치 이동 처리.
+
+
+
+
+    //context menu ui복사처리.
+    oAPP.fn.contextMenuUiCopy = function(){
+    
+        //TREE ITEM에 해당하는 UI의 ATTRIBUTE정보 매핑 처리.
+        function lf_setTreeItemAttr(is_tree){
+
+            //TREE ITEM에 UI정보가 존재하는경우.
+            if(typeof oAPP.attr.prev[is_tree.OBJID] !== "undefined"){
+                //해당 UI의 ATTRIBUTE정보 매핑.
+                is_tree._T_0015 = oAPP.attr.prev[is_tree.OBJID]._T_0015;
+
+            }
+
+            //현재 UI의 DESCRIPTION 정보 얻기.
+            var l_desc = oAPP.fn.getDesc(is_tree.OBJID);
+
+            //DESCRIPTION정보가 존재하는경우.
+            if(l_desc !== ""){
+                //DESCRIPTION정보 추가.
+                is_tree._DESC = l_desc;
+            }
+
+            //CLIENT EVENT 정보 얻기.
+            var lt_CEVT = oAPP.fn.getUiClientEvent(is_tree);
+
+            //CLIENT EVENT 정보가 존재하는경우.
+            if(typeof lt_CEVT !== "undefined"){
+                //CLIENT EVENT 정보 추가.
+                is_tree._CEVT = lt_CEVT;
+            }
+
+            //CHILD정보가 없다면 EXIT.
+            if(is_tree.zTREE.length === 0){return;}
+
+            //CHILD정보가 존재하는경우 하위를 탐색하며 UI의 ATTRIBUTE정보 매핑 처리.
+            for(var i=0, l=is_tree.zTREE.length; i<l; i++){
+                lf_setTreeItemAttr(is_tree.zTREE[i]);
+            }
+
+        }   //TREE ITEM에 해당하는 UI의 ATTRIBUTE정보 매핑 처리.
+
+
+
+        //context menu를 호출한 라인의 OBJID 얻기.
+        var l_OBJID = oAPP.attr.oModel.getProperty("/lcmenu/OBJID");
+
+        //OBJID에 해당하는 TREE 정보 얻기.
+        var ls_tree = oAPP.fn.getTreeData(l_OBJID);
+        
+        //DOCUMENT, APP에서 COPY한경우 EXIT.
+        if(ls_tree.OBJID === "ROOT" || ls_tree.OBJID === "APP"){
+            return;
+        }
+
+        //현재 라인에 해당하는 UI복사 처리.
+        ls_tree = JSON.parse(JSON.stringify(ls_tree));
+
+        ////TREE ITEM에 해당하는 UI의 ATTRIBUTE정보 매핑 처리.
+        lf_setTreeItemAttr(ls_tree);
+
+        //현재 라인 정보를 복사 처리.
+        oAPP.fn.setCopyData("U4AWSuiDesignArea", ["U4AWSuiDesignArea"], ls_tree);
+
+
+    };  //context menu ui복사처리.
+
+
+
+
+    //context menu ui 붙여넣기 처리.
+    oAPP.fn.contextMenuUiPaste = function(){
+        
+        //UI의 attr 정보 복사 처리.
+        function lf_copyAttrData(is_14, is_copied, aggrParam, bKeep){
+
+            if(is_copied._T_0015.length === 0){return;}
+
+            var lt_0015 = [];
+
+            for(var i=0, l=is_copied._T_0015.length; i<l; i++){
+                
+                //프로퍼티 구조 신규 생성.
+                var ls_15 = oAPP.fn.crtStru0015();
+
+                //기존 복사건을 신규 15번 구조에 매핑.
+                oAPP.fn.moveCorresponding(is_copied._T_0015[i], ls_15);
+
+                ls_15.APPID = oAPP.attr.appInfo.APPID;
+                ls_15.GUINR = oAPP.attr.appInfo.GUINR;
+                ls_15.OBJID = is_14.OBJID;
+
+                //복사된 ui의 최상위 정보의 aggregation 정보 변경처리.
+                if(aggrParam && ls_15.UIATY === "6"){
+                    ls_15.UIATK = aggrParam.UIATK;
+                    ls_15.UIATT = aggrParam.UIATT;
+                    ls_15.UIASN = aggrParam.UIASN;
+                    ls_15.UIADT = aggrParam.UIADT;
+                    ls_15.UIADS = aggrParam.UIADS;
+                    ls_15.ISMLB = aggrParam.ISMLB;
+
+                }
+
+                //바인딩, 서버이벤트를 동일하게 유지하는경우.
+                if(bKeep === true){
+                    //프로퍼티 복사건 재수집 처리.
+                    lt_0015.push(ls_15);
+                    continue;
+                }
+
+                //바인딩, 서버이벤트를 초기화 하는경우 하위로직 수행.
+
+                //복사된 값에 바인딩 처리가 된경우.
+                if(ls_15.ISBND === "X" && ls_15.UIATV !== ""){
+                    //바인딩 flag 필드 초기화.                        
+                    ls_15.ISBND = "";
+
+                    //바인딩 값 초기화.
+                    ls_15.UIATV = "";
+
+                }
+
+                //이벤트의 경우 서버이벤트가 존재시.
+                if(ls_15.UIATY === "2" && ls_15.UIATV !== ""){
+                    //서버이벤트 초기화.
+                    ls_15.UIATV = "";
+                }
+
+                //프로퍼티 복사건 재수집 처리.
+                lt_0015.push(ls_15);
+
+            }
+
+            return lt_0015;
+
+        }
+
+
+        //복사된 ui를 붙여넣기 처리.
+        function lf_setPasteCopiedData(is_parent, is_copied, aggrParam, it_ua018, bKeep){
+
+            //신규 14번 구조 생성.
+            var ls_14 = oAPP.fn.crtStru0014();
+
+            //바인딩 처리 필드 생성.
+            oAPP.fn.crtTreeBindField(ls_14);
+            
+            //기존 복사건을 신규 14번 구조에 매핑.
+            oAPP.fn.moveCorresponding(is_copied, ls_14);
+
+            //application 정보 재정의.
+            ls_14.APPID = oAPP.attr.appInfo.APPID;
+            ls_14.GUINR = oAPP.attr.appInfo.GUINR;
+
+            if(aggrParam){
+                //aggr 선택 팝업에서 선택한 aggregation정보 매핑.
+                ls_14.UIATK = aggrParam.UIATK;
+                ls_14.UIATT = aggrParam.UIATT;
+                ls_14.UIASN = aggrParam.UIASN;
+                ls_14.UIATY = aggrParam.UIATY;
+                ls_14.UIADT = aggrParam.UIADT;
+                ls_14.UIADS = aggrParam.UIADS;
+                ls_14.ISMLB = aggrParam.ISMLB;
+                ls_14.PUIATK = aggrParam.UIATK;                
+            }
+
+            //OBJID에 포함된 숫자 제거.
+            ls_14.OBJID = ls_14.OBJID.replace(/\d/g,"");
+
+            //현재 UI의 OBJID 재 매핑.
+            ls_14.OBJID = oAPP.fn.setOBJID(ls_14.OBJID);
+
+            //PARENT의 ID 매핑 처리.
+            ls_14.POBID = is_parent.OBJID;
+
+            //부모 UI OBJECT ID 매핑 처리.
+            ls_14.PUIOK = is_parent.UIOBK;
+
+            //attribute 입력건 복사 처리.
+            var lt_0015 = lf_copyAttrData(ls_14, is_copied, aggrParam, bKeep);
+
+
+            //부모 정보에 현재 복사처리한 UI 수집처리.
+            is_parent.zTREE.push(ls_14);
+
+
+            //UI DESC 정보가 존재하는경우.
+            if(typeof is_copied._DESC !== "undefined"){
+                //UI DESC 정보 구성.
+                oAPP.fn.setDesc(ls_14.OBJID, is_copied._DESC);
+            }
+
+
+            //UI의 클라이언트 이벤트가 존재하는 경우 복사 처리.
+            lf_copyClientEvent(ls_14.OBJID, is_copied);
+
+            //미리보기 UI 추가
+            oAPP.attr.ui.frame.contentWindow.addUIObjPreView(ls_14.OBJID, ls_14.UIOBK, ls_14.UILIB, ls_14.UIFND, ls_14.POBID, ls_14.UIATT, lt_0015, it_ua018);
+
+            if(is_copied.zTREE.length === 0){return;}
+
+            for(var i=0, l=is_copied.zTREE.length; i<l; i++){
+                lf_setPasteCopiedData(ls_14, is_copied.zTREE[i], undefined, it_ua018, bKeep);
+
+            }
+
+            //붙여넣기 데이터의 최상위인경우 해당 값 return.
+            if(aggrParam){return ls_14;}
+
+        }   //복사된 ui를 붙여넣기 처리.
+
+
+
+        //붙여넣기 callback 이벤트.
+        function lf_paste_cb(param, i_cdata, bKeep){
+            
+            //공통코드 미리보기 UI Property 고정값 정보 검색.
+            lt_ua018 = oAPP.DATA.LIB.T_9011.filter( a=> a.CATCD === "UA018");
+
+            debugger;
+
+            //복사한 UI 붙여넣기 처리.
+            var ls_14 = lf_setPasteCopiedData(ls_tree, i_cdata, param, lt_ua018, bKeep);
+
+            //model 갱신 처리.
+            oAPP.attr.oModel.refresh();
+
+            //design tree의 tree binding 정보 갱신 처리.
+            var l_bind = oAPP.attr.ui.oLTree1.getBinding();
+            l_bind._buildTree(0,oAPP.fn.designGetTreeItemCount());
+
+            
+            //붙여넣기한 UI의 신규 생성됨 flag 처리.
+            oAPP.attr.prev[ls_14.OBJID].__isnew = "X";
+
+            //붙여넣기한 UI 선택 처리.
+            oAPP.fn.setSelectTreeItem(ls_14.OBJID);
+
+            //변경 FLAG 처리.
+            oAPP.fn.setChangeFlag();
+
+
+        } //붙여넣기 callback 이벤트.
+
+
+
+        //AGGR 선택 팝업의 CALLBACK FUNCTION.
+        function lf_aggrPopup_cb(param, i_cdata){
+
+            //복사한 UI의 APPLICATION이 현재 APPLICATION과 다른 경우.
+            //바인딩, 서버이벤트 초기화 여부 확인 팝업 호출.
+            parent.showMessage(sap, 40, "I", "Copy and paste application is different.Do you want to keep the binding?.",function(oEvent){
+
+                //취소를 한경우 exit.
+                if(oEvent === "CANCEL"){return;}
+
+                //default 바인딩, 서버이벤트 해제 처리.
+                var l_flag = false;
+
+                //바인딩, 서버이벤트를 유지하는경우.
+                if(oEvent === "YES"){
+                    l_flag = true;
+                }
+
+                //복사된 ui 붙여넣기 처리.
+                lf_paste_cb(param, i_cdata, l_flag);                
+
+            });
+
+
+        }   //AGGR 선택 팝업의 CALLBACK FUNCTION.
+
+
+
+        //클라이언트 이벤트 복사 처리.
+        function lf_copyClientEvent(OBJID, is_tree){
+            //복사된 UI에 클라이언트가 없는경우 EXIT.
+            if(typeof is_tree._CEVT === "undefined"){return;}
+
+            //클라이언트 이벤트를 복사 처리.
+            for(var i=0, l=is_tree._CEVT.length; i<l; i++){
+                //이전의 클라이언트 이벤트의 OBJID를 복사된 UI의 이름으로 변경처리.
+                is_tree._CEVT[i].OBJID = is_tree._CEVT[i].OBJID.replace(is_tree.OBJID, OBJID);
+            }
+
+            //OBJID를 재구성한 클라이언트 이벤트 수집 처리.
+            oAPP.DATA.APPDATA.T_CEVT = oAPP.DATA.APPDATA.T_CEVT.concat(is_tree._CEVT);
+
+        }
+
+
+        //편집 불가능 상태일때는 exit.
+        if(oAPP.attr.oModel.oData.IS_EDIT !== true){
+            return;
+        }
+
+        //context menu를 호출한 라인의 OBJID 얻기.
+        var l_OBJID = oAPP.attr.oModel.getProperty("/lcmenu/OBJID");
+        
+        //DOCUMENT영역에 PASTE한경우 EXIT.
+        if(l_OBJID === "ROOT"){
+            return;
+        }
+
+        //OBJID에 해당하는 TREE 정보 얻기.
+        var ls_tree = oAPP.fn.getTreeData(l_OBJID);
+
+        //붙여넣기 정보 얻기.
+        var l_cpoied = oAPP.fn.getCopyData("U4AWSuiDesignArea");
+
+        //붙여넣기 정보가 존재하지 않는경우.
+        if(!l_cpoied){
+            return;
+        }
+
+        //복사된 정보중 tree에 관련된 정보 발췌.
+        var l_cdata = l_cpoied[0].DATA;
+
+
+        //aggregation 선택 팝업 호출.
+        if(typeof oAPP.fn.aggrSelectPopup !== "undefined"){
+
+            oAPP.fn.aggrSelectPopup(l_cdata, ls_tree, lf_aggrPopup_cb);
+            return;
+        }
+
+        //aggregation 선택 팝업이 존재하지 않는경우 js load후 호출.
+        oAPP.fn.getScript("design/js/aggrSelectPopup",function(){
+            oAPP.fn.aggrSelectPopup(l_cdata, ls_tree, lf_aggrPopup_cb);
+        });
+
+
+    };  //context menu ui 붙여넣기 처리.
+
 
 })();

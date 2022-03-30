@@ -114,38 +114,8 @@
     }); //drop 이벤트.
 
 
-    
-    
 
-
-    //Context menu open전 이벤트.
-    oLTree1.attachBeforeOpenContextMenu(function(oEvent){
-      return;
-      //context menu 호출 라인 index가 존재하지 않는경우 exit.
-      if(typeof oEvent.mParameters.rowIndex === "undefined" || 
-        oEvent.mParameters.rowIndex === null){
-        return;
-      }
-
-      var l_bind = this.getBinding();
-      if(!l_bind){return;}
-
-      //해당 라인의 바인딩 정보 얻기.
-      var l_ctxt = l_bind.getContextByIndex(oEvent.mParameters.rowIndex);
-      if(!l_ctxt){return;}
-
-      //tree 정보 얻기.
-      var ls_tree = l_ctxt.getProperty();
-      if(!ls_tree){return;}
-
-      //context menu 호출전 메뉴 선택 가능 여부 설정.
-      oAPP.fn.beforeOpenContextMenu(ls_tree.OBJID);
-
-
-    }); //Context menu open전 이벤트.
-
-
-
+    //tree toolbar UI.
     var oLTBar1 = new sap.m.Toolbar();
     oLTree1.setToolbar(oLTBar1);
 
@@ -239,10 +209,7 @@
     oLTree1.attachFirstVisibleRowChanged(function(){
 
       //context menu가 open되어있다면 close 처리.
-      if(typeof oMenu !== "undefined" && oMenu.isOpen() === true){
-        oMenu.close();  
-      }      
-
+      oAPP.fn.contextMenuClosePopup(oMenu);
 
     }); //design tree 스크롤 이벤트.
 
@@ -252,67 +219,15 @@
     //oLTree1.setContextMenu(oLCmenu1);
 
     
-
-    //UI move Position
-    var oLCMItem5 = new sap.m.MenuItem({icon:"sap-icon://outdent",text:"Move Position",enabled:"{/lcmenu/enab05}"});
-    oLCmenu1.addItem(oLCMItem5);
-
-    //UI move Position 메뉴 선택 이벤트
-    oLCMItem5.attachPress(function(oEvent){
-
-      function lf_callback(pos){
-        lf_moveUI(l_ctxt, undefined, pos);
-      }
-
-      var l_ctxt = oEvent.oSource.getBindingContext();
-
-      var l_path = l_ctxt.getPath();
-
-      var l_parent = oAPP.attr.oModel.getProperty(l_path.substr(0,l_path.lastIndexOf("/")));
-
-      var l_pos = parseInt(l_path.substr(l_path.lastIndexOf("/")+1)) + 1;
-
-
-      if(typeof oAPP.fn.uiMovePosition === "undefined"){
-        oAPP.fn.getScript("design/js/uiMovePosition",function(){
-          oAPP.fn.uiMovePosition(l_pos,l_parent.length,lf_callback);
-        });
-
-      }else{
-          oAPP.fn.uiMovePosition(l_pos,l_parent.length,lf_callback);
-      }
-
-    }); //UI move Position 메뉴 선택 이벤트
-
-
-
     //copy 메뉴.
     var oLCMItem6 = new sap.m.MenuItem({icon:"sap-icon://copy",text:"Copy",enabled:"{/lcmenu/enab06}"});
     oLCmenu1.addItem(oLCMItem6);
 
-    //copy 메뉴 선택 이벤트
-    oLCMItem6.attachPress(function(oEvent){
-
-      var l_bind = this.getBindingContext();
-
-      var ls_tree = l_bind.getProperty();
-
-      //DOCUMENT, APP에서 COPY한경우 EXIT.
-      if(ls_tree.OBJID === "ROOT" || ls_tree.OBJID === "APP"){
-        return;
-      }
-
-      //현재 라인 정보를 복사 처리.
-      oAPP.fn.setCopyData("U4AWSuiDesignArea", ["U4AWSuiDesignArea"], ls_tree);
-
-
-    }); //copy 메뉴 선택 이벤트
-
-
-
     //paste 메뉴.
     var oLCMItem7 = new sap.m.MenuItem({icon:"sap-icon://paste",text:"Paste",enabled:"{/lcmenu/enab07}"});
     oLCmenu1.addItem(oLCMItem7);
+
+
 
     //paste 메뉴 선택 이벤트
     oLCMItem7.attachPress(function(oEvent){
@@ -396,7 +311,7 @@
         oAPP.fn.copyDesc(l_objid, ls_14.OBJID);
 
         //Client event 정보 복사.
-        oAPP.fn.copyUIClientEvent(l_objid, ls_14);
+        oAPP.fn.copyUiClientEvent(l_objid, ls_14);
 
 
         //미리보기 UI 추가
@@ -700,7 +615,7 @@
 
 
   //삭제 대상 UI의 클라이언트 이벤트 및 sap.ui.core.HTML의 content 수집 정보 삭제 처리.
-  oAPP.fn.delUIClientEvent = function(is_tree){
+  oAPP.fn.delUiClientEvent = function(is_tree){
 
     //클라이언트 이벤트가 존재하지 않는경우 exit.
     if(oAPP.DATA.APPDATA.T_CEVT.length === 0){return;}
@@ -745,8 +660,58 @@
 
 
 
+  //대상 UI의 클라이언트 이벤트 존재건 검색.
+  oAPP.fn.getUiClientEvent = function(is_tree){
+
+    //클라이언트 이벤트가 존재하지 않는경우 exit.
+    if(oAPP.DATA.APPDATA.T_CEVT.length === 0){return;}
+
+    var lt_CEVT = [];
+
+    //sap.ui.core.HTML UI인경우.
+    if(is_tree.UIFND === "SAP.UI.CORE.HTML"){
+      //content 프로퍼티에 직접 입력한 내용이 존재하는지 확인.
+      var l_findx = oAPP.DATA.APPDATA.T_CEVT.findIndex( a => a.OBJID === is_tree.OBJID + "CONTENT" && a.OBJTY === "HM");
+
+      if(l_findx !== -1){
+        //해당 HTML 수집 처리.
+        lt_CEVT.push(oAPP.DATA.APPDATA.T_CEVT[l_findx]);
+      }
+
+    }
+
+    //이벤트 설정건 존재여부 확인.
+    var lt_evt = oAPP.attr.prev[is_tree.OBJID]._T_0015.filter( a => a.UIATY === "2" );
+
+    //이벤트 설정건이 없는경우 exit.
+    if(lt_evt.length === 0){
+      return lt_CEVT.length === 0 ? undefined : lt_CEVT;
+    }
+
+
+    for(var i=0, l=lt_evt.length; i<l; i++){
+
+      //클라이언트 이벤트 설정건 존재여부 확인.
+      var l_findx = oAPP.DATA.APPDATA.T_CEVT.findIndex( a => a.OBJID === is_tree.OBJID + lt_evt[i].UIASN && a.OBJTY === "JS");
+
+      //설정건이 없는경우 continue
+      if(l_findx === -1){continue;}
+
+      //클라이언트 이벤트가 존재하는경우 해당 이벤트 삭제 처리.
+      lt_CEVT.push(oAPP.DATA.APPDATA.T_CEVT[l_findx]);
+
+    }
+
+    return lt_CEVT.length === 0 ? undefined : lt_CEVT;
+
+
+  };  //대상 UI의 클라이언트 이벤트 존재건 검색.
+
+
+
+
   //클라이언트 이벤트, HTML정보 복사 처리.
-  oAPP.fn.copyUIClientEvent = function(OBJID, is_tree){
+  oAPP.fn.copyUiClientEvent = function(OBJID, is_tree){
 
     //클라이언트 이벤트, HTML정보가 한건도 없는경우 exit.
     if(oAPP.DATA.APPDATA.T_CEVT.length === 0){return;}
@@ -1117,7 +1082,7 @@
 
 
     //미리보기 ui 선택 처리
-    oAPP.attr.ui.frame.contentWindow.selPreviewUI(is_tree.OBJID);
+    oAPP.attr.ui.frame.contentWindow.selPreviewUI(is_tree.OBJID, "I");
 
     if(typeof iIndex === "undefined"){return;}
 
@@ -1398,10 +1363,10 @@
         if(it_tree[i].chk === true){
 
           //클라이언트 이벤트 및 sap.ui.core.HTML의 프로퍼티 입력건 제거 처리.
-          oAPP.fn.delUIClientEvent(it_tree[i]);
+          oAPP.fn.delUiClientEvent(it_tree[i]);
 
           //Description 정보 삭제.
-          oAPP.fn.deltDesc(it_tree[i].OBJID);
+          oAPP.fn.delDesc(it_tree[i].OBJID);
 
           //미리보기에 해당 UI삭제 처리.
           oAPP.attr.ui.frame.contentWindow.delUIObjPreView(it_tree[i].OBJID, it_tree[i].POBID, it_tree[i].UIATT, it_tree[i].ISMLB);

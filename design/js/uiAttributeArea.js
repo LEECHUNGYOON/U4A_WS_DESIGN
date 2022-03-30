@@ -333,7 +333,24 @@
     oAPP.fn.fnClientEditorPopupOpener("HM", l_objid,function(param){
 
       //동일 이벤트 정보 얻기.
-      //var ls_0015 = oAPP.attr.prev[ls_attr.OBJID]._T_0015.find( a=> a.UIATK === ls_attr.UIATK);
+      var ls_0015 = oAPP.attr.prev[is_attr.OBJID]._T_0015.find( a=> a.UIATK === is_attr.UIATK);
+
+      if(typeof ls_0015 === "undefined"){
+        //수집된건이 없는경우 신규 라인 생성 처리.
+        ls_0015 = oAPP.fn.crtStru0015();
+
+        //attribute라인정보 MOVE-CORRESPONDING 처리.
+        oAPP.fn.moveCorresponding(is_attr, ls_0015);
+        
+        ls_0015.APPID = oAPP.attr.appInfo.APPID;
+        ls_0015.GUINR = oAPP.attr.appInfo.GUINR;
+
+        oAPP.attr.prev[is_attr.OBJID]._T_0015.push(ls_0015);
+
+      }
+
+      //HTML content 추가됨 flag 구성.
+      is_attr.ADDSC = ls_0015.ADDSC = "HM";
 
       //default 색상 처리.
       is_attr.icon2_color = "#acaba7";
@@ -402,7 +419,24 @@
     oAPP.fn.fnClientEditorPopupOpener("JS", l_objid,function(param){
 
       //동일 이벤트 정보 얻기.
-      //var ls_0015 = oAPP.attr.prev[ls_attr.OBJID]._T_0015.find( a=> a.UIATK === ls_attr.UIATK);
+      var ls_0015 = oAPP.attr.prev[is_attr.OBJID]._T_0015.find( a=> a.UIATK === is_attr.UIATK);
+
+      if(typeof ls_0015 === "undefined"){
+        //수집된건이 없는경우 신규 라인 생성 처리.
+        ls_0015 = oAPP.fn.crtStru0015();
+
+        //attribute라인정보 MOVE-CORRESPONDING 처리.
+        oAPP.fn.moveCorresponding(is_attr, ls_0015);
+        
+        ls_0015.APPID = oAPP.attr.appInfo.APPID;
+        ls_0015.GUINR = oAPP.attr.appInfo.GUINR;
+
+        oAPP.attr.prev[is_attr.OBJID]._T_0015.push(ls_0015);
+
+      }
+
+      //javascript client event 추가됨 flag 구성.
+      is_attr.ADDSC = ls_0015.ADDSC = "JS";
 
       //default 색상 처리.
       is_attr.icon2_color = "#acaba7";
@@ -418,6 +452,8 @@
 
     });
 
+    //function 사용처의 하위로직 skip을 위한 flag return.
+    return true;
 
   }; //client event popup 호출처리.
 
@@ -1295,10 +1331,10 @@
 
 
     //공통코드의 DOCUMENT 구성 정보 검색.
-    var lt_ua003 = oAPP.DATA.LIB.T_9011.filter( a => a.CATCD === "UA003");
+    var lt_ua003 = oAPP.DATA.LIB.T_9011.filter( a => a.CATCD === "UA003" );
 
     //세팅된 DOCUMENT 정보 검색.
-    var lt_0015 = oAPP.attr.prev[OBJID]._T_0015.filter( a => a.OBJID === OBJID);
+    var lt_0015 = oAPP.attr.prev[OBJID]._T_0015.filter( a => a.OBJID === OBJID );
 
     //코드마스터의 UI5 Document 속성 정보 기준으로 attributes 정보 구성.
     for(var i=0, l= lt_ua003.length; i<l; i++){
@@ -1310,7 +1346,7 @@
       oAPP.fn.attrCreateAttrBindField(ls_0015);
 
       //세팅된 DOCUMENT 정보 존재 여부 확인.
-      var ls_temp = lt_0015.find( a => a.UIATK === lt_ua003[i].ITMCD);
+      var ls_temp = lt_0015.find( a => a.UIATK === lt_ua003[i].ITMCD );
 
       //수정불가 값에 따른 EDIT 가능여부 처리.
       if(lt_ua003[i].FLD06 === ""){
@@ -1387,7 +1423,7 @@
 
       ls_0015.APPID = oAPP.attr.appInfo.APPID;
       ls_0015.GUINR = oAPP.attr.appInfo.GUINR;
-      ls_0015.UIATK = lt_ua003[i].ITMCD;;
+      ls_0015.UIATK = lt_ua003[i].ITMCD;
       ls_0015.UIATT = lt_ua003[i].FLD01;
       ls_0015.UIATV = "";
       ls_0015.UIATY = "1";
@@ -1972,7 +2008,7 @@
 
 
   //Description 삭제.
-  oAPP.fn.deltDesc = function(OBJID){
+  oAPP.fn.delDesc = function(OBJID){
 
     //OBJID의 위치 검색.
     var l_indx = oAPP.DATA.APPDATA.T_DESC.findIndex( a=> a.OBJID === OBJID );
@@ -2274,6 +2310,102 @@
     }
 
   };  //ATTRIBUTE FOCUS 처리.
+
+
+
+  /************************************************************************
+   * DOCUMENT 영역의 ATTRIBUTE 갱신 처리.
+   * **********************************************************************
+   * @param {array} it_attr - document영역의 갱신대상 attribute항목
+   * 예) [{"UIATK":"DH001020","UIATV":"00003"},...]
+   ************************************************************************/
+  oAPP.fn.attrUpdateDocAttr = function(it_attr){
+
+    //갱신처리 attribute 정보가 존재하지 않는경우 exit.
+    if(it_attr.length === 0){return;}
+
+    //갱신처리 대상건을 기준으로 ROOT에 수집된 attribute 갱신처리.
+    for(var i=0, l=it_attr.length; i<l; i++){
+
+      switch(it_attr[i].UIATK){
+        case "DH001020":  //Web Application Version
+          oAPP.attr.appInfo.APPVR = it_attr[i].UIATV;
+          break;
+
+        case "DH001025":  //Request/Task
+          oAPP.attr.appInfo.REQNR = it_attr[i].UIATV;
+          oAPP.attr.appInfo.REQNO = it_attr[i].UIATV;
+          break;
+
+        case "DH001140":  //Change User
+          oAPP.attr.appInfo.AEUSR = it_attr[i].UIATV;
+          break;
+
+        case "DH001150":  //Change Date
+          oAPP.attr.appInfo.AEDAT = it_attr[i].UIATV;
+          break;
+
+        case "DH001160":  //Change Time
+          oAPP.attr.appInfo.AETIM = it_attr[i].UIATV;
+          break;
+      }
+
+      //기존에 수집되어있는 ATTRIBUTE항목 확인.
+      var ls_attr = oAPP.attr.prev.ROOT._T_0015.find( a=> a.UIATK === it_attr[i].UIATK );
+
+      //기존 수집 항목의 값을 갱신 처리.
+      if(ls_attr){
+        ls_attr.UIATV = it_attr[i].UIATV;
+        continue;
+      }
+
+      //기존에 수집된 항목에 존재하지 않는경우 코드마스터에서 document attr정보 얻기.
+      var ls_ua003 = oAPP.DATA.LIB.T_9011.find( a => a.CATCD === "UA003" && a.ITMCD === it_attr[i].UIATK );
+      
+      //코드마스터에 존재하지 않는경우 skip.
+      if(!ls_ua003){continue;}
+
+      //기존에 수집된 항목에 존재하지 않는경우 신규 라인 생성 처리.
+      ls_attr = oAPP.fn.crtStru0015();      
+
+      ls_attr.APPID = oAPP.attr.appInfo.APPID;
+      ls_attr.GUINR = oAPP.attr.appInfo.GUINR;
+      ls_attr.OBJID = "ROOT";
+      ls_attr.UIATK = it_attr[i].UIATK;
+      ls_attr.UIATV = it_attr[i].UIATV;
+      ls_attr.UIOBK = "ROOT";
+      ls_attr.UIATT = ls_ua003.FLD01;
+      ls_attr.UIASN = ls_attr.UIATT.toUpperCase();
+      ls_attr.UIASN = ls_attr.UIASN.substr(0,18);
+      ls_attr.UIADT = "string";
+      ls_attr.UIATY = "1";
+      oAPP.attr.prev.ROOT._T_0015.push(ls_attr);
+
+    }
+
+    //현재 선택한 TREE가 ROOT가 아닌경우 EXIT.
+    if(oAPP.attr.oModel.oData.uiinfo.OBJID !== "ROOT"){return;}
+
+    //갱신처리 대상건을 기준으로 ATTRIBUTE 영역의 출력정보 갱신 처리.
+    for(var i=0, l=it_attr.length; i<l; i++){
+      
+      //대상 ATTRIBUTE 라인 얻기.
+      var ls_attr = oAPP.attr.oModel.oData.T_ATTR.find( a => a.UIATK === it_attr[i].UIATK );
+      
+      //해당 라인을 얻지못한 경우 SKIP.
+      if(!ls_attr){continue;}
+
+      //갱신값 매핑.
+      ls_attr.UIATV = it_attr[i].UIATV;
+
+    }
+
+    //모델 갱신 처리.
+    oAPP.attr.oModel.refresh();
+
+
+  };  //DOCUMENT 영역의 ATTRIBUTE 갱신 처리.
+
 
 
 })();
