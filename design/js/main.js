@@ -10,6 +10,9 @@
     oAPP.attr.bfselUI = undefined; //이전 선택 UI 정보
     oAPP.attr.UA015UI = undefined; //이전 미리보기 예외 UI정보
 
+    //미리보기 DROP UI정보(미리보기에서 drop한 UI의 잔상 제거 목적)
+    oAPP.attr.prevDropUI = undefined;
+
     //APPLICATION의 세부 정보 광역화.
     oAPP.attr.appInfo = {};
 
@@ -477,7 +480,7 @@
     //model, 미리보기 정보 제거.
     oAPP.fn.removeContent = function(){
       //미리보기 화면 제거.
-      oAPP.attr.ui.frame.contentWindow.removePreviewPage();
+      oAPP.attr.ui.frame.contentWindow.removePreviewPage();      
 
       //모델 초기화.
       oAPP.attr.oModel.oData = {};
@@ -566,9 +569,7 @@
               "S_WSO": oAPP.DATA.APPDATA.S_WSO};
 
     };  //UI 저장 정보 구성.
-
-
-    
+   
 
 
 
@@ -626,10 +627,8 @@
     //ui design area(좌측 TREE 영역)
     oAPP.fn.getScript("design/js/uiDesignArea",function(){oAPP.fn.uiDesignArea(oLPage);});
 
-
     //ui preview area(가운데 미리보기 영역)
     oAPP.fn.getScript("design/js/uiPreviewArea",function(){oAPP.fn.uiPreviewArea(oMPage);});
-
 
     //ui attribute area(우측 ui 속성정보 영역)
     oAPP.fn.getScript("design/js/uiAttributeArea",function(){oAPP.fn.uiAttributeArea(oRPage);});

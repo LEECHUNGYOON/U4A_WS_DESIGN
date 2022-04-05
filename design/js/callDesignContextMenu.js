@@ -3,62 +3,61 @@
     //디자인영역(미리보기)의 CONTEXT MENU UI 구성.
     oAPP.fn.callDesignContextMenu = function(){
         
-        //context menu popover UI생성.
-        var oPop = new sap.m.ResponsivePopover({placement:"Auto", titleAlignment:"Center", title:"{/lcmenu/title}"});
+        //MENU UI생성.
+        var oMenu1 = new this.sap.m.Menu({title:"{/lcmenu/title}"});
 
-        oPop.attachBeforeOpen(function(){
-            //popup 호출전 이전 선택건 초기화 처리.
-            oMenu1.clearSelection();
-        });
+        var oModel = new this.sap.ui.model.json.JSONModel();        
 
         //context menu popover에 모델 설정.
-        oPop.setModel(oAPP.attr.oModel);
-
-        //MENU UI생성.
-        var oMenu1 = new sap.m.SelectList();
-        oPop.addContent(oMenu1);
+        oMenu1.setModel(oModel);
 
         //menu item 선택 이벤트.
-        oMenu1.attachItemPress(function(oEvent){
+        oMenu1.attachItemSelected(function(oEvent){
             //메뉴 item선택건에 따른 기능 분기 처리.
             oAPP.fn.contextMenuItemPress(oEvent);
 
             //메뉴 선택 후 popup종료 처리.
-            oAPP.fn.contextMenuClosePopup(oPop);
+            oAPP.fn.contextMenuClosePopup(oMenu1);
             
         }); //menu item 선택 이벤트.
 
         //UI 추가 메뉴
-        var oMItem1 = new sap.m.MenuItem({key:"M01", icon:"sap-icon://add", text:"Insert Element", enabled:"{/lcmenu/enab01}"});
+        var oMItem1 = new this.sap.m.MenuItem({key:"M01", icon:"sap-icon://add", text:"Insert Element", enabled:"{/lcmenu/enab01}"});
         oMenu1.addItem(oMItem1);
 
         //UI 삭제 메뉴
-        var oMItem2 = new sap.m.MenuItem({key:"M02", icon:"sap-icon://delete", text:"Delete", enabled:"{/lcmenu/enab02}"});
+        var oMItem2 = new this.sap.m.MenuItem({key:"M02", icon:"sap-icon://delete", text:"Delete", enabled:"{/lcmenu/enab02}"});
         oMenu1.addItem(oMItem2);
 
         //UI up
-        var oMItem3 = new sap.m.MenuItem({key:"M03", icon:"sap-icon://navigation-up-arrow", text:"Up", enabled:"{/lcmenu/enab03}"});
+        var oMItem3 = new this.sap.m.MenuItem({key:"M03", icon:"sap-icon://navigation-up-arrow", text:"Up", enabled:"{/lcmenu/enab03}",startsSection:true});
         oMenu1.addItem(oMItem3);
 
         //UI down
-        var oMItem4 = new sap.m.MenuItem({key:"M04", icon:"sap-icon://navigation-down-arrow", text:"Down",enabled:"{/lcmenu/enab04}"});
+        var oMItem4 = new this.sap.m.MenuItem({key:"M04", icon:"sap-icon://navigation-down-arrow", text:"Down",enabled:"{/lcmenu/enab04}"});
         oMenu1.addItem(oMItem4);
 
         //UI move Position
-        var oMItem5 = new sap.m.MenuItem({key:"M05", icon:"sap-icon://outdent", text:"Move Position",enabled:"{/lcmenu/enab05}"});
+        var oMItem5 = new this.sap.m.MenuItem({key:"M05", icon:"sap-icon://outdent", text:"Move Position",enabled:"{/lcmenu/enab05}"});
         oMenu1.addItem(oMItem5);
 
         //copy 메뉴.
-        var oMItem6 = new sap.m.MenuItem({key:"M06", icon:"sap-icon://copy", text:"Copy",enabled:"{/lcmenu/enab06}"});
+        var oMItem6 = new this.sap.m.MenuItem({key:"M06", icon:"sap-icon://copy", text:"Copy",enabled:"{/lcmenu/enab06}",startsSection:true});
         oMenu1.addItem(oMItem6);
 
         //paste 메뉴.
-        var oMItem7 = new sap.m.MenuItem({key:"M07", icon:"sap-icon://paste", text:"Paste", enabled:"{/lcmenu/enab07}"});
+        var oMItem7 = new this.sap.m.MenuItem({key:"M07", icon:"sap-icon://paste", text:"Paste", enabled:"{/lcmenu/enab07}"});
         oMenu1.addItem(oMItem7);
+
+        var oMItem8 = new this.sap.m.MenuItem({key:"M08", icon:"sap-icon://paste", text:"관리자",startsSection:true});
+        oMenu1.addItem(oMItem8);
+
+        var oMItem9 = new this.sap.m.MenuItem({key:"M09", icon:"sap-icon://paste", text:"Wizard Template 등록"});
+        oMItem8.addItem(oMItem9);
 
 
         //생성한 popup 정보 return;
-        return oPop;
+        return oMenu1;
 
 
     };  //디자인영역(미리보기)의 CONTEXT MENU 기능.
@@ -68,11 +67,14 @@
     
     //context menu popup 종료 처리.
     oAPP.fn.contextMenuClosePopup = function(oUi){
-        //context menu 팝업이 open되어있으면.
-        if(oUi.isOpen() === true){
-            //popup 닫기.
-            oUi.close();
-        }
+        //메뉴 정보 얻기.
+        var oMenu = oUi._getMenu();
+
+        //메뉴정보를 못얻은경우, 메뉴가 열려있지 않은경우 exit.
+        if(!oMenu || !oMenu.bOpen){return;}
+        
+        //popup 닫기.
+        oUi.close();
 
     };  //context menu popup 종료 처리.
 
@@ -124,9 +126,11 @@
 
 
     //디자인영역 context menu 활성여부 설정.
-    oAPP.fn.enableDesignContextMenu = function(OBJID){
+    oAPP.fn.enableDesignContextMenu = function(oMenu, OBJID){
 
         var ls_menu = {};
+
+        var oModel = oMenu.getModel();
 
         //context menu의 TITLE 정보.
         ls_menu.title = OBJID;
@@ -145,6 +149,7 @@
 
         //ROOT(DOCUMENT)영역인경우 모든 CONTEXT MENU 비활성 처리.
         if(OBJID === "ROOT"){
+            oModel.setProperty('/lcmenu',ls_menu);
             oAPP.attr.oModel.setProperty('/lcmenu',ls_menu);
 
             //TREE ITEM 선택처리.
@@ -163,6 +168,7 @@
 
         //APP에서 menu 호출한 경우 편집 여부에 따라 UI추가, UI붙여넣기 메뉴만 사용 가능.
         if(OBJID === "APP"){
+            oModel.setProperty('/lcmenu',ls_menu);
             oAPP.attr.oModel.setProperty('/lcmenu',ls_menu);
 
             //TREE ITEM 선택처리.
@@ -173,6 +179,7 @@
         //DOCUMENT, APP가 아닌 영역에서 CONTEXT MENU 호출시 display 상태인경우 메뉴 비활성 처리.
         if(oAPP.attr.oModel.oData.IS_EDIT === false){
             ls_menu.enab06 = true; //copy 가능
+            oModel.setProperty('/lcmenu',ls_menu);
             oAPP.attr.oModel.setProperty('/lcmenu',ls_menu);
 
             //TREE ITEM 선택처리.
@@ -219,6 +226,7 @@
         }
 
         //context menu 정보 바인딩.
+        oModel.setProperty('/lcmenu',ls_menu);
         oAPP.attr.oModel.setProperty('/lcmenu',ls_menu);
 
         //context menu를 호출한 UI 선택 처리.

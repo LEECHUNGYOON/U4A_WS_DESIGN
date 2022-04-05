@@ -149,7 +149,7 @@ oAPP.fn.callF4HelpPopup = function(I_SHLPNAME, I_SHLP_DEF, IT_SHLP, IT_FIELDDESC
 
   //-검색 서버 조회 전송 처리 스크립트 펑션 생성
   function LF_getServerData(){
-    debugger;
+
     oTable.setBusy(true);
     SerchBT1.setBusy(true);
 
@@ -191,13 +191,13 @@ oAPP.fn.callF4HelpPopup = function(I_SHLPNAME, I_SHLP_DEF, IT_SHLP, IT_FIELDDESC
 
 
     //검색조건에 따른 결과 리스트 검색을 위한 서버 호출.
-    sendAjax(oAPP.attr.servNm + "/f4serverData", oFormData, function(param){
+    sendAjax(parent.getServerPath() + "/f4serverData", oFormData, function(param){
       //~조회 정보 존재시 data 처리
 
         //BUSY OFF.
         parent.setBusy(false);
 
-        debugger;
+        
         if(param.TEXT[0].NAME == "REFDATA"){
 
           modeloTable.oData.TF4LIST = [];
@@ -266,12 +266,11 @@ oAPP.fn.callF4HelpPopup = function(I_SHLPNAME, I_SHLP_DEF, IT_SHLP, IT_FIELDDESC
 
 
     //f4 help 필드정보 검색.
-    sendAjax(oAPP.attr.servNm + "/f4serverData", oFormData, function(param){
+    sendAjax(parent.getServerPath() + "/f4serverData", oFormData, function(param){
 
       //BUSY OFF.
       parent.setBusy(false);
 
-      debugger;
       //~witing mode 제거
       oDialog.setBusy(false);
 
