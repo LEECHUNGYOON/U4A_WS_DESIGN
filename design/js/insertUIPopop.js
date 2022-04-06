@@ -238,11 +238,9 @@
       //sap.ui.table.Row UI를 찾지 못한 경우 exit.
       if(!l_row){return;}
 
-      //row UI가 존재하는 index위치를 선택 처리.
-      oTab1.setSelectedIndex(oTab1.indexOfRow(l_row));
+      //선택 처리건에 대한 return.
+      lf_selectUi(l_row.getBindingContext().getProperty());
 
-      //UI 추가 이벤트 처리.
-      oBtn1.firePress();
 
     }); //tree 더블클릭 이벤트.
 
@@ -310,6 +308,29 @@
         parent.showMessage(sap, 20, 'E', '라인을 선택해 주십시오.');
         return;
       }
+            
+      //선택 처리건에 대한 return.
+      lf_selectUi(oTab1.getContextByIndex(l_sidx).getProperty());
+
+
+    });
+
+
+    //종료버튼
+    var oBtn2 = new sap.m.Button({icon: "sap-icon://decline",text: "Cancel",type: "Reject"});
+    oDlg.addButton(oBtn2);
+    oBtn2.attachPress(function(){
+      oDlg.close();
+      oDlg.destroy();
+    });
+
+    oDlg.open();
+
+
+    
+
+    //UI 선택처리 FUNCTION.
+    function lf_selectUi(is_UI){
 
       var l_ret = {};
 
@@ -320,7 +341,7 @@
 
 
       //리스트 선택정보(22번 테이블 구조)
-      l_ret.E_UIOBJ = oMdl.getProperty("",oTab1.getContextByIndex(l_sidx));
+      l_ret.E_UIOBJ = is_UI;
 
       //리스트에서 선택한 ui가 갖고 있는 aggr 정보(23번 테이블)
       l_ret.E_AGGRT = oAPP.DATA.LIB.T_0023.filter(a => a.UIOBK === l_ret.E_UIOBJ.UIOBK && a.UIATY === "3" && a.ISDEP !== "X");
@@ -336,18 +357,8 @@
       //return parameter 전달.
       retFunc(l_ret);
 
-    });
 
-
-    //종료버튼
-    var oBtn2 = new sap.m.Button({icon: "sap-icon://decline",text: "Cancel",type: "Reject"});
-    oDlg.addButton(oBtn2);
-    oBtn2.attachPress(function(){
-      oDlg.close();
-      oDlg.destroy();
-    });
-
-    oDlg.open();
+    } //UI 선택처리 FUNCTION.
 
   };
 

@@ -150,7 +150,7 @@
 
         //copy 버튼 선택 이벤트.
         oCopy.attachPress(function(){
-            debugger;
+
             //버튼선택 라인의 바인딩정보에 해당하는 값 얻기.
             var ls_icon = this.getBindingContext().getProperty();
 

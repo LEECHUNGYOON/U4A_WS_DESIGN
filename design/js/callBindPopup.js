@@ -183,8 +183,6 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
         //2레벨의 TABLE, STRUCTURE정보만 발췌.
         var lt_filt = l_model.oData.TREE.filter( a => a.ZLEVEL === 2 && a.KIND !== "E");
 
-        debugger;
-
         //TABLE, STRUCTURE를 탐색하며 선택 가능 여부 처리.
         lf_setBindEnable(lt_filt, l_path, l_model);
 
@@ -224,7 +222,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
 
   //라인선택 이벤트
   function lf_selTabRow(oEvent){
-    debugger;
+
     var l_indx = this.getSelectedIndex();
     if(l_indx === -1){return;}
 

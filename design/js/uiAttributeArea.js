@@ -143,6 +143,11 @@
 
       }
 
+      //autoGrowing 프로퍼티 변경건 예외처리.
+      if(oAPP.attrChangeAutoGrowingProp(ls_0015) === true){
+        return;
+      }
+
       //attr 변경처리.
       oAPP.fn.attrChgAttrVal(ls_0015, "DDLB");
 
@@ -273,6 +278,168 @@
 
   };  //우측 페이지(attribute 영역) 구성
 
+
+
+  /************************************************************************
+   * autoGrowing 프로퍼티 변경건에 대한 예외처리.
+   * **********************************************************************
+   * @param {object} is_attr - 이벤트 발생한 attribute의 라인 정보.
+   * @return {boolean} autoGrowing프로퍼티 변경건인경우 function 호출처의
+   * 하위로직 skip을 위한 true값 return.
+   ************************************************************************/
+  oAPP.attrChangeAutoGrowingProp = function(is_attr){
+
+    //autoGrowing 프로퍼티 변경건이 아닌경우 EXIT.
+    if(is_attr.UIATK !== "EXT00001347" && is_attr.UIATK === "EXT00001348" &&
+      is_attr.UIATK !== "EXT00001349"){
+      return;
+    }
+
+    //바인딩 처리된경우 exit.
+    if(is_attr.ISBND === "X"){return;}
+
+    //autoGrowing을 true로 설정하지 않은경우 exit.
+    if(is_attr.UIATV !== "true"){return;}
+
+    var l_msg = "autoGrowing을 설정할 경우 이전에 설정한 서버이벤트 및 클라이언트 이벤트가 초기화 됩니다. " + 
+                "진행하시겠습니까?";
+
+    //autoGrowing을 true로 설정한 경우 확인 팝업 호출.
+    parent.showMessage(sap, 30, "I", l_msg, function(param){
+
+      //질문 팝업에서 YES를 누르지 않은경우(취소한경우)
+      if(param !== "YES"){
+
+        //default false 처리.
+        is_attr.UIATV = "false";
+
+        //ATTR 변경건 처리.
+        oAPP.fn.attrChgAttrVal(is_attr, "DDLB");
+
+        //모델 갱신 처리.
+        oAPP.attr.oModel.refresh();
+
+        return;
+
+      }
+
+      //autoGrowing 프로퍼티 값에 따른 예외처리.
+      oAPP.fn.attrSetAutoGrowingException(is_attr);
+
+    });
+
+    //function 사용처의 하위로직 skip을 위한 flag return.
+    return true;
+
+  };
+
+
+  /************************************************************************
+   * autoGrowing 프로퍼티 값에 따른 예외처리.
+   * **********************************************************************
+   * @param {object} is_attr - attribute의 라인 정보.
+   * @param {boolean} bClear - 대상 이벤트 초기화 여부(true : 초기화함)
+   ************************************************************************/
+  oAPP.fn.attrSetAutoGrowingException = function(is_attr, bClear){
+    
+    var lt_UIATK = [];
+
+    //autoGrowing 프로퍼티 KEY에 따른 점검대상 ATTR의 key정보 구성.
+    switch(is_attr.UIATK){
+      case "EXT00001347": //sap.ui.table.Table의 autoGrowing.        
+        //firstVisibleRowChanged
+        lt_UIATK = ["AT000013085"];
+        break;
+
+      case "EXT00001348": //sap.m.Table의 autoGrowing.
+        //growingStarted, growingFinished, updateStarted, updateFinished
+        lt_UIATK = ["AT000005916", "AT000005917", "AT000005918", "AT000005919"];
+        break;
+
+      case "EXT00001349": //sap.m.List의 autoGrowing.
+        //growingStarted, growingFinished, updateStarted, updateFinished
+        lt_UIATK = ["AT000003866", "AT000003867", "AT000003868", "AT000003869"];
+        break;
+
+      default:
+        //autoGrowing이 아닌경우 exit.
+        return;
+
+    }
+   
+
+    //점검대상 event 항목에 대한 처리.
+    for(var i=0, l=lt_UIATK.length; i<l; i++){
+      //대상 이벤트 검색.
+      var ls_attr = oAPP.attr.oModel.oData.T_ATTR.find( a => a.UIATK === lt_UIATK[i] );
+
+      //대상 이벤트를 찾지못한 경우 skip.
+      if(typeof ls_attr === "undefined"){continue;}
+
+      //입력 불가 처리.
+      ls_attr.edit = false;
+
+      //서버이벤트 아이콘 비활성 처리.
+      ls_attr.icon1_visb = false;
+
+      //클라이언트 이벤트 아이콘 비활성 처리.
+      ls_attr.icon2_visb = false;
+
+      //초기화 처리가 아닌경우 skip.
+      if(bClear !== true){continue}
+
+      //서버이벤트 입력건 초기화.
+      ls_attr.UIATV = "";
+
+      //클라이언트 이벤트 SOURCE TYPE 초기화.
+      ls_attr.ADDSC = "";
+
+      //클라이언트 수집건 여부 확인 후 삭제.
+      oAPP.fn.attrChgAttrVal(ls_attr,"DDLB");
+
+      //UI에 수집되어있는 해당 이벤트 삭제.
+      if(oAPP.DATA.APPDATA.T_CEVT.length === 0){continue;}
+
+      //클라이언트 이벤트 존재여부 확인.
+      var l_index = oAPP.DATA.APPDATA.T_CEVT.findIndex( a => a.OBJID === ls_attr.OBJID + ls_attr.UIASN && a.OBJTY === "JS" );
+
+      //존재하지 않는경우 skip.
+      if(l_index === -1){continue;}
+
+      //클라이언트 이벤트 존재시 해당 라인 삭제 처리.
+      oAPP.DATA.APPDATA.T_CEVT.splice(l_index, 1);
+
+    }
+
+    //모델 갱신 처리.
+    oAPP.attr.oModel.refresh();
+
+
+  };  //autoGrowing 프로퍼티 값에 따른 예외처리.
+
+
+
+
+  /************************************************************************
+   * 입력받은 attr 라인의 모델 갱신 처리.
+   * **********************************************************************
+   * @param {object} is_attr - 이벤트 발생한 attribute의 라인 정보.
+   ************************************************************************/
+  oAPP.fn.attrUpdateLine = function(is_attr){
+    
+    //입력받은 attribute 항목을 model에서 검색.
+    var ls_attr = oAPP.attr.oModel.oData.T_ATTR.find( a=> a.UIATK === is_attr.UIATK );
+
+    //찾지못한 경우 exit.
+    if(typeof ls_attr === "undefined"){return;}
+
+    //찾은경우 입력받은 attr을 모델의 해당 라인에 매핑.
+    oAPP.fn.moveCorresponding(is_attr, ls_attr);
+
+    //모델 갱신 처리.
+    oAPP.attr.oModel.refresh();
+
+  };  //입력받은 attr 라인의 모델 갱신 처리.
 
 
   //sap.ui.core.HTML UI의 content 프로퍼티에서 바인딩, editor 호출전 점검.
@@ -468,7 +635,7 @@
 
     //f4 help callback 이벤트.
     function lf_returnDOC(param){
-      debugger;
+
         var l_fldnm = "";
         switch(ls_ua003.ITMCD){
           case "DH001040":  //Code Page
@@ -1082,6 +1249,57 @@
     var l_val = is_attr.UIATV;
     var l_dval = "";
 
+    //기존 수집건 존재 여부 확인.
+    var l_indx = oAPP.attr.prev[is_attr.OBJID]._T_0015.findIndex( a => a.OBJID === is_attr.OBJID && a.UIATT === is_attr.UIATT);
+
+    //이벤트에서 입력값이 변경된경우.
+    if(is_attr.UIATY === "2"){
+
+      //이벤트 입력값이 존재하지 않는경우.
+      if(is_attr.UIATV === ""){
+        
+        //수집된건이 없는경우 exit.
+        if(l_indx === -1){return;}
+
+        //클라이언트 이벤트 검색.
+        var l_cevt = oAPP.DATA.APPDATA.T_CEVT.find( a => a.OBJID === is_attr.OBJID && is_attr.UIASN && a.OBJTY === "JS" );
+
+        //수집건이 존재하는경우 클라이언트 이벤트가 존재시 exit.
+        if(l_cevt){return;}
+
+        //수집건존재, 클라이언트 이벤트가 없는경우 해당 라인 삭제 처리.
+        oAPP.attr.prev[is_attr.OBJID]._T_0015.splice(l_indx, 1);
+        return;
+
+      }
+
+      //서버이벤트 입력값이 존재하는경우.
+      if(is_attr.UIATV !== ""){
+
+        //수집건이 존재하는경우.
+        if(l_indx !== -1){
+          //해당 이벤트 매핑.
+          oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].UIATV = is_attr.UIATV;
+          return;
+        }
+
+        //수집건이 존재하지 않는경우 신규 라인 생성 처리.
+        var ls_0015 = oAPP.fn.crtStru0015();
+
+        //attr의 입력값 매핑.
+        oAPP.fn.moveCorresponding(is_attr, ls_0015);
+
+        //이벤트 입력건 수집 처리.
+        ls_0015.APPID = oAPP.attr.appInfo.APPID;
+        ls_0015.GUINR = oAPP.attr.appInfo.GUINR;
+        oAPP.attr.prev[is_attr.OBJID]._T_0015.push(ls_0015);
+
+      }
+
+      return;
+
+    }
+
     //checkbox에서 발생한 이벤트인경우.
     if(uitp === "CHECK"){
       //checkbox를 선택한경우 abap_true로, 선택하지 않은경우 abap_false 처리.
@@ -1096,9 +1314,6 @@
       l_dval = oAPP.DATA.LIB.T_0023.find( a => a.UIATK === is_attr.UIATK ).DEFVL;
 
     }
-
-    //프로퍼티 입력건 수집 항목에 현재 UI의 프로퍼티가 수집됐는지 확인.
-    var l_indx = oAPP.attr.prev[is_attr.OBJID]._T_0015.findIndex( a => a.OBJID === is_attr.OBJID && a.UIATT === is_attr.UIATT);
 
     //default 값과 동일한 경우 수집항목이 존재하지 않는경우 exit.
     if(l_dval === l_val && l_indx === -1){
@@ -1231,7 +1446,7 @@
     
     //f4 help callback function.
     function lf_returnDOC(a){
-      debugger;
+
     } //f4 help callback function.
 
     //f4 help팝업을 load한경우.

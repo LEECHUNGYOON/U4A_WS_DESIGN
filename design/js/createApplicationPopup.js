@@ -406,7 +406,7 @@
 
       function lf_chkPackage(is_create){
         //application명 서버전송 데이터 구성.
-        debugger;
+
         var oFormData = new FormData();
         oFormData.append("PACKG", is_create.PACKG);
 

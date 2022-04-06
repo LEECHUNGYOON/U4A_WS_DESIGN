@@ -10,9 +10,6 @@
     oAPP.attr.bfselUI = undefined; //이전 선택 UI 정보
     oAPP.attr.UA015UI = undefined; //이전 미리보기 예외 UI정보
 
-    //미리보기 DROP UI정보(미리보기에서 drop한 UI의 잔상 제거 목적)
-    oAPP.attr.prevDropUI = undefined;
-
     //APPLICATION의 세부 정보 광역화.
     oAPP.attr.appInfo = {};
 
@@ -291,7 +288,7 @@
         }
 
         //wait off 처리.
-        parent.setBusy('');
+        //parent.setBusy('');
 
       }); //서버 호출.
 
@@ -482,8 +479,19 @@
       //미리보기 화면 제거.
       oAPP.attr.ui.frame.contentWindow.removePreviewPage();      
 
+      oAPP.attr.prev = {}; //미리보기 정보
+      oAPP.attr.popup = [];  //팝업 정보
+      oAPP.attr.bfselUI = undefined; //이전 선택 UI 정보
+      oAPP.attr.UA015UI = undefined; //이전 미리보기 예외 UI정보
+
+      //APPLICATION의 세부 정보 광역화.
+      oAPP.attr.appInfo = {};
+
       //모델 초기화.
       oAPP.attr.oModel.oData = {};
+
+      //서버이벤트 리스트 제거.
+      delete oAPP.attr.T_EVT;
 
       //application 정보 제거.
       delete oAPP.DATA.APPDATA;

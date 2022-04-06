@@ -236,19 +236,49 @@
 
 
 
+
+    /************************************************************************
+   * UI가 입력 가능한 카디널리티 여부 확인.
+   * **********************************************************************
+   * @param {object} is_parent - 점검 대상 부모 tree 정보.
+   * @param {string} UIATK - 부모 추가하려는 aggregation KEY
+   * @param {abap_bool} ISMLB - 카디널리티 ("X" = 0:N, "" = 0:1)
+   ************************************************************************/
+    oAPP.fn.chkUiCardinality = function(is_parent, UIATK, ISMLB){
+
+        //n건 입력가능하거나, 부모의 child정보가 한건도 없는경우 exit.
+        if(ISMLB === "X" || is_parent.zTREE.length === 0){return;}
+
+        //부모의 대상 aggregation에 이미 UI가 추가된경우 오류 처리(0:1 aggregation의 경우 1개의 UI만 추가 가능).
+        if(is_parent.zTREE.findIndex( a => a.UIATK === UIATK ) !== -1){
+            //022	Can not specify more than one object in the corresponding Aggrigation.
+            parent.showMessage(sap, 10, "W", "Can not specify more than one object in the corresponding Aggrigation.");
+
+            //오류 flag return
+            return true;
+
+        }
+
+    };  //UI가 입력 가능한 카디널리티 여부 확인.
+
     
     //UI 추가 메뉴 선택 처리.
     oAPP.fn.contextMenuInsertUI = function(){
       
         //UI 추가.
-        function lf_setChild(a){
+        function lf_setChild(param){
+
+            //UI가 입력 가능한 카디널리티 여부 확인.
+            if(oAPP.fn.chkUiCardinality(ls_tree, param.E_EMB_AGGR.UIATK, param.E_EMB_AGGR.ISMLB) === true){
+                return;
+            }
             
             //context menu 호출 UI의 child 정보가 존재하지 않는경우 생성.
             if(!ls_tree.zTREE){
                 ls_tree.zTREE = [];
             }
 
-            var l_cnt = parseInt(a.E_CRTCNT);
+            var l_cnt = parseInt(param.E_CRTCNT);
 
             //UI 반복 횟수만큼 그리기.
             for(var i=0; i<l_cnt; i++){
@@ -264,25 +294,25 @@
                 l_14.GUINR = oAPP.attr.appInfo.GUINR;
 
                 //UI명 구성.
-                l_14.OBJID = oAPP.fn.setOBJID(a.E_UIOBJ.UIOBJ);
+                l_14.OBJID = oAPP.fn.setOBJID(param.E_UIOBJ.UIOBJ);
                 l_14.POBID = ls_tree.OBJID;
-                l_14.UIOBK = a.E_UIOBJ.UIOBK;
+                l_14.UIOBK = param.E_UIOBJ.UIOBK;
                 l_14.PUIOK = ls_tree.UIOBK;
 
-                l_14.UIATK = a.E_EMB_AGGR.UIATK;
-                l_14.UIATT = a.E_EMB_AGGR.UIATT;
-                l_14.UIASN = a.E_EMB_AGGR.UIASN;
-                l_14.UIATY = a.E_EMB_AGGR.UIATY;
-                l_14.UIADT = a.E_EMB_AGGR.UIADT;
-                l_14.UIADS = a.E_EMB_AGGR.UIADS;
-                l_14.ISMLB = a.E_EMB_AGGR.ISMLB;
+                l_14.UIATK = param.E_EMB_AGGR.UIATK;
+                l_14.UIATT = param.E_EMB_AGGR.UIATT;
+                l_14.UIASN = param.E_EMB_AGGR.UIASN;
+                l_14.UIATY = param.E_EMB_AGGR.UIATY;
+                l_14.UIADT = param.E_EMB_AGGR.UIADT;
+                l_14.UIADS = param.E_EMB_AGGR.UIADS;
+                l_14.ISMLB = param.E_EMB_AGGR.ISMLB;
 
-                l_14.UIFND = a.E_UIOBJ.UIFND;
-                l_14.PUIATK = a.E_EMB_AGGR.UIATK;
-                l_14.UILIB = a.E_UIOBJ.LIBNM;
-                l_14.ISEXT = a.E_UIOBJ.ISEXT;
-                l_14.TGLIB = a.E_UIOBJ.TGLIB;
-                l_14.LIBNM = a.E_UIOBJ.LIBNM;
+                l_14.UIFND = param.E_UIOBJ.UIFND;
+                l_14.PUIATK = param.E_EMB_AGGR.UIATK;
+                l_14.UILIB = param.E_UIOBJ.LIBNM;
+                l_14.ISEXT = param.E_UIOBJ.ISEXT;
+                l_14.TGLIB = param.E_UIOBJ.TGLIB;
+                l_14.LIBNM = param.E_UIOBJ.LIBNM;
 
                 //context menu 호출 라인의 child에 추가한 UI정보 수집.
                 ls_tree.zTREE.push(l_14);
@@ -293,19 +323,19 @@
                 ls_0015.APPID = oAPP.attr.appInfo.APPID;
                 ls_0015.GUINR = oAPP.attr.appInfo.GUINR;
                 ls_0015.OBJID = l_14.OBJID;
-                ls_0015.UIOBK = a.E_UIOBJ.UIOBK;
-                ls_0015.UIATK = a.E_EMB_AGGR.UIATK;
-                ls_0015.UILIK = a.E_UIOBJ.UILIK;
-                ls_0015.UIATT = a.E_EMB_AGGR.UIATT;
-                ls_0015.UIASN = a.E_EMB_AGGR.UIASN;
-                ls_0015.UIADT = a.E_EMB_AGGR.UIADT;
+                ls_0015.UIOBK = param.E_UIOBJ.UIOBK;
+                ls_0015.UIATK = param.E_EMB_AGGR.UIATK;
+                ls_0015.UILIK = param.E_UIOBJ.UILIK;
+                ls_0015.UIATT = param.E_EMB_AGGR.UIATT;
+                ls_0015.UIASN = param.E_EMB_AGGR.UIASN;
+                ls_0015.UIADT = param.E_EMB_AGGR.UIADT;
                 ls_0015.UIATY = "6";
-                ls_0015.ISMLB = a.E_EMB_AGGR.ISMLB;
+                ls_0015.ISMLB = param.E_EMB_AGGR.ISMLB;
                 ls_0015.ISEMB = "X";
 
 
                 //미리보기 UI 추가
-                oAPP.attr.ui.frame.contentWindow.addUIObjPreView(l_14.OBJID, l_14.UIOBK, l_14.LIBNM, l_14.UIFND, l_14.POBID, a.E_EMB_AGGR.UIATT);
+                oAPP.attr.ui.frame.contentWindow.addUIObjPreView(l_14.OBJID, l_14.UIOBK, l_14.LIBNM, l_14.UIFND, l_14.POBID, param.E_EMB_AGGR.UIATT);
 
 
                 //UI 생성건 수집 처리.
@@ -402,7 +432,7 @@
             var ls_tree = oAPP.fn.getTreeData(l_OBJID);
 
             //미리보기 화면 UI 제거.
-            oAPP.attr.ui.frame.contentWindow.delUIObjPreView(ls_tree.OBJID, ls_tree.POBID, ls_tree.UIATT, ls_tree.ISMLB);
+            oAPP.attr.ui.frame.contentWindow.delUIObjPreView(ls_tree.OBJID, ls_tree.POBID, ls_tree.UIATT, ls_tree.ISMLB, ls_tree.UIOBK);
 
             //삭제 이후 이전 선택처리 정보 얻기.
             var l_prev = oAPP.fn.designGetPreviousTreeItem(ls_tree.OBJID);
@@ -497,7 +527,7 @@
         //AGGREGATION상에서 위치가 변경된경우.
         if(l_indx1 !== l_indx2){
             //미리보기 갱신 처리.
-            oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(ls_tree.OBJID, ls_tree.POBID, ls_tree.UIATT,l_indx2);
+            oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(ls_tree.OBJID, ls_tree.POBID, ls_tree.UIATT,l_indx2, ls_tree.UIOBK);
 
             //미리보기 ui 선택.
             oAPP.attr.ui.frame.contentWindow.selPreviewUI(ls_tree.OBJID);
@@ -704,6 +734,7 @@
             
             //기존 복사건을 신규 14번 구조에 매핑.
             oAPP.fn.moveCorresponding(is_copied, ls_14);
+            ls_14.zTREE = [];
 
             //application 정보 재정의.
             ls_14.APPID = oAPP.attr.appInfo.APPID;
@@ -754,7 +785,9 @@
             //미리보기 UI 추가
             oAPP.attr.ui.frame.contentWindow.addUIObjPreView(ls_14.OBJID, ls_14.UIOBK, ls_14.UILIB, ls_14.UIFND, ls_14.POBID, ls_14.UIATT, lt_0015, it_ua018, it_ua032);
 
-            if(is_copied.zTREE.length === 0){return;}
+            if(is_copied.zTREE.length === 0){
+                return aggrParam ? ls_14 : undefined;
+            }
 
             for(var i=0, l=is_copied.zTREE.length; i<l; i++){
                 lf_setPasteCopiedData(ls_14, is_copied.zTREE[i], undefined, it_ua018, it_ua032, bKeep);
@@ -775,8 +808,6 @@
             lt_ua018 = oAPP.DATA.LIB.T_9011.filter( a=> a.CATCD === "UA018");
 
             lt_ua032 = oAPP.DATA.LIB.T_9011.filter( a=> a.CATCD === "UA032" && a.FLD06 !== "X" );
-
-            debugger;
 
             //복사한 UI 붙여넣기 처리.
             var ls_14 = lf_setPasteCopiedData(ls_tree, i_cdata, param, lt_ua018, lt_ua032, bKeep);
@@ -805,6 +836,11 @@
 
         //AGGR 선택 팝업의 CALLBACK FUNCTION.
         function lf_aggrPopup_cb(param, i_cdata){
+
+            //UI가 입력 가능한 카디널리티 여부 확인.
+            if(oAPP.fn.chkUiCardinality(ls_tree, param.UIATK, param.ISMLB) === true){
+                return;
+            }
 
             //복사한 UI의 APPLICATION이 현재 APPLICATION과 다른 경우.
             //바인딩, 서버이벤트 초기화 여부 확인 팝업 호출.
