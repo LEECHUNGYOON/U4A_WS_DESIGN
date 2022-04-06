@@ -72,6 +72,17 @@
     }
 
 
+    //예외처리 대상 프로퍼티입력건 여부 확인.
+    var l_ua032 = oAPP.DATA.LIB.T_9011.find( a => a.CATCD === "UA032" && a.FLD01 === is_attr.UIOBK && a.FLD03 === is_attr.UIATT && a.FLD06 !== "X" );
+    
+    //예외처리 대상 프로퍼티를 입력한 경우.
+    if(l_ua032 && l_ua032.FLD07 !== ""){
+      //해당 function을 수행한 결과값으로 변경 처리.
+      l_prop = oAPP.attr.ui.frame.contentWindow[l_ua032.FLD07](l_prop);
+      
+    }
+
+    //UI.setProperty(value); 처리.
     oAPP.attr.prev[is_attr.OBJID][l_propnm](l_prop);
 
   };  //미리보기 화면 UI의 프로퍼티 변경 처리.

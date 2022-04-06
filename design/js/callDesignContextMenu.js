@@ -694,7 +694,7 @@
 
 
         //복사된 ui를 붙여넣기 처리.
-        function lf_setPasteCopiedData(is_parent, is_copied, aggrParam, it_ua018, bKeep){
+        function lf_setPasteCopiedData(is_parent, is_copied, aggrParam, it_ua018, it_ua032, bKeep){
 
             //신규 14번 구조 생성.
             var ls_14 = oAPP.fn.crtStru0014();
@@ -752,12 +752,12 @@
             lf_copyClientEvent(ls_14.OBJID, is_copied);
 
             //미리보기 UI 추가
-            oAPP.attr.ui.frame.contentWindow.addUIObjPreView(ls_14.OBJID, ls_14.UIOBK, ls_14.UILIB, ls_14.UIFND, ls_14.POBID, ls_14.UIATT, lt_0015, it_ua018);
+            oAPP.attr.ui.frame.contentWindow.addUIObjPreView(ls_14.OBJID, ls_14.UIOBK, ls_14.UILIB, ls_14.UIFND, ls_14.POBID, ls_14.UIATT, lt_0015, it_ua018, it_ua032);
 
             if(is_copied.zTREE.length === 0){return;}
 
             for(var i=0, l=is_copied.zTREE.length; i<l; i++){
-                lf_setPasteCopiedData(ls_14, is_copied.zTREE[i], undefined, it_ua018, bKeep);
+                lf_setPasteCopiedData(ls_14, is_copied.zTREE[i], undefined, it_ua018, it_ua032, bKeep);
 
             }
 
@@ -774,10 +774,12 @@
             //공통코드 미리보기 UI Property 고정값 정보 검색.
             lt_ua018 = oAPP.DATA.LIB.T_9011.filter( a=> a.CATCD === "UA018");
 
+            lt_ua032 = oAPP.DATA.LIB.T_9011.filter( a=> a.CATCD === "UA032" && a.FLD06 !== "X" );
+
             debugger;
 
             //복사한 UI 붙여넣기 처리.
-            var ls_14 = lf_setPasteCopiedData(ls_tree, i_cdata, param, lt_ua018, bKeep);
+            var ls_14 = lf_setPasteCopiedData(ls_tree, i_cdata, param, lt_ua018, lt_ua032, bKeep);
 
             //model 갱신 처리.
             oAPP.attr.oModel.refresh();

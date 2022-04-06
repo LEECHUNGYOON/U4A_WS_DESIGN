@@ -901,7 +901,7 @@
     var l_indx = i_drop.zTREE.filter( a => a.UIATT === i_drag.UIATT );
 
     //미리보기 갱신 처리.
-    oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drag.OBJID, i_drag.POBID, i_drag.UIATT, l_indx, i_drag.ISMLB);
+    oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drag.OBJID, i_drag.POBID, i_drag.UIATT, l_indx.length, i_drag.ISMLB);
 
     //drag한 UI 선택 처리.
     oAPP.fn.setSelectTreeItem(i_drag.OBJID);
@@ -919,11 +919,6 @@
 
   //UI design tree 라인 선택 이벤트.
   oAPP.fn.designTreeItemPress = function(is_tree, iIndex){
-    /*
-    //동일한 라인을 선택한 경우 exit.
-    if(oAPP.attr.oModel.oData.uiinfo && oAPP.attr.oModel.oData.uiinfo.OBJID === is_tree.OBJID){
-      return;
-    }*/
 
     //UI Info 영역 갱신 처리.
     oAPP.fn.setUIInfo(is_tree);
