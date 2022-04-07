@@ -290,7 +290,7 @@
   oAPP.attrChangeAutoGrowingProp = function(is_attr){
 
     //autoGrowing 프로퍼티 변경건이 아닌경우 EXIT.
-    if(is_attr.UIATK !== "EXT00001347" && is_attr.UIATK === "EXT00001348" &&
+    if(is_attr.UIATK !== "EXT00001347" && is_attr.UIATK !== "EXT00001348" &&
       is_attr.UIATK !== "EXT00001349"){
       return;
     }
@@ -299,7 +299,11 @@
     if(is_attr.ISBND === "X"){return;}
 
     //autoGrowing을 true로 설정하지 않은경우 exit.
-    if(is_attr.UIATV !== "true"){return;}
+    if(is_attr.UIATV !== "true"){
+      //autoGrowing 프로퍼티 값에 따른 예외처리.
+      oAPP.fn.attrSetAutoGrowingException(is_attr, true);
+      return;
+    }
 
     var l_msg = "autoGrowing을 설정할 경우 이전에 설정한 서버이벤트 및 클라이언트 이벤트가 초기화 됩니다. " + 
                 "진행하시겠습니까?";
@@ -324,7 +328,7 @@
       }
 
       //autoGrowing 프로퍼티 값에 따른 예외처리.
-      oAPP.fn.attrSetAutoGrowingException(is_attr);
+      oAPP.fn.attrSetAutoGrowingException(is_attr, true, true);
 
     });
 
@@ -338,10 +342,38 @@
    * autoGrowing 프로퍼티 값에 따른 예외처리.
    * **********************************************************************
    * @param {object} is_attr - attribute의 라인 정보.
+   * @param {boolean} bModelRefresh - 모델 갱신 여부(true : 갱신 처리)
    * @param {boolean} bClear - 대상 이벤트 초기화 여부(true : 초기화함)
    ************************************************************************/
-  oAPP.fn.attrSetAutoGrowingException = function(is_attr, bClear){
-    
+  oAPP.fn.attrSetAutoGrowingException = function(is_attr, bModelRefresh, bClear){
+
+
+    //입력 ATTRIBUTE 라인 정보가 없는경우.
+    if(!is_attr){
+      
+      //현재 ATTRIBUTE에 출력된 UI정보를 기준으로 autoGrowing 판단 대상건 여부 확인.
+      switch (oAPP.attr.oModel.oData.uiinfo.UIOBK) {
+        case "UO00326": //sap.m.List
+          is_attr = oAPP.attr.oModel.oData.T_ATTR.find( a => a.UIATK === "EXT00001349" );
+          break;
+
+        case "UO00447": //sap.m.Table
+          is_attr = oAPP.attr.oModel.oData.T_ATTR.find( a => a.UIATK === "EXT00001348" );
+          break;
+
+        case "UO01139": //sap.ui.table.Table
+          is_attr = oAPP.attr.oModel.oData.T_ATTR.find( a => a.UIATK === "EXT00001347" );
+          break;
+      
+        default:
+          //autoGrowing처리 대상 UI가 아닌경우 EXIT.
+          return;
+      }
+    }
+
+    //autoGrowing attribute를 찾지 못한 경우 exit.
+    if(!is_attr){return;}
+
     var lt_UIATK = [];
 
     //autoGrowing 프로퍼티 KEY에 따른 점검대상 ATTR의 key정보 구성.
@@ -366,7 +398,15 @@
         return;
 
     }
-   
+    
+    //default 입력 가능 처리.
+    var l_edit = true;
+
+    //autoGrowing값이 true인경우.
+    if(is_attr.UIATV === "true"){
+      //입력 불가 처리.
+      l_edit = false;
+    }
 
     //점검대상 event 항목에 대한 처리.
     for(var i=0, l=lt_UIATK.length; i<l; i++){
@@ -377,13 +417,13 @@
       if(typeof ls_attr === "undefined"){continue;}
 
       //입력 불가 처리.
-      ls_attr.edit = false;
+      ls_attr.edit = l_edit;
 
       //서버이벤트 아이콘 비활성 처리.
-      ls_attr.icon1_visb = false;
+      ls_attr.icon1_visb = l_edit;
 
       //클라이언트 이벤트 아이콘 비활성 처리.
-      ls_attr.icon2_visb = false;
+      ls_attr.icon2_visb = l_edit;
 
       //초기화 처리가 아닌경우 skip.
       if(bClear !== true){continue}
@@ -410,6 +450,9 @@
       oAPP.DATA.APPDATA.T_CEVT.splice(l_index, 1);
 
     }
+
+    //모델 갱신처리 flag가 없는경우 exit.
+    if(!bModelRefresh){return;}
 
     //모델 갱신 처리.
     oAPP.attr.oModel.refresh();
@@ -440,6 +483,8 @@
     oAPP.attr.oModel.refresh();
 
   };  //입력받은 attr 라인의 모델 갱신 처리.
+
+
 
 
   //sap.ui.core.HTML UI의 content 프로퍼티에서 바인딩, editor 호출전 점검.
@@ -993,7 +1038,7 @@
     function lf_unbindAttrRec(oUI, UIATT){
 
       //n건 바인딩이 없는경우 exit.
-      if(oUI._BIND_AGGR[UIATT].length === 0){
+      if(!oUI._BIND_AGGR[UIATT] || oUI._BIND_AGGR[UIATT].length === 0){
         return;
       }
 
@@ -1436,6 +1481,8 @@
     }
 
   };
+
+
 
 
   //select option2의 F4HelpID 프로퍼티의 팝업 호출 처리.
@@ -1911,6 +1958,18 @@
       //입력 비활성 처리.
       oAPP.attr.oModel.oData.T_ATTR[i].edit = false;
 
+      //입력필드 활성화 처리.
+      oAPP.attr.oModel.oData.T_ATTR[i].inp_visb = true;
+
+      //checkbox 비활성 처리.
+      oAPP.attr.oModel.oData.T_ATTR[i].chk_visb = false;
+
+      //버튼 비활성 처리.
+      oAPP.attr.oModel.oData.T_ATTR[i].btn_visb = false;
+
+      //ddlb 비활성 처리.
+      oAPP.attr.oModel.oData.T_ATTR[i].sel_visb = false;
+
     } //대상 UI에 매핑되어있는 프로퍼티, 이벤트 항목에 대한건 ATTRIBUTE영역에 매핑.
 
 
@@ -1927,6 +1986,9 @@
       oAPP.fn.setExcepAttr(oAPP.attr.oModel.oData.T_ATTR[i]);
 
     }
+    
+    //autoGrowing여부에 따른 화면 잠금처리.
+    oAPP.fn.attrSetAutoGrowingException();
 
     //모델 갱신 처리.
     oAPP.attr.oModel.refresh(true);
@@ -1982,6 +2044,9 @@
 
     //UI명.
     ls_uiinfo.OBJID_bf = ls_uiinfo.OBJID = is_tree.OBJID;
+
+    //UI OBJECT KEY.
+    ls_uiinfo.UIOBK = is_tree.UIOBK;
 
     //DOCUMENT, APP인경우 UI명 변경 불가 처리.
     ls_uiinfo.ENAB01 = true;
@@ -2467,7 +2532,7 @@
 
 
   //ATTRIBUTE FOCUS 처리.
-  oAPP.fn.setAttrFocus = function(UIATK){
+  oAPP.fn.setAttrFocus = function(UIATK, TYPE){
     
     //UI Attribute Internal Key가 입력안된경우 exit.
     if(typeof UIATK === "undefined"){return;}
@@ -2489,6 +2554,30 @@
 
       //focus 대상 UIATK가 아닌경우 다음건 확인.
       if(l_attr.UIATK !== UIATK){continue;}
+
+      l_attr.valst = undefined;
+      l_attr.valtx = undefined;        
+
+      switch(TYPE){
+        case "E":
+          l_attr.valst = "Error";
+          break;
+
+        case "S":
+          l_attr.valst = "Success";
+          break;
+
+        case "I":
+          l_attr.valst = "Information";
+          break;
+
+        case "W":
+          l_attr.valst = "Warning";
+          break;
+
+        default:
+          break;
+      }
 
       //focus 처리대상건인경우 해당 라인 focus 처리 후 exit.
       oAPP.attr.ui.oRTab1.setSelectedItem(lt_item[i]);
@@ -2523,6 +2612,12 @@
       break;
 
     }
+
+    //타입이 존재하지 않는경우 exit.
+    if(typeof TYPE === "undefined" || TYPE === ""){return;}
+
+    //타입이 존재하는경우 모델 갱신 처리.
+    oAPP.attr.oModel.refresh();
 
   };  //ATTRIBUTE FOCUS 처리.
 

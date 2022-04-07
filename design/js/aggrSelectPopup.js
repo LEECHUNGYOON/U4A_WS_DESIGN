@@ -26,7 +26,7 @@
       //해당 aggregation에 n건 바인딩이 설정된 경우
       //child UI가 이미 존재하는 경우 skip.
       if(oAPP.attr.prev[i_drop.OBJID]._MODEL[lt_0023[i].UIATT] &&
-        (l_child !== null || l_child.length !== 0)){
+        (l_child !== null && l_child.length !== 0)){
         continue;
       }
 

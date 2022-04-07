@@ -247,15 +247,37 @@
     oAPP.fn.chkUiCardinality = function(is_parent, UIATK, ISMLB){
 
         //n건 입력가능하거나, 부모의 child정보가 한건도 없는경우 exit.
-        if(ISMLB === "X" || is_parent.zTREE.length === 0){return;}
+        if(is_parent.zTREE.length === 0){return;}
+
+        //현재 추가하고자 하는 aggregation에 UI가 존재하는지 여부 확인.
+        var l_indx = is_parent.zTREE.findIndex( a => a.UIATK === UIATK );
 
         //부모의 대상 aggregation에 이미 UI가 추가된경우 오류 처리(0:1 aggregation의 경우 1개의 UI만 추가 가능).
-        if(is_parent.zTREE.findIndex( a => a.UIATK === UIATK ) !== -1){
+        if(ISMLB === "" && l_indx !== -1){
             //022	Can not specify more than one object in the corresponding Aggrigation.
             parent.showMessage(sap, 10, "W", "Can not specify more than one object in the corresponding Aggrigation.");
 
             //오류 flag return
             return true;
+
+        }
+
+        //N건이 추가 가능한 AGGREGATION인경우.
+        if(ISMLB === "X"){
+
+            //부모 UI의 입력한 AGGREGATION정보 얻기.
+            var ls_0015 = oAPP.attr.prev[is_parent.OBJID]._T_0015.find( a => a.UIATK === UIATK && a.UIATY === "3" );
+
+            //대상 AGGREGATION에 바인딩처리가 됐으며, 이미 대상 AGGREGATION에 UI가 추가된경우.
+            if(typeof ls_0015 !== "undefined" && ls_0015.UIATV !== "" && ls_0015.ISBND === "X" && l_indx !== -1){
+
+                //021	The object is already specified in Aggrigation.
+                parent.showMessage(sap, 10, "W", "The object is already specified in Aggrigation.");
+
+                //오류 flag return
+                return true;
+
+            }
 
         }
 

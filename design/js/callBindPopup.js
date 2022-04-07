@@ -586,14 +586,18 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
 
 
   //바인딩 선택전 점검.
-  function lf_chkBindVal(){
+  function lf_chkBindVal(bskipSelIndex){
 
-    var l_indx = oAPP.attr.oBindDialog._oTree.getSelectedIndex();
+    //선택라인 점검 필요시.
+    if(bskipSelIndex){
+      var l_indx = oAPP.attr.oBindDialog._oTree.getSelectedIndex();
 
-    //선택한 라인이 존재하지 않는경우.
-    if(l_indx === -1){
-      parent.showMessage(sap, 10, "E", "Select field information for Binding.");
-      return true;
+      //선택한 라인이 존재하지 않는경우.
+      if(l_indx === -1){
+        parent.showMessage(sap, 10, "E", "Select field information for Binding.");
+        return true;
+      }
+
     }
 
     //aggregation인경우 하위 로직 점검 skip.
@@ -666,7 +670,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
 
 
   //bind 버튼 선택 이벤트.
-  function lf_bindBtnEvt(){
+  function lf_bindBtnEvt(oCtxt){
 
     //바인딩 추가속성정보 메시지 초기화.
     lf_resetMPROPMsg();
@@ -676,15 +680,23 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
       return;
     }
 
+    
+    l_cxtx = oCtxt;
+    
     //bind전 입력값 점검시 오류가 발생한 경우 exit.
-    if(lf_chkBindVal() === true){
+    if(lf_chkBindVal(oCtxt ? false : true) === true){
       oAPP.attr.oBindDialog._oModel.refresh();
       return;
     }
 
-    var l_indx = oAPP.attr.oBindDialog._oTree.getSelectedIndex();
+    //context 파라메터가 존재하지 않는경우 table의 라인선택건 정보 판단.
+    if(typeof oCtxt === "undefined"){      
 
-    var l_cxtx = oAPP.attr.oBindDialog._oTree.getContextByIndex(l_indx);
+      var l_indx = oAPP.attr.oBindDialog._oTree.getSelectedIndex();
+
+      var l_cxtx = oAPP.attr.oBindDialog._oTree.getContextByIndex(l_indx);
+
+    }
 
     var ls_tree = l_cxtx.getProperty(),
         lt_MPROP = oAPP.attr.oBindDialog._oModel.oData.T_MPROP;
@@ -826,11 +838,8 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
     //sap.ui.table.Row UI를 찾지 못한 경우 exit.
     if(!l_row){return;}
 
-    //row UI가 존재하는 index위치를 선택 처리.
-    oTree.setSelectedIndex(oTree.indexOfRow(l_row));
-
     //바인딩 처리.
-    lf_bindBtnEvt();
+    lf_bindBtnEvt(l_row.getBindingContext());
 
   }); //tree 더블클릭 이벤트.
 
