@@ -209,7 +209,7 @@
 
 
     //바인딩(서버 이벤트) 아이콘
-    var oRIcon1 = new sap.ui.core.Icon({src:"{icon1_src}",color:"{icon1_color}"});
+    var oRIcon1 = new sap.ui.core.Icon({src:"{icon1_src}",color:"{icon1_color}",visible:"{icon1_visb}"});
     oRListItem1.addCell(oRIcon1);
 
     //바인딩(서버 이벤트) 아이콘 선택 이벤트
@@ -245,7 +245,7 @@
 
 
     //help(script 이벤트) 아이콘
-    var oRIcon2 = new sap.ui.core.Icon({src:"{icon2_src}",color:"{icon2_color}"});
+    var oRIcon2 = new sap.ui.core.Icon({src:"{icon2_src}",color:"{icon2_color}",visible:"{icon2_visb}"});
     oRListItem1.addCell(oRIcon2);
 
     //help(script 이벤트) 아이콘 선택 이벤트
@@ -329,6 +329,9 @@
 
       //autoGrowing 프로퍼티 값에 따른 예외처리.
       oAPP.fn.attrSetAutoGrowingException(is_attr, true, true);
+
+      //ATTR 변경건 처리.
+      oAPP.fn.attrChgAttrVal(is_attr, "DDLB");
 
     });
 
@@ -792,8 +795,8 @@
       //모델 갱신 처리.
       oAPP.attr.oModel.refresh();
 
-      //미리보기 화면 갱신 처리.
-      oAPP.fn.previewUIsetProp(is_attr);
+      //변경값 수집 처리.
+      oAPP.fn.attrChgAttrVal(is_attr);
 
     } //icon popup의 callback function.
 
@@ -1184,6 +1187,11 @@
   //바인딩 & 이벤트 팝업 호출 처리 function.
   oAPP.fn.attrBindNEvtPopup = function(is_attr){
 
+    //event 팝=인경우 display상태인경우 exit.
+    if(is_attr.UIATY === "2" && oAPP.attr.oModel.oData.IS_EDIT === false){
+      return;
+    }
+
     //Aggregation의 바인딩 팝업 버튼 선택시.
     if(is_attr.UIATY === "3"){
 
@@ -1355,7 +1363,7 @@
     oAPP.fn.previewUIsetProp(is_attr);
 
     //default 값 얻기.
-    if(is_attr.OBJID !== "ROOT"){
+    if(is_attr.OBJID !== "ROOT" && is_attr.UIATK.indexOf("_1") === -1){
       l_dval = oAPP.DATA.LIB.T_0023.find( a => a.UIATK === is_attr.UIATK ).DEFVL;
 
     }
@@ -1824,6 +1832,10 @@
       if(ls_0015.UIATY !== "3"){
         ls_0015.edit = true;
       }
+
+      //DEFAULT 아이콘 활성 처리.
+      ls_0015.icon1_visb = true;
+      ls_0015.icon2_visb = true;
 
       //UI 타입에 따른 로직 분기.
       switch(ls_0015.UIATY){
@@ -2555,9 +2567,11 @@
       //focus 대상 UIATK가 아닌경우 다음건 확인.
       if(l_attr.UIATK !== UIATK){continue;}
 
+      //default value state 처리.
       l_attr.valst = undefined;
       l_attr.valtx = undefined;        
 
+      //type에 따른 value state 처리.
       switch(TYPE){
         case "E":
           l_attr.valst = "Error";
@@ -2579,7 +2593,7 @@
           break;
       }
 
-      //focus 처리대상건인경우 해당 라인 focus 처리 후 exit.
+      //focus 처리대상건인경우 해당 라인 focus 처리.
       oAPP.attr.ui.oRTab1.setSelectedItem(lt_item[i]);
 
       var l_pos;

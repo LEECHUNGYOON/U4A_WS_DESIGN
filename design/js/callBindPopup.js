@@ -586,7 +586,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
 
 
   //바인딩 선택전 점검.
-  function lf_chkBindVal(bskipSelIndex){
+  function lf_chkBindVal(bskipSelIndex, is_tree){
 
     //선택라인 점검 필요시.
     if(bskipSelIndex){
@@ -598,6 +598,12 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
         return true;
       }
 
+    }
+
+    //aggregation인경우 TABLE 유형이 아닌걸 선택시 오류 처리.
+    if(oAPP.attr.oBindDialog._is_attr.UIATY === "3" && is_tree.KIND !== "T"){
+      parent.showMessage(sap, 10, "E", "table 유형만 선택할 수 있습니다.");
+      return true;
     }
 
     //aggregation인경우 하위 로직 점검 skip.
@@ -682,12 +688,6 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
 
     
     l_cxtx = oCtxt;
-    
-    //bind전 입력값 점검시 오류가 발생한 경우 exit.
-    if(lf_chkBindVal(oCtxt ? false : true) === true){
-      oAPP.attr.oBindDialog._oModel.refresh();
-      return;
-    }
 
     //context 파라메터가 존재하지 않는경우 table의 라인선택건 정보 판단.
     if(typeof oCtxt === "undefined"){      
@@ -700,6 +700,14 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
 
     var ls_tree = l_cxtx.getProperty(),
         lt_MPROP = oAPP.attr.oBindDialog._oModel.oData.T_MPROP;
+
+        
+    
+    //bind전 입력값 점검시 오류가 발생한 경우 exit.
+    if(lf_chkBindVal(oCtxt ? false : true, ls_tree) === true){
+      oAPP.attr.oBindDialog._oModel.refresh();
+      return;
+    }
 
     //프로퍼티에서 바인딩 팝업을 호출한 경우.
     if(oAPP.attr.oBindDialog._is_attr.UIATY === "1"){

@@ -531,7 +531,7 @@
         }
 
       } //순번 정보(POSIT) 재정의 재귀호출 function
-
+      
       var l_pos = 0;
 
       //UI POSTION 정보 재매핑 처리.

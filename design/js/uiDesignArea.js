@@ -65,6 +65,7 @@
     var oLtxt2 = new sap.m.Text({text:"{UIATT}"});
     oLHbox1.addItem(oLtxt2);
 
+    
 
     //drag UI 생성.
     var oLTDrag1 = new sap.ui.core.dnd.DragInfo({sourceAggregation:"rows"});
@@ -118,8 +119,6 @@
     //drop 이벤트.
     oLTDrop1.attachDrop(function(oEvent){
 
-      
-
       if(!oEvent.mParameters.droppedControl){return;}
 
       var l_drop = oModel.getProperty("",oEvent.mParameters.droppedControl.getBindingContext());
@@ -130,6 +129,7 @@
 
     }); //drop 이벤트.
 
+    
 
 
     //tree toolbar UI.
@@ -164,7 +164,7 @@
 
 
     //구분자 추가.
-    oLTBar1.addContent(new sap.m.ToolbarSeparator());
+    oLTBar1.addContent(new sap.m.ToolbarSeparator({visible:"{/IS_EDIT}"}));
 
     //삭제 버튼.
     var oLBtn3 = new sap.m.Button({icon:"sap-icon://delete",visible:"{/IS_EDIT}"});
@@ -178,6 +178,23 @@
 
     });
 
+
+    //구분자 추가.
+    oLTBar1.addContent(new sap.m.ToolbarSeparator({visible:"{/IS_EDIT}"}));
+
+
+    //wizard 버튼 추가.
+    var oLBtn4 = new sap.m.Button({icon:"sap-icon://responsive",visible:"{/IS_EDIT}"});
+    oLTBar1.addContent(oLBtn4);
+
+
+    //wizard 버튼 선택 이벤트.
+    oLBtn4.attachPress(function(oEvent){
+
+      //위자드 팝업 호출.
+      oAPP.fn.designCallWizardPopup();
+
+    });
 
 
     //context menu ui 변수.
@@ -239,6 +256,70 @@
 
   };
 
+
+
+
+  /************************************************************************
+   * 위자드 팝업 호출 버튼 이벤트.
+   * **********************************************************************
+   ************************************************************************/
+  oAPP.fn.designCallWizardPopup = function(){
+    
+    //선택 라인 정보 얻기.
+    var l_indx = oAPP.attr.ui.oLTree1.getSelectedIndex();
+
+    //선택한 라인이 존재하지 않는경우 오류 메시지 처리.
+    if(l_indx === -1){
+      //073 &1 does not exist.
+      parent.showMessage(sap, 10, "E", "Selected line does not exist.");
+      return;
+    }
+
+    //선택 라인의 tree 정보 얻기.
+    var ls_tree = oAPP.attr.ui.oLTree1.getContextByIndex(l_indx).getProperty();
+
+    //DOCUMENT를 선택한 경우 오류 메시지 처리.
+    if(ls_tree.OBJID === "ROOT"){
+      //056	& is not the target location.
+      parent.showMessage(sap, 10, "E", "DOCUMENT is not the target location.");
+      return;
+    }
+
+
+    //application명 서버전송 데이터 구성.
+    var oFormData = new FormData();
+    oFormData.append("ACTCD", "WZD_CHKER");
+
+    //UI OBJECT KEY.
+    oFormData.append("UIOBK", ls_tree.UIOBK);
+
+    //UI OBJECT ID.
+    oFormData.append("UIOBJ", ls_tree.OBJID);
+
+    //CONTROLLER CLASS NAME.
+    oFormData.append("CLSID", oAPP.attr.appInfo.CLSID);
+
+    //서버 호출.
+    sendAjax(oAPP.attr.servNm + "/ui_temp_wzd", oFormData, function(param){
+      //WIZARD 데이터구성에 실패한 경우.
+      if(param.RETCD === "E"){
+        //오류에 대한 메시지 처리.
+        parent.showMessage(sap, 10, "E", param.RTMSG);
+        return;
+      }
+      
+      //성공이 아닌경우 exit.
+      if(param.RETCD !== "S"){
+        return;
+      }
+      
+      //template wizard 팝업 호출.
+      oAPP.fn.fnUiTempWizardPopupOpener(param);
+
+    });
+
+
+  };  //위자드 팝업 호출.
 
 
   //drag 종료 처리.
