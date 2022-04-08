@@ -289,7 +289,11 @@
 
 
 
-  //table의 더블클릭에 따른 이벤트 처리.
+  /************************************************************************
+   * attribute table의 더블클릭에 따른 이벤트 처리.
+   * **********************************************************************
+   * @param {object} oEvent - dblclick 이벤트 발생시 파라메터.
+   ************************************************************************/
   oAPP.fn.attrDblclickEvent = function(oEvent){
 
     //더블클릭 이벤트 발생 위치의 UI정보 얻기.
@@ -321,13 +325,13 @@
 
       case "3": //AGGREGATION 영역인경우.
         break;
-        
+
       default:
         return;
     }
 
 
-  };
+  };  //attribute table의 더블클릭에 따른 이벤트 처리.
 
 
   /************************************************************************
@@ -1008,6 +1012,10 @@
     //unbind 처리된경우.
     if(is_unbind === true){
       oAPP.fn.attrUnbindAttr(is_attr);
+
+      //변경 FLAG 처리.
+      oAPP.fn.setChangeFlag();
+      
       return;
     }
 
@@ -1082,6 +1090,9 @@
       //자신 UI에 N건 바인딩 처리함 매핑.
       oAPP.fn.setAggrBind(oAPP.attr.prev[is_attr.OBJID],is_attr.UIATT, is_attr.UIATV);
     }
+
+    //변경 FLAG 처리.
+    oAPP.fn.setChangeFlag();
 
   }; //바인딩 팝업 Call Back 이벤트
 

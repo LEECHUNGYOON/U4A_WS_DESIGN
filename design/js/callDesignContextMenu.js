@@ -302,6 +302,16 @@
 
             var l_cnt = parseInt(param.E_CRTCNT);
 
+            //부모 UI의 입력한 AGGREGATION정보 얻기.
+            var ls_0015 = oAPP.attr.prev[ls_tree.OBJID]._T_0015.find( a => a.UIATK === param.E_EMB_AGGR.UIATK && a.UIATY === "3" );
+
+            //대상 AGGREGATION에 바인딩 처리된경우 추가하고자 하는 UI를 2개 이상 입력했다면 알림 메시지, UI는 1개만 추가되게 처리.
+            if(typeof ls_0015 !== "undefined" && ls_0015.UIATV !== "" && ls_0015.ISBND === "X" & l_cnt >= 2){
+                l_cnt = 1;
+                //021	The object is already specified in Aggrigation.
+                parent.showMessage(sap, 10, "W", "The object is already specified in Aggrigation.");
+            }
+
             //UI 반복 횟수만큼 그리기.
             for(var i=0; i<l_cnt; i++){
 
@@ -335,6 +345,17 @@
                 l_14.ISEXT = param.E_UIOBJ.ISEXT;
                 l_14.TGLIB = param.E_UIOBJ.TGLIB;
                 l_14.LIBNM = param.E_UIOBJ.LIBNM;
+
+                //UI ICON 구성.
+                l_14.UICON = oAPP.fn.fnGetSapIconPath(param.E_UIOBJ.UICON);
+
+                //default 아이콘 비활성 처리.
+                l_14.icon_visible = false;
+
+                //아이콘이 존재하는 경우 아이콘 활성 처리.
+                if(typeof l_14.UICON !== "undefined" && l_14.UICON !== ""){
+                    l_14.icon_visible = true;
+                }
 
                 //context menu 호출 라인의 child에 추가한 UI정보 수집.
                 ls_tree.zTREE.push(l_14);
@@ -858,6 +879,13 @@
 
         //AGGR 선택 팝업의 CALLBACK FUNCTION.
         function lf_aggrPopup_cb(param, i_cdata){
+
+            //이동 가능한 aggregation 정보가 존재하지 않는경우.
+            if(typeof param === "undefined"){
+                //오류 메시지 출력.
+                parent.showMessage(sap, 10, 'I', '이동 가능한 aggregation이 존재하지 않습니다.');
+                return;                
+            }
 
             //UI가 입력 가능한 카디널리티 여부 확인.
             if(oAPP.fn.chkUiCardinality(ls_tree, param.UIATK, param.ISMLB) === true){

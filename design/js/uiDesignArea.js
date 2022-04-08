@@ -36,7 +36,7 @@
     });
       
 
-    
+
     //tree instance 정보 광역화.
     oAPP.attr.ui.oLTree1 = oLTree1;
 
@@ -55,7 +55,7 @@
     oLHbox2.addItem(oChk1);
 
     //UI 아이콘
-    var oImage = new sap.m.Image({src:"{UICON}",width:"22px",visible:"{icon_visible}"});
+    var oImage = new sap.m.Image({src:"{UICON}",width:"19px",visible:"{icon_visible}"});
     oLHbox2.addItem(oImage);
 
     oImage.addStyleClass("sapUiTinyMarginEnd");
@@ -342,7 +342,11 @@
 
 
 
-  //UI design tree 영역 UI에 따른 ICON 세팅.
+  /************************************************************************
+   * UI design tree 영역 UI에 따른 ICON 세팅.
+   * **********************************************************************
+   * @param {object} is_tree - 처리대상 tree 라인.
+   ************************************************************************/
   oAPP.fn.setTreeUiIcon = function(is_tree){
 
     //UI 라이브러리 정보 검색.

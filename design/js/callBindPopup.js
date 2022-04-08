@@ -600,9 +600,9 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
 
     }
 
-    //aggregation인경우 TABLE 유형이 아닌걸 선택시 오류 처리.
-    if(oAPP.attr.oBindDialog._is_attr.UIATY === "3" && is_tree.KIND !== "T"){
-      parent.showMessage(sap, 10, "E", "table 유형만 선택할 수 있습니다.");
+    //선택 가능한 라인인지 여부 확인.
+    if(is_tree.enable !== true){
+      parent.showMessage(sap, 10, "E", "해당 라인은 선택할 수 없습니다.");
       return true;
     }
 
@@ -610,6 +610,8 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
     if(oAPP.attr.oBindDialog._is_attr.UIATY === "3"){
       return false;
     }
+
+    if(!oAPP.attr.oBindDialog._oModel.oData.T_MPROP){return;}
 
     var ls_P04 = oAPP.attr.oBindDialog._oModel.oData.T_MPROP.find( a => a.ITMCD === "P04");
 

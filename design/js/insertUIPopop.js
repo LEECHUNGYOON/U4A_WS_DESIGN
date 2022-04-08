@@ -5,6 +5,11 @@
     //Aggregation Name DDLB 바인딩 정보 구성.
     var lt_sel = oAPP.DATA.LIB.T_0023.filter(a => a.UIOBK === UIOBK && a.UIATY === "3");
 
+    if(lt_sel.length === 0){
+      parent.showMessage(sap,10,"W", "입력 가능한 Aggregation이 존재하지 않습니다.");
+      return;
+    }
+
     var ls_sel = JSON.stringify(lt_sel[0]);
     ls_sel = JSON.parse(ls_sel);
     for(var i in ls_sel){
