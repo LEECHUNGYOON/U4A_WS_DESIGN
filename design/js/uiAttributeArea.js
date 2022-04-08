@@ -66,9 +66,17 @@
     var oRElm3 = new sap.ui.layout.form.FormElement();
     oRCtn2.addFormElement(oRElm3);
 
+    //attribute table UI.
     var oRTab1 = new sap.m.Table({mode:"SingleSelectMaster",alternateRowColors:true});
     oRElm3.addField(oRTab1);
     oAPP.attr.ui.oRTab1 = oRTab1;
+
+    //table 더블클릭 이벤트 처리.
+    oAPP.attr.ui.oRTab1.attachBrowserEvent('dblclick',function(oEvent){
+      //table의 더블클릭에 따른 이벤트 처리.
+      oAPP.fn.attrDblclickEvent(oEvent);
+
+    });
 
     //attribute명 컬럼.
     var oRCol1 = new sap.m.Column({width:"30%"});
@@ -278,6 +286,48 @@
 
   };  //우측 페이지(attribute 영역) 구성
 
+
+
+
+  //table의 더블클릭에 따른 이벤트 처리.
+  oAPP.fn.attrDblclickEvent = function(oEvent){
+
+    //더블클릭 이벤트 발생 위치의 UI정보 얻기.
+    var l_ui = oAPP.fn.getUiInstanceDOM(oEvent.target, sap.ui.getCore());
+
+    //UI INSTANCE를 얻지 못한 경우 EXIT.
+    if(!l_ui){return;}
+
+    //바인딩 정보 얻기.
+    var l_ctxt = l_ui.getBindingContext();
+
+    //바인딩 정보를 얻지 못한 경우 exit.
+    if(!l_ctxt){return;}
+
+    //이벤트 발생 라인의 attribute 정보 얻기.
+    var ls_0015 = l_ctxt.getProperty();
+
+    //ATTRIBUTE TYPE에 따른 로직 분기.
+    switch(ls_0015.UIATY){
+      case "1": //PROPERTY 영역인경우.
+        break;
+
+      case "2": //EVENT 영역인경우.
+        if(ls_0015.UIATV !== ""){
+          //해당 이벤트로 네비게이션 처리.
+          oAPP.common.execControllerClass(ls_0015.UIATV);
+        }
+        break;
+
+      case "3": //AGGREGATION 영역인경우.
+        break;
+        
+      default:
+        return;
+    }
+
+
+  };
 
 
   /************************************************************************
@@ -751,8 +801,10 @@
     //enum정보가 구성된경우 exit.
     if(typeof is_attr.T_DDLB !== "undefined" && is_attr.T_DDLB.length !== 0){return;}
 
+    var l_UIATT = is_attr.UIATT.toUpperCase();
+
     //프로퍼티명에 COLOR가 포함안되는경우 exit.
-    if(is_attr.UIASN.indexOf('COLOR') === -1){return;}
+    if(l_UIATT.indexOf("COLOR") === -1){return;}
 
     jQuery.sap.require("sap.ui.unified.ColorPickerPopover");
 
@@ -808,8 +860,10 @@
     //enum정보가 구성된경우 exit.
     if(typeof is_attr.T_DDLB !== "undefined" && is_attr.T_DDLB.length !== 0){return;}
 
+    var l_UIATT = is_attr.UIATT.toUpperCase();
+
     //프로퍼티명에 COLOR가 포함안되는경우 exit.
-    if(is_attr.UIASN.indexOf('ICON') === -1){return;}
+    if(l_UIATT.indexOf('ICON') === -1 && l_UIATT.indexOf('IMAGE') === -1 && l_UIATT.indexOf('SRC') === -1){return;}
 
 
     //icon list popup function이 존재하는 경우.
@@ -1174,8 +1228,11 @@
     //DDLB가 설정된 경우 EXIT.
     if(typeof is_attr.T_DDLB !== "undefined" && is_attr.T_DDLB.length !== 0){return;}
 
+    var l_UIATT = is_attr.UIATT.toUpperCase();
+
     //프로퍼티명에 COLOR, ICON이 없는경우 EXIT.
-    if(is_attr.UIASN.indexOf("COLOR") === -1 && is_attr.UIASN.indexOf("ICON") === -1){return;}
+    if(l_UIATT.indexOf("COLOR") === -1 && l_UIATT.indexOf("ICON") === -1 && 
+      l_UIATT.indexOf("IMAGE") === -1 && l_UIATT.indexOf("SRC") === -1){return;}
 
     //f4 help 버튼 활성화.
     is_attr.showF4 = true;

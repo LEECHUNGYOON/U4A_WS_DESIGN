@@ -261,6 +261,9 @@
         //UI design tree영역 체크박스 활성여부 처리.
         oAPP.fn.setTreeChkBoxEnable(oAPP.attr.oModel.oData.zTREE[0]);
 
+        //UI design tree 영역 UI에 따른 ICON 세팅.
+        oAPP.fn.setTreeUiIcon(oAPP.attr.oModel.oData.zTREE[0]);
+
         //모델 갱신 처리.
         oAPP.attr.oModel.refresh();
 

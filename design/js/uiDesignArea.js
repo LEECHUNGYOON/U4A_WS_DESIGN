@@ -26,8 +26,17 @@
 
     }); //tree item 선택 이벤트.
 
+    
 
+    
+    //TREE TABLE이 아닌 다른 영역을 더블클릭 이후 ROW 선택시
+    // 선택되지 않는 문제 해결을 위한 예외처리 로직.
+    oLTree1.attachBrowserEvent('click',function(){
+        window.getSelection().removeAllRanges();
+    });
+      
 
+    
     //tree instance 정보 광역화.
     oAPP.attr.ui.oLTree1 = oLTree1;
 
@@ -45,6 +54,12 @@
     var oChk1 = new sap.m.CheckBox({visible:"{chk_visible}",selected:"{chk}"});
     oLHbox2.addItem(oChk1);
 
+    //UI 아이콘
+    var oImage = new sap.m.Image({src:"{UICON}",width:"22px",visible:"{icon_visible}"});
+    oLHbox2.addItem(oImage);
+
+    oImage.addStyleClass("sapUiTinyMarginEnd");
+    
     //checkbox 선택 이벤트.
     oChk1.attachSelect(function(oEvent){
 
@@ -86,6 +101,9 @@
       //drag한 TREE 정보 얻기.
       var ls_drag = l_ctxt.getProperty();
       if(!ls_drag){return;}
+
+      //DRAG한 UI의 라이브러리명 정보 세팅(Runtime Class Navigator 기능에서 사용)
+      event.dataTransfer.setData("rtmcls", ls_drag.UILIB);
 
       //DRAG한 UI ID 정보 세팅.
       event.dataTransfer.setData("text/plain", ls_drag.OBJID);
@@ -322,6 +340,39 @@
   };  //위자드 팝업 호출.
 
 
+
+
+  //UI design tree 영역 UI에 따른 ICON 세팅.
+  oAPP.fn.setTreeUiIcon = function(is_tree){
+
+    //UI 라이브러리 정보 검색.
+    var ls_0022 = oAPP.DATA.LIB.T_0022.find( a => a.UIOBK === is_tree.UIOBK );
+    
+    //검색성공시 해당 아이콘 얻기.
+    if(typeof ls_0022 !== "undefined" && ls_0022.UICON !== ""){
+      is_tree.UICON = oAPP.fn.fnGetSapIconPath(ls_0022.UICON);
+
+    }
+
+    //default 아이콘 비활성 처리.
+    is_tree.icon_visible = false;
+
+    if(typeof is_tree.UICON !== "undefined" && is_tree.UICON !== ""){
+      //아이콘이 존재하는경우 아이콘 활성 처리.
+      is_tree.icon_visible = true;
+    }
+
+    if(is_tree.zTREE.length === 0){return;}
+
+    for(var i=0, l=is_tree.zTREE.length; i<l; i++){
+      oAPP.fn.setTreeUiIcon(is_tree.zTREE[i]);
+    }
+
+  };  //UI design tree 영역 UI에 따른 ICON 세팅.
+
+
+
+
   //drag 종료 처리.
   oAPP.fn.designDragEnd = function(){
 
@@ -335,7 +386,7 @@
 
     for(var i=0, l=lt_item.length; i<l;i++){
       //drag 종료시 drop 불가능 css 제거 처리.
-      lt_item[i].removeStyleClass("disableTreeDrop");
+      lt_item[i].removeStyleClass("u4aWsDisableTreeDrop");
     }
 
   };  //drag 종료 처리.
@@ -351,6 +402,11 @@
 
     is_0014.chk = false; //chkbox checked 바인딩 필드.
 
+    is_0014.UICON = ""; //ui icon 바인딩 필드.
+    
+    is_0014.icon_visible = false; // icon 활성여부 필드.
+
+    //TREE 하위 정보 구성.
     if(typeof is_0014.zTREE === "undefined"){
       is_0014.zTREE = []; //하위 TREE 정보
     }
@@ -1233,7 +1289,7 @@
 
     for(var i=0, l=lt_row.length; i<l; i++){
       //기존 style 제거 처리.
-      lt_row[i].removeStyleClass("disableTreeDrop");
+      lt_row[i].removeStyleClass("u4aWsDisableTreeDrop");
 
       //해당 row에 binding context정보가 존재하지 않는경우 skip.
       if(!lt_ctxt[i] || !lt_ctxt[i].context){
@@ -1245,7 +1301,7 @@
 
       //drop 불가능 상태인경우 css 처리.
       if(l_drop_enable !== true){
-        lt_row[i].addStyleClass("disableTreeDrop");
+        lt_row[i].addStyleClass("u4aWsDisableTreeDrop");
       }
 
     }
