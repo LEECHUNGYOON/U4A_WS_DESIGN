@@ -167,6 +167,9 @@
       //DDLB 변경 라인 STYLE 처리.
       oAPP.fn.attrSetLineStyle(ls_0015);
 
+      //모델 갱신 처리.
+      oAPP.attr.oModel.refresh();
+
     }); //DDLB 선택 이벤트.
 
 
@@ -1171,12 +1174,10 @@
   oAPP.fn.attrBindCallBack = function(bIsbind, is_tree, is_attr){
 
     //unbind 처리된경우.
-    if(bIsbind === true){
+    if(bIsbind === false){
+      //unbind 처리.
       oAPP.fn.attrUnbindAttr(is_attr);
 
-      //변경 FLAG 처리.
-      oAPP.fn.setChangeFlag();
-      
       return;
     }
 
@@ -1208,6 +1209,9 @@
 
     //해당 라인의 style 처리.
     oAPP.fn.attrSetLineStyle(is_attr);
+    
+    //dropAble 프로퍼티 입력값 여부에 따른 attr 잠금처리.
+    oAPP.fn.attrSetDropAbleException(is_attr);
 
     //화면 갱신 처리.
     oAPP.attr.oModel.refresh();
@@ -1255,6 +1259,7 @@
       oAPP.fn.setAggrBind(oAPP.attr.prev[is_attr.OBJID],is_attr.UIATT, is_attr.UIATV);
     }
 
+    
     //변경 FLAG 처리.
     oAPP.fn.setChangeFlag();
 
@@ -1347,12 +1352,17 @@
       lf_unbindAttrRec(oAPP.attr.prev[is_attr.OBJID],is_attr.UIATT);
     }
 
-    is_attr.UIATV = "";
+    //이전 정보가 바인딩 처리된건이라면.
+    if(is_attr.ISBND === "X" && is_attr.UIATV !== ""){
+      //바인딩 정보 초기화.
+      is_attr.UIATV = "";
+      
+      //바인딩 FLAG 초기화.
+      is_attr.ISBND = "";
 
-    //property 바인딩 해제건인경우.
-    if(is_attr.UIATY === "1" && is_attr.UIATK.substr(3) !== "EXT"){
-      //해당 property의 default 값 매핑.
-      is_attr.UIATV = oAPP.attr.prev[is_attr.OBJID].mProperties[is_attr.UIATT];
+      //property의 바인딩 추가속성 정의 초기화.
+      is_attr.MPROP = "";
+
     }
 
 
@@ -1361,31 +1371,16 @@
       //값을 직접 입력 가능 처리.
       is_attr.edit = true;
     }
+    
 
-    //바인딩 FLAG 초기화.
-    is_attr.ISBND = "";
-
-    //property의 바인딩 추가속성 정의 초기화.
-    is_attr.MPROP = "";
-
-    //attr 변경건이 수집됐는지 확인.
-    var l_indx = oAPP.attr.prev[is_attr.OBJID]._T_0015.findIndex( a => a.UIATK === is_attr.UIATK && a.UIATY === is_attr.UIATY);
-
-    //수집된건이 존재하는경우.
-    if(l_indx !== -1){
-      //수집된건 제거 처리.
-      oAPP.attr.prev[is_attr.OBJID]._T_0015.splice(l_indx, 1);
-    }
-   
+    //attr 변경건 수집 처리.
+    oAPP.fn.attrChgAttrVal(is_attr);
 
     //해당 라인의 style 처리.
     oAPP.fn.attrSetLineStyle(is_attr);
 
     //화면 갱신 처리.
-    oAPP.attr.oModel.refresh();
-
-    //미리보기 화면 갱신 처리.
-    oAPP.fn.previewUIsetProp(is_attr);
+    oAPP.attr.oModel.refresh(true);
 
     //ATTRIBUTE 영역 갱신 처리.
     oAPP.fn.updateAttrList(is_attr.UIOBK, is_attr.OBJID);
