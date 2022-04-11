@@ -26,7 +26,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
         case "T": //TABLE인경우.
 
           //property에서 바인딩 팝업 호출시 n건 바인딩 path와 현재 path가 동일한 경우 하위 탐색.
-          if(oAPP.attr.oBindDialog._is_attr.UIATY === "1" && l_path.substr(0,it_tree[i].CHILD.length) === it_tree[i].CHILD){
+          if(oAPP.attr.oBindDialog._is_attr.UIATY === "1" && ( l_path && l_path.substr(0,it_tree[i].CHILD.length) === it_tree[i].CHILD)){
 
             var lt_child = l_model.oData.TREE.filter( a => a.PARENT === it_tree[i].CHILD );
             lf_setBindEnable(lt_child, l_path, l_model, it_tree[i].KIND);
@@ -86,7 +86,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
              oAPP.attr.oBindDialog._is_attr.UIATK === "EXT00001192" ||
              oAPP.attr.oBindDialog._is_attr.UIATK === "EXT00001193"){
 
-             if(it_tree[i].CHILD.substr(0, l_path.length) !== l_path){
+             if(l_path && it_tree[i].CHILD.substr(0, l_path.length) !== l_path){
               continue;
 
              }
@@ -96,8 +96,8 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
           
           //property인경우 필드 선택 가능 처리.
           if(oAPP.attr.oBindDialog._is_attr.UIATY === "1"){
-            
-            if(KIND === "T" && it_tree[i].CHILD.substr(0, l_path.length) !== l_path){
+
+            if(l_path && KIND === "T" && it_tree[i].CHILD.substr(0, l_path.length) !== l_path){
               continue;
             }
 
