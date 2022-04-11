@@ -1356,6 +1356,17 @@
     if(is_attr.ISBND === "X" && is_attr.UIATV !== ""){
       //바인딩 정보 초기화.
       is_attr.UIATV = "";
+
+      //일반 프로퍼티의 경우.
+      if(is_attr.UIATY === "1" && is_attr.ISSTR === ""){
+        //프로퍼티의 DEFAULT VALUE 검색.
+        var ls_0023 = oAPP.DATA.LIB.T_0023.find( a => a.UIATK === is_attr.UIATK );
+
+        //DEFAULT VALUE가 존재하는경우 해당 값 매핑.
+        if(ls_0023 && ls_0023.DEFVL !== ""){
+          is_attr.UIATV = ls_0023.DEFVL;
+        }
+      }
       
       //바인딩 FLAG 초기화.
       is_attr.ISBND = "";
@@ -1465,15 +1476,17 @@
     }
 
 
-    var l_title = "";
+    var l_title = "", l_CARDI = "";
 
     switch(is_attr.UIATY){
       case "1": //property
-        l_title = "Property";
+        l_title = "Data Binding / Unbinding - Property";
+        l_CARDI = "F";
         break;
 
         case "3": //Aggregation
-        l_title = "Aggregation";
+        l_title = "Data Binding / Unbinding - Aggregation";
+        l_CARDI = "T";
         break;
 
       default:
@@ -1484,13 +1497,13 @@
 
     //대상 function이 존재하는경우 호출 처리.
     if(typeof oAPP.fn.callBindPopup !== "undefined"){
-      oAPP.fn.callBindPopup(l_title, is_attr.UIATY, oAPP.fn.attrBindCallBack, is_attr.UIATK);
+      oAPP.fn.callBindPopup(l_title, l_CARDI, oAPP.fn.attrBindCallBack, is_attr.UIATK);
       return;
     }
 
     //대상 function이 존재하지 않는경우 script 호출.
     oAPP.fn.getScript("design/js/callBindPopup",function(){
-      oAPP.fn.callBindPopup(l_title, is_attr.UIATY, oAPP.fn.attrBindCallBack, is_attr.UIATK);
+      oAPP.fn.callBindPopup(l_title, l_CARDI, oAPP.fn.attrBindCallBack, is_attr.UIATK);
     });
 
   
@@ -2518,6 +2531,9 @@
   //부모 path로부터 파생된 child path 여부 확인.
   oAPP.fn.chkBindPath = function(parent, child){
     //부모 path를 -로 분리.
+    if(typeof parent === "undefined" || parent === ""){return;}
+    if(typeof child === "undefined" || child === ""){return;}
+
     var l_sp1 = parent.split("-");
 
     //CHILD path를 -로 분리.
