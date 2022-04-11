@@ -72,7 +72,7 @@
     oAPP.attr.ui.oRTab1 = oRTab1;
 
     //table 더블클릭 이벤트 처리.
-    oAPP.attr.ui.oRTab1.attachBrowserEvent('dblclick',function(oEvent){
+    oAPP.attr.ui.oRTab1.attachBrowserEvent("dblclick",function(oEvent){
       //table의 더블클릭에 따른 이벤트 처리.
       oAPP.fn.attrDblclickEvent(oEvent);
 
@@ -156,15 +156,23 @@
         return;
       }
 
+      //dropAble 프로퍼티 변경건 예외처리.
+      if(oAPP.attrChangeDropAbleProp(ls_0015) === true){
+        return;
+      }
+
       //attr 변경처리.
       oAPP.fn.attrChgAttrVal(ls_0015, "DDLB");
+
+      //DDLB 변경 라인 STYLE 처리.
+      oAPP.fn.attrSetLineStyle(ls_0015);
 
     }); //DDLB 선택 이벤트.
 
 
     //DDLB ITEM.
     var oRItm1 = new sap.ui.core.ListItem({key:"{KEY}",text:"{TEXT}",additionalText:"{DESC}"});
-    oRSel1.bindAggregation('items',{path:"T_DDLB",template:oRItm1,templateShareable:true});
+    oRSel1.bindAggregation("items",{path:"T_DDLB",template:oRItm1,templateShareable:true});
     oRHbox1.addItem(oRSel1);
 
     //Attribute Button UI
@@ -334,6 +342,8 @@
   };  //attribute table의 더블클릭에 따른 이벤트 처리.
 
 
+
+
   /************************************************************************
    * autoGrowing 프로퍼티 변경건에 대한 예외처리.
    * **********************************************************************
@@ -395,6 +405,29 @@
   };
 
 
+
+
+  /************************************************************************
+   * dropAble 프로퍼티 변경건에 대한 예외처리.
+   * **********************************************************************
+   * @param {object} is_attr - 이벤트 발생한 attribute의 라인 정보.
+   * @return {boolean} dropAble프로퍼티 변경건인경우 function 호출처의
+   * 하위로직 skip을 위한 true값 return.
+   ************************************************************************/
+   oAPP.attrChangeDropAbleProp = function(is_attr){
+
+    //dropAble 프로퍼티 변경건이 아닌경우 EXIT.
+    if(is_attr.UIASN !== "DROPABLE"){
+      return;
+    }
+
+    oAPP.fn.attrSetDropAbleException(is_attr, true, true);
+    return true;
+  };
+
+
+
+
   /************************************************************************
    * autoGrowing 프로퍼티 값에 따른 예외처리.
    * **********************************************************************
@@ -403,7 +436,6 @@
    * @param {boolean} bClear - 대상 이벤트 초기화 여부(true : 초기화함)
    ************************************************************************/
   oAPP.fn.attrSetAutoGrowingException = function(is_attr, bModelRefresh, bClear){
-
 
     //입력 ATTRIBUTE 라인 정보가 없는경우.
     if(!is_attr){
@@ -492,19 +524,13 @@
       ls_attr.ADDSC = "";
 
       //클라이언트 수집건 여부 확인 후 삭제.
-      oAPP.fn.attrChgAttrVal(ls_attr,"DDLB");
+      oAPP.fn.attrChgAttrVal(ls_attr, "DDLB");
 
       //UI에 수집되어있는 해당 이벤트 삭제.
-      if(oAPP.DATA.APPDATA.T_CEVT.length === 0){continue;}
+      oAPP.fn.attrDelClientEvent(ls_attr);
 
-      //클라이언트 이벤트 존재여부 확인.
-      var l_index = oAPP.DATA.APPDATA.T_CEVT.findIndex( a => a.OBJID === ls_attr.OBJID + ls_attr.UIASN && a.OBJTY === "JS" );
-
-      //존재하지 않는경우 skip.
-      if(l_index === -1){continue;}
-
-      //클라이언트 이벤트 존재시 해당 라인 삭제 처리.
-      oAPP.DATA.APPDATA.T_CEVT.splice(l_index, 1);
+      //해당 라인의 style 처리.
+      oAPP.fn.attrSetLineStyle(ls_attr);
 
     }
 
@@ -516,6 +542,107 @@
 
 
   };  //autoGrowing 프로퍼티 값에 따른 예외처리.
+
+
+
+
+  /************************************************************************
+   * 클라이언트 이벤트 삭제 처리.
+   * **********************************************************************
+   * @param {object} is_attr - 이벤트 발생한 attribute의 라인 정보.
+   ************************************************************************/
+  oAPP.fn.attrDelClientEvent = function(is_attr){
+
+    //수집된 클라이언트 이벤트가 존재하지 않는경우 exit.
+    if(oAPP.DATA.APPDATA.T_CEVT.length === 0){return;}
+
+    //클라이언트 이벤트 존재여부 확인.
+    var l_index = oAPP.DATA.APPDATA.T_CEVT.findIndex( a => a.OBJID === is_attr.OBJID + is_attr.UIASN && a.OBJTY === "JS" );
+
+    //클라이언트 이벤트가 존재하지 않는경우 EXIT.
+    if(l_index === -1){return;}
+    
+    //클라이언트 이벤트 존재시 해당 라인 삭제 처리.
+    oAPP.DATA.APPDATA.T_CEVT.splice(l_index, 1);
+
+  };  //클라이언트 이벤트 삭제 처리.
+
+
+
+
+  /************************************************************************
+   * 입력받은 attr 라인의 모델 갱신 처리.
+   * **********************************************************************
+   * @param {object} is_attr - 이벤트 발생한 attribute의 라인 정보.
+   ************************************************************************/
+  oAPP.fn.attrSetDropAbleException = function(is_attr, bModelRefresh, bClear){
+
+    //입력 파라메터가 존재하지 않는경우.
+    if(typeof is_attr === "undefined"){
+      //현재 attr 리스트에서 dropAble 프로퍼티 검색.
+      is_attr = oAPP.attr.oModel.oData.T_ATTR.find( a => a.UIASN === "DROPABLE" );
+
+    }
+
+    //attr 파라메터가 존재하지 않는경우 exit.
+    if(typeof is_attr === "undefined"){return;}
+
+    //dropAble 프로퍼티 변경건이 아닌경우 exit.
+    if(is_attr.UIASN !== "DROPABLE"){return;}
+
+    //default 변경 변경 가능 처리.
+    var l_edit = true;
+
+    //dropAble의 값이 false인경우 drop 이벤트 입력 불가 처리.
+    if(is_attr.UIATV === "false"){
+      l_edit = false;
+    }
+
+    if(bClear){      
+      //attr 변경건 수집/제거 처리.
+      oAPP.fn.attrChgAttrVal(is_attr);
+
+      //해당 라인의 style 처리.
+      oAPP.fn.attrSetLineStyle(is_attr);
+
+    }
+
+    //drop 이벤트 라인 찾기.
+    var ls_drop = oAPP.attr.oModel.oData.T_ATTR.find( a => a.UIASN === "DNDDROP" );
+
+    if(!ls_drop){return;}
+
+    //drop 이벤트 edit 가능여부 처리.
+    ls_drop.edit = l_edit;
+
+    //기존 이벤트 입력건 초기화 여부 FLAG가 존재하는경우, 입력 불가시.
+    if(bClear === true && l_edit === false){
+
+
+      //입력된 이벤트 초기화 처리.
+      ls_drop.UIATV = "";
+
+      //클라이언트 이벤트 SOURCE TYPE 초기화.
+      ls_drop.ADDSC = "";
+
+      //클라이언트 수집건 여부 확인 후 삭제.
+      oAPP.fn.attrChgAttrVal(ls_drop);
+
+      //UI에 수집되어있는 해당 이벤트 삭제.
+      oAPP.fn.attrDelClientEvent(ls_drop);
+
+      //해당 라인의 style 처리.
+      oAPP.fn.attrSetLineStyle(ls_drop);
+      
+    }
+
+    if(bModelRefresh){
+      oAPP.attr.oModel.refresh();
+    }
+
+    return true;
+
+  };
 
 
 
@@ -561,7 +688,7 @@
       //HTML editor 입력건 존재여부 확인.
       l_chk = oAPP.DATA.APPDATA.T_CEVT.findIndex( a => a.OBJTY === "HM" && a.OBJID === l_objid) !== -1 ? true : false;
 
-      l_msg = 'HTML Editor에 입력한 정보가 존재합니다. 바인딩 처리를 진행하시겠습니까?';
+      l_msg = "HTML Editor에 입력한 정보가 존재합니다. 바인딩 처리를 진행하시겠습니까?";
 
     //HTML editor 팝업전 호출한 경우.
     }else if(bFlag === false){
@@ -571,7 +698,7 @@
         l_chk = true;
       }
 
-      l_msg = '바인딩 정보가 존재합니다. HTML Source 입력처리를 진행하시겠습니까?';
+      l_msg = "바인딩 정보가 존재합니다. HTML Source 입력처리를 진행하시겠습니까?";
 
     }
 
@@ -707,14 +834,8 @@
       //javascript client event 추가됨 flag 구성.
       is_attr.ADDSC = ls_0015.ADDSC = "JS";
 
-      //default 색상 처리.
-      is_attr.icon2_color = "#acaba7";
-
-      //클라이언트 이벤트가 등록된경우.
-      if(param === "X"){
-        is_attr.icon2_color = "red";
-
-      }
+      //해당 라인의 style 처리.
+      oAPP.fn.attrSetLineStyle(is_attr);
 
       //모델 갱신 처리.
       oAPP.attr.oModel.refresh();
@@ -819,7 +940,7 @@
     oColPic.attachChange(function(oEvent){
 
       //선택 색상 매핑.
-      is_attr.UIATV = oEvent.getParameter('hex');
+      is_attr.UIATV = oEvent.getParameter("hex");
 
       //모델 갱신 처리.
       oAPP.attr.oModel.refresh();
@@ -867,7 +988,7 @@
     var l_UIATT = is_attr.UIATT.toUpperCase();
 
     //프로퍼티명에 COLOR가 포함안되는경우 exit.
-    if(l_UIATT.indexOf('ICON') === -1 && l_UIATT.indexOf('IMAGE') === -1 && l_UIATT.indexOf('SRC') === -1){return;}
+    if(l_UIATT.indexOf("ICON") === -1 && l_UIATT.indexOf("IMAGE") === -1 && l_UIATT.indexOf("SRC") === -1){return;}
 
 
     //icon list popup function이 존재하는 경우.
@@ -1045,6 +1166,9 @@
       is_attr.T_DDLB.push({KEY:is_attr.UIATV,TEXT:is_attr.UIATV});
     }
 
+    //해당 라인의 style 처리.
+    oAPP.fn.attrSetLineStyle(is_attr);
+
     //화면 갱신 처리.
     oAPP.attr.oModel.refresh();
 
@@ -1052,7 +1176,7 @@
     oAPP.fn.previewUIsetProp(is_attr);
 
     //attr 변경건이 수집됐는지 확인.
-    var l_indx = oAPP.attr.prev[is_attr.OBJID]._T_0015.findIndex( a => a.UIATK === is_attr.UIATK );
+    var l_indx = oAPP.attr.prev[is_attr.OBJID]._T_0015.findIndex( a => a.UIATK === is_attr.UIATK && a.UIATY === "3" );
 
     //수집된건이 존재하는경우.
     if(l_indx !== -1){
@@ -1212,6 +1336,10 @@
       //수집된건 제거 처리.
       oAPP.attr.prev[is_attr.OBJID]._T_0015.splice(l_indx, 1);
     }
+   
+
+    //해당 라인의 style 처리.
+    oAPP.fn.attrSetLineStyle(is_attr);
 
     //화면 갱신 처리.
     oAPP.attr.oModel.refresh();
@@ -1274,7 +1402,7 @@
 
         //현재 aggregation에 2개 이상의 UI가 추가된경우.
         if(lt_filter.length >= 2){
-          parent.showMessage(sap, 10, 'E', 'If you have one or more child objects, you can not specify a model.');
+          parent.showMessage(sap, 10, "E", "If you have one or more child objects, you can not specify a model.");
           return;
         }
 
@@ -1288,19 +1416,19 @@
     //UI Attribute Type에 따른 분기.
     switch(is_attr.UIATY){
       case "1": //property
-        l_func = 'callBindPopup';
-        l_title = 'Property';
+        l_func = "callBindPopup";
+        l_title = "Property";
         f_callback = oAPP.fn.attrBindCallBack;
         break;
 
       case "2": //event
-        l_func = 'createEventPopup';
+        l_func = "createEventPopup";
         f_callback = oAPP.fn.lf_eventCallBack;
         break;
 
       case "3": //Aggregation
-        l_func = 'callBindPopup';
-        l_title = 'Aggregation';
+        l_func = "callBindPopup";
+        l_title = "Aggregation";
         f_callback = oAPP.fn.attrBindCallBack;
         break;
 
@@ -1332,6 +1460,9 @@
     //DDLB항목에 바인딩한 정보 추가.
     //is_attr.T_DDLB.push({KEY:evtnm,TEXT:evtnm});
 
+    //이벤트 추가에 따른 style 처리.
+    oAPP.fn.attrSetLineStyle(is_attr);
+
     //화면 갱신 처리.
     oAPP.attr.oModel.refresh();
 
@@ -1355,6 +1486,7 @@
       oAPP.attr.prev[is_attr.OBJID]._T_0015.push(is_attr);
 
     }
+
 
   }; //이벤트 팝업 call back 이벤트
 
@@ -1383,7 +1515,7 @@
         if(l_indx === -1){return;}
 
         //클라이언트 이벤트 검색.
-        var l_cevt = oAPP.DATA.APPDATA.T_CEVT.find( a => a.OBJID === is_attr.OBJID && is_attr.UIASN && a.OBJTY === "JS" );
+        var l_cevt = oAPP.DATA.APPDATA.T_CEVT.find( a => a.OBJID === is_attr.OBJID + is_attr.UIASN && a.OBJTY === "JS" );
 
         //수집건이 존재하는경우 클라이언트 이벤트가 존재시 exit.
         if(l_cevt){return;}
@@ -1833,6 +1965,96 @@
 
 
 
+  //attr 라인에 따른 style 처리.
+  oAPP.fn.attrSetLineStyle = function(is_attr){
+    console.log(is_attr);
+    //UI 타입에 따른 로직 분기.
+    switch(is_attr.UIATY){
+      case "1": //프로퍼티
+        //바인딩 아이콘 처리
+        is_attr.icon1_src = "sap-icon://fallback";
+        is_attr.icon1_color = "#dec066";  //바인딩(서버이벤트) 색상 필드
+
+        //help 아이콘 처리.
+        is_attr.icon2_src = "sap-icon://sys-help";
+        is_attr.icon2_color = "#40baf3";  //바인딩(서버이벤트) 색상 필드
+
+        //프로퍼티 아이콘 처리.
+        is_attr.UIATT_ICON = "sap-icon://customize";
+
+        //프로퍼티에 바인딩 처리된건이 존재하는경우.
+        if(is_attr.UIATV !== "" && is_attr.ISBND === "X"){
+          is_attr.icon1_color = "yellow";  //바인딩(서버이벤트) 색상 필드
+        }
+
+        break;
+
+      case "2": //이벤트
+        //서버이벤트 아이콘 처리.
+        is_attr.icon1_src = "sap-icon://developer-settings";
+        is_attr.icon1_color = "#c9e088";  //바인딩(서버이벤트) 색상 필드
+
+        //서버 이벤트가 존재하는경우.
+        if(is_attr.UIATV !== ""){
+          is_attr.icon1_color = "blue";  //바인딩(서버이벤트) 색상 필드
+        }
+
+        //클라이언트이벤트 아이콘 처리.
+        is_attr.icon2_src = "sap-icon://syntax";
+        is_attr.icon2_color = "#acaba7";  //바인딩(클라이언트 이벤트) 색상 필드
+
+        //클라이언트 이벤트 검색.
+        var l_indx = oAPP.DATA.APPDATA.T_CEVT.findIndex( a => a.OBJID === is_attr.OBJID + is_attr.UIASN && a.OBJTY === "JS" );
+
+        //클라이언트 이벤트가 존재하는경우.
+        if(l_indx !== -1){
+          is_attr.icon2_color = "red";  //바인딩(클라이언트 이벤트) 색상 필드
+        }
+
+        //이벤트 아이콘 처리.
+        is_attr.UIATT_ICON = "sap-icon://border";
+
+        break;
+
+      case "3": //Aggregation
+        //N개의 UI가 추가되는 Aggregation인경우
+        if(is_attr.ISMLB === "X"){
+          //바인딩 아이콘 처리
+          is_attr.icon1_src = "sap-icon://fallback";
+          is_attr.icon1_color = "#dec066";  //바인딩(서버이벤트) 색상 필드
+        }
+
+        //help 아이콘 처리.
+        is_attr.icon2_src = "sap-icon://warning2";
+
+        //직접 입력 가능한 Aggregation이 아닌경우 ICON 처리.
+        if(is_attr.ISSTR !== "X"){
+          is_attr.UIATT_ICON = "sap-icon://color-fill";
+        }
+      
+        //Aggregation cardinality 0:N건인경우.
+        if(is_attr.ISMLB === "X"){
+          //N건 아이콘 처리.
+          is_attr.UIATT_ICON = "sap-icon://dimension";
+        }
+
+        //AGGREGATION에 바인딩 처리된건이 존재하는경우.
+        if(is_attr.UIATV !== ""){
+          is_attr.icon1_color = "green";  //바인딩(서버이벤트) 색상 필드
+        }
+
+        break;
+
+      default:
+        break;
+
+    } //UI 타입에 따른 로직 분기.
+
+
+  };  //attr 라인에 따른 style 처리.
+
+
+
   //선택한 UI에 해당하는 attribute 리스트 업데이트 처리.
   oAPP.fn.updateAttrList = function(UIOBK,OBJID){
 
@@ -1905,64 +2127,6 @@
       ls_0015.icon1_visb = true;
       ls_0015.icon2_visb = true;
 
-      //UI 타입에 따른 로직 분기.
-      switch(ls_0015.UIATY){
-        case "1": //프로퍼티
-          //바인딩 아이콘 처리
-          ls_0015.icon1_src = "sap-icon://fallback";
-          ls_0015.icon1_color = "#dec066";  //바인딩(서버이벤트) 색상 필드
-
-          //help 아이콘 처리.
-          ls_0015.icon2_src = "sap-icon://sys-help";
-          ls_0015.icon2_color = "#40baf3";  //바인딩(서버이벤트) 색상 필드
-
-          //프로퍼티 아이콘 처리.
-          ls_0015.UIATT_ICON = "sap-icon://customize";
-
-          break;
-
-        case "2": //이벤트
-          //서버이벤트 아이콘 처리.
-          ls_0015.icon1_src = "sap-icon://developer-settings";
-          ls_0015.icon1_color = "#c9e088";  //바인딩(서버이벤트) 색상 필드
-
-          //클라이언트이벤트 아이콘 처리.
-          ls_0015.icon2_src = "sap-icon://syntax";
-          ls_0015.icon2_color = "#acaba7";  //바인딩(클라이언트 이벤트) 색상 필드
-
-          //이벤트 아이콘 처리.
-          ls_0015.UIATT_ICON = "sap-icon://border";
-
-          break;
-
-        case "3": //Aggregation
-          //N개의 UI가 추가되는 Aggregation인경우
-          if(ls_0015.ISMLB === "X"){
-            //바인딩 아이콘 처리
-            ls_0015.icon1_src = "sap-icon://fallback";
-            ls_0015.icon1_color = "#dec066";  //바인딩(서버이벤트) 색상 필드
-          }
-
-          //help 아이콘 처리.
-          ls_0015.icon2_src = "sap-icon://warning2";
-
-          //직접 입력 가능한 Aggregation이 아닌경우 ICON 처리.
-          if(ls_0015.ISSTR !== "X"){
-            ls_0015.UIATT_ICON = "sap-icon://color-fill";
-          }
-        
-          //Aggregation cardinality 0:N건인경우.
-          if(ls_0015.ISMLB === "X"){
-            //N건 아이콘 처리.
-            ls_0015.UIATT_ICON = "sap-icon://dimension";
-          }
-
-          break;
-
-        default:
-          break;
-
-      } //UI 타입에 따른 로직 분기.
 
       oAPP.attr.oModel.oData.T_ATTR.push(ls_0015);
 
@@ -2021,7 +2185,8 @@
     for(var i=0, l=oAPP.attr.oModel.oData.T_ATTR.length; i<l; i++){
 
       //대상 UI에 해당하는 입력건 검색.
-      var ls_0015 = oAPP.attr.prev[OBJID]._T_0015.find( a => a.UIATK === oAPP.attr.oModel.oData.T_ATTR[i].UIATK );
+      var ls_0015 = oAPP.attr.prev[OBJID]._T_0015.find( a => a.UIATK === oAPP.attr.oModel.oData.T_ATTR[i].UIATK && 
+        a.UIATY === oAPP.attr.oModel.oData.T_ATTR[i].UIATY );
 
       if(typeof ls_0015 === "undefined"){continue;}
 
@@ -2064,11 +2229,17 @@
 
       //icon 처리.
       oAPP.fn.setExcepAttr(oAPP.attr.oModel.oData.T_ATTR[i]);
+      
+      //attr 라인에 따른 style 처리.
+      oAPP.fn.attrSetLineStyle(oAPP.attr.oModel.oData.T_ATTR[i]);
 
     }
     
-    //autoGrowing여부에 따른 화면 잠금처리.
+    //autoGrowing 프로퍼티 입력값 여부에 따른 attr 잠금처리.
     oAPP.fn.attrSetAutoGrowingException();
+
+    //dropAble 프로퍼티 입력값 여부에 따른 attr 잠금처리.
+    oAPP.fn.attrSetDropAbleException();
 
     //모델 갱신 처리.
     oAPP.attr.oModel.refresh(true);
@@ -2084,7 +2255,7 @@
   //attribute 영역 그룹핑 처리.
   oAPP.fn.setAttrModelSort = function(){
 
-    var l_bind = oAPP.attr.ui.oRTab1.getBinding('items');
+    var l_bind = oAPP.attr.ui.oRTab1.getBinding("items");
 
     //attribute 영역 그룹핑 처리.
     l_bind.sort([new sap.ui.model.Sorter("UIATY",false,function(oContext){
@@ -2300,16 +2471,16 @@
   //부모 path로부터 파생된 child path 여부 확인.
   oAPP.fn.chkBindPath = function(parent, child){
     //부모 path를 -로 분리.
-    var l_sp1 = parent.split('-');
+    var l_sp1 = parent.split("-");
 
     //CHILD path를 -로 분리.
-    var l_sp2 = child.split('-');
+    var l_sp2 = child.split("-");
 
     //부모 path 부분만 남김.
     l_sp2.splice(l_sp1.length);
 
     //부모 path로부터 파생된 child path인경우.
-    if(parent === l_sp2.join('-')){
+    if(parent === l_sp2.join("-")){
       //부모 path로부터 파생됨 flag return
       return true;
     }

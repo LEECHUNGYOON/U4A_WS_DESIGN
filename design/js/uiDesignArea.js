@@ -75,11 +75,10 @@
     //UI명.
     var oLtxt1 = new sap.m.Text({text:"{OBJID}"});
     oLHbox2.addItem(oLtxt1);
-
-    //부모 Aggregation
+    
+    //부모 Aggregation text UI.
     var oLtxt2 = new sap.m.Text({text:"{UIATT}"});
     oLHbox1.addItem(oLtxt2);
-
     
 
     //drag UI 생성.

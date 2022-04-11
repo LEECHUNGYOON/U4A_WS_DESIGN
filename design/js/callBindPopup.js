@@ -16,7 +16,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
 
 
   //바인딩 가능여부 flag 처리.
-  function lf_setBindEnable(it_tree, l_path, l_model){
+  function lf_setBindEnable(it_tree, l_path, l_model, KIND){
 
     if(it_tree.length === 0){return;}
 
@@ -26,10 +26,10 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
         case "T": //TABLE인경우.
 
           //property에서 바인딩 팝업 호출시 n건 바인딩 path와 현재 path가 동일한 경우 하위 탐색.
-          if(oAPP.attr.oBindDialog._is_attr.UIATY === "1" && l_path === it_tree[i].CHILD){
+          if(oAPP.attr.oBindDialog._is_attr.UIATY === "1" && l_path.substr(0,it_tree[i].CHILD.length) === it_tree[i].CHILD){
 
             var lt_child = l_model.oData.TREE.filter( a => a.PARENT === it_tree[i].CHILD );
-            lf_setBindEnable(lt_child, l_path, l_model);
+            lf_setBindEnable(lt_child, l_path, l_model, it_tree[i].KIND);
             continue;
 
           }
@@ -43,7 +43,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
           if(oAPP.attr.oBindDialog._is_attr.UIATY === "3" && l_path === it_tree[i].CHILD){
 
             var lt_child = l_model.oData.TREE.filter( a => a.PARENT === it_tree[i].CHILD && a.KIND !== "E" );
-            lf_setBindEnable(lt_child, l_path, l_model);
+            lf_setBindEnable(lt_child, l_path, l_model, it_tree[i].KIND);
             continue;
           }
 
@@ -75,25 +75,32 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
           var lt_child = l_model.oData.TREE.filter( a => a.PARENT === it_tree[i].CHILD && a.KIND !== l_KIND);
 
           //하위 path를 탐색하며 선택 가능 flag 처리.
-          lf_setBindEnable(lt_child, l_path, l_model);
+          lf_setBindEnable(lt_child, l_path, l_model, KIND);
           break;
 
         case "E": //일반 필드인경우.
 
+          //TREE의 경우PARENT, CHILD에 바인딩시 바인딩된 AGGR의 TABLE건만 가능.
           if(oAPP.attr.oBindDialog._is_attr.UIATK === "EXT00001190" ||
              oAPP.attr.oBindDialog._is_attr.UIATK === "EXT00001191" ||
              oAPP.attr.oBindDialog._is_attr.UIATK === "EXT00001192" ||
              oAPP.attr.oBindDialog._is_attr.UIATK === "EXT00001193"){
 
              if(it_tree[i].CHILD.substr(0, l_path.length) !== l_path){
-              return;
+              continue;
 
              }
 
           }
 
+          
           //property인경우 필드 선택 가능 처리.
           if(oAPP.attr.oBindDialog._is_attr.UIATY === "1"){
+            
+            if(KIND === "T" && it_tree[i].CHILD.substr(0, l_path.length) !== l_path){
+              continue;
+            }
+
             it_tree[i].enable = true;
             it_tree[i].stat_src = "sap-icon://status-positive";
             it_tree[i].stat_color = "#01DF3A";
