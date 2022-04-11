@@ -1,5 +1,5 @@
 // 이벤트 생성 팝업 호출.
-oAPP.fn.createEventPopup = function(i_dummy, is_attr, f_callBack){
+oAPP.fn.createEventPopup = function(is_attr, f_callBack){
 
   function lf_dialogClose(){
     oDlg.close();

@@ -1,5 +1,5 @@
 //바인딩 팝업 처리 function.
-oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
+oAPP.fn.callBindPopup = function(sTitle, UIATY, f_callback, UIATK){
 
   //팝업 종료 function.
   function lf_closePopup(){
@@ -26,7 +26,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
         case "T": //TABLE인경우.
 
           //property에서 바인딩 팝업 호출시 n건 바인딩 path와 현재 path가 동일한 경우 하위 탐색.
-          if(oAPP.attr.oBindDialog._is_attr.UIATY === "1" && ( l_path && l_path.substr(0,it_tree[i].CHILD.length) === it_tree[i].CHILD)){
+          if(oAPP.attr.oBindDialog._UIATY === "1" && ( l_path && l_path.substr(0,it_tree[i].CHILD.length) === it_tree[i].CHILD)){
 
             var lt_child = l_model.oData.TREE.filter( a => a.PARENT === it_tree[i].CHILD );
             lf_setBindEnable(lt_child, l_path, l_model, it_tree[i].KIND);
@@ -35,12 +35,12 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
           }
 
           //property에서 바인딩 팝업 호출시 table인경우 하위 정보 활성화 skip.
-          if(oAPP.attr.oBindDialog._is_attr.UIATY === "1"){
+          if(oAPP.attr.oBindDialog._UIATY === "1"){
             continue;
           }
 
           //aggregation인경우 첫번째 만나는 TABLE은 선택 가능 처리 후 하위 정보 활성화 SKIP.
-          if(oAPP.attr.oBindDialog._is_attr.UIATY === "3" && l_path === it_tree[i].CHILD){
+          if(oAPP.attr.oBindDialog._UIATY === "3" && l_path === it_tree[i].CHILD){
 
             var lt_child = l_model.oData.TREE.filter( a => a.PARENT === it_tree[i].CHILD && a.KIND !== "E" );
             lf_setBindEnable(lt_child, l_path, l_model, it_tree[i].KIND);
@@ -48,7 +48,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
           }
 
           //aggregation인경우 첫번째 만나는 TABLE은 선택 가능 처리 후 하위 정보 활성화 SKIP.
-          if(oAPP.attr.oBindDialog._is_attr.UIATY === "3"){
+          if(oAPP.attr.oBindDialog._UIATY === "3"){
             it_tree[i].enable = true;
             it_tree[i].stat_src = "sap-icon://status-positive";
             it_tree[i].stat_color = "#01DF3A";
@@ -67,7 +67,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
           var l_KIND = "";
 
           //aggregation인경우 일반 필드는 검색 불필요 함으로 제외 조건값 구성.
-          if(oAPP.attr.oBindDialog._is_attr.UIATY === "3"){
+          if(oAPP.attr.oBindDialog._UIATY === "3"){
             l_KIND = "E";
           }
 
@@ -95,7 +95,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
 
           
           //property인경우 필드 선택 가능 처리.
-          if(oAPP.attr.oBindDialog._is_attr.UIATY === "1"){
+          if(oAPP.attr.oBindDialog._UIATY === "1"){
 
             if(l_path && KIND === "T" && it_tree[i].CHILD.substr(0, l_path.length) !== l_path){
               continue;
@@ -133,7 +133,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
     oAPP.attr.oBindDialog.open();
 
     //화면 잠금 처리.
-    oAPP.attr.oBindDialog._oModel.setProperty('/busy',true);
+    oAPP.attr.oBindDialog._oModel.setProperty("/busy",true);
 
     //클래스명 서버 전송 데이터에 구성.
     var oFormData = new FormData();
@@ -221,7 +221,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
       l_model.refresh(true);
 
 
-    },'');  //바인딩 필드 정보 검색.
+    },"");  //바인딩 필드 정보 검색.
 
   } //서버에서 바인딩 attr 정보 얻은 이후 popup open
 
@@ -233,7 +233,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
     var l_indx = this.getSelectedIndex();
     if(l_indx === -1){return;}
 
-    var l_bind = this.getBinding('rows');
+    var l_bind = this.getBinding("rows");
 
     var l_ctxt = l_bind.getContextByIndex(l_indx);
     if(!l_ctxt){return;}
@@ -255,7 +255,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
     }
 
     //프로퍼티에서 바인딩 팝업 호출시 추가속성 정보 활성 처리.
-    if(oAPP.attr.oBindDialog._is_attr.UIATY === "1"){
+    if(oAPP.attr.oBindDialog._UIATY === "1"){
       oAPP.attr.oBindDialog._oModel.oData.width = "65%";
       oAPP.attr.oBindDialog._oModel.oData.resize = true;
     }
@@ -266,7 +266,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
 
     var l_path = l_ctxt.getPath();
 
-    l_path = l_path.substr(0,l_path.lastIndexOf('/'));
+    l_path = l_path.substr(0,l_path.lastIndexOf("/"));
 
     //추가속성 정보 출력 처리.
     lf_setAdditBindInfo(ls_tree, oAPP.attr.oBindDialog._oModel.getProperty(l_path));
@@ -301,7 +301,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
     //이전 바인딩 path가 존재하는 경우.
     if(L_UIATV !== ""){
       //이전 바인딩 PATH를 -로 분리.
-       lt_split = L_UIATV.split('-');
+       lt_split = L_UIATV.split("-");
     }
 
 
@@ -312,7 +312,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
     var l_KIND = "E";
 
     //aggregation에서 바인딩 팝업 호출한경우 TABLE 필드 타입.
-    if(oAPP.attr.oBindDialog._is_attr.UIATY === "3"){
+    if(oAPP.attr.oBindDialog._UIATY === "3"){
       l_KIND = "T";
     }
 
@@ -377,7 +377,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
     if(oAPP.attr.oBindDialog._oModel.oData.isSetLay){return;}
 
     //프로퍼티에서 바인딩 팝업 호출한경우 이전 바인딩 정보가 존재하지 않는경우.
-    if(is_frist === true && oAPP.attr.oBindDialog._is_attr.UIATY === "1" &&
+    if(is_frist === true && oAPP.attr.oBindDialog._UIATY === "1" &&
        oAPP.attr.oBindDialog._is_attr.ISBND !== "X" ){
        //최초 1번 바인딩 추가속성 정보 비활성 처리.
        oAPP.attr.oBindDialog._oModel.oData.width = "100%";
@@ -390,14 +390,14 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
     oAPP.attr.oBindDialog._oModel.oData.isSetLay = true;
 
     //aggregation인경우 바인딩 추가속성정보 비활성.
-    if(oAPP.attr.oBindDialog._is_attr.UIATY === "3"){
+    if(oAPP.attr.oBindDialog._UIATY === "3"){
       oAPP.attr.oBindDialog._oModel.oData.width = "100%";
       oAPP.attr.oBindDialog._oModel.oData.resize = false;
       return;
     }
 
     //프로퍼티에서 바인딩 팝업 호출시 추가속성 정보 활성 처리.
-    if(oAPP.attr.oBindDialog._is_attr.UIATY === "1"){
+    if(oAPP.attr.oBindDialog._UIATY === "1"){
       oAPP.attr.oBindDialog._oModel.oData.width = "65%";
       oAPP.attr.oBindDialog._oModel.oData.resize = true;
     }
@@ -410,7 +410,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
   function lf_setAdditBindInfo(is_tree, it_parent){
 
     //바인딩 팝업 호출 ATTR의 타입이 프로퍼티가 아닌경우 EXIT.
-    if(oAPP.attr.oBindDialog._is_attr.UIATY !== "1"){return;}
+    if(oAPP.attr.oBindDialog._UIATY !== "1"){return;}
 
     //바인딩 추가 속성 정보 초기화.
     oAPP.attr.oBindDialog._oModel.oData.T_MPROP = [];
@@ -540,7 +540,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
 
           //값이 존재하지 않는경우 default false
           if(ls_mprop.val === ""){
-            ls_mprop.val = 'false';
+            ls_mprop.val = "false";
           }
 
           ls_mprop.sel_vis = true;
@@ -563,7 +563,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
 
           //값이 존재하지 않는경우 default false
           if(ls_mprop.val === ""){
-            ls_mprop.val = 'false';
+            ls_mprop.val = "false";
           }
 
           ls_mprop.sel_vis = true;
@@ -614,7 +614,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
     }
 
     //aggregation인경우 하위 로직 점검 skip.
-    if(oAPP.attr.oBindDialog._is_attr.UIATY === "3"){
+    if(oAPP.attr.oBindDialog._UIATY === "3"){
       return false;
     }
 
@@ -651,7 +651,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
     var l_ret = false;
 
     // Conversion Routine 존재여부 확인.
-    sendAjax(oAPP.attr.servNm + '/chkConvExit', oFormData,function(param){
+    sendAjax(oAPP.attr.servNm + "/chkConvExit", oFormData,function(param){
       //잘못된 Conversion Routine을 입력한 경우.
       if(param.RETCD === "E"){
         ls_P06.stat = "Error";
@@ -660,7 +660,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
         l_ret = true;
       }
 
-    },'',false);
+    },"",false);
 
 
     return l_ret;
@@ -673,7 +673,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
   function lf_resetMPROPMsg(){
 
     //프로퍼티에서 바인딩 팝업 호출된건이 아닌경우 SKIP.
-    if(oAPP.attr.oBindDialog._is_attr.UIATY !== ""){return;}
+    if(oAPP.attr.oBindDialog._UIATY !== ""){return;}
 
     for(var i=0, l=oAPP.attr.oBindDialog.oData.T_MPROP.length; i<l; i++){
       oAPP.attr.oBindDialog.oData.T_MPROP[i].stat = "None";
@@ -703,6 +703,12 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
 
       var l_indx = oAPP.attr.oBindDialog._oTree.getSelectedIndex();
 
+      //선택한 라인이 존재하지 않는경우.
+      if(l_indx === -1){
+        parent.showMessage(sap, 10, "E", "선택한 라인이 존재하지 않습니다.");
+        return true;
+      }
+
       var l_cxtx = oAPP.attr.oBindDialog._oTree.getContextByIndex(l_indx);
 
     }
@@ -719,7 +725,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
     }
 
     //프로퍼티에서 바인딩 팝업을 호출한 경우.
-    if(oAPP.attr.oBindDialog._is_attr.UIATY === "1"){
+    if(oAPP.attr.oBindDialog._UIATY === "1"){
 
       for(var i=3, l=lt_MPROP.length, l_array = []; i<l; i++){
         //바인딩 추가 속성 정보 수집.
@@ -732,7 +738,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
     }
 
     //callback function으로 팝업에서 선택한 라인정보 return
-    f_callback(ls_tree, oAPP.attr.oBindDialog._is_attr);
+    oAPP.attr.oBindDialog._f_callback(true, ls_tree, oAPP.attr.oBindDialog._is_attr);
 
     //팝업종료 처리.
     lf_closePopup();
@@ -742,24 +748,51 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
   //unbind 버튼 선택 이벤트.
   function lf_unbindBtnEvt(){
     //callback function으로 unbind 정보 return
-    f_callback(null,oAPP.attr.oBindDialog._is_attr,true);
+    oAPP.attr.oBindDialog._f_callback(false, null, oAPP.attr.oBindDialog._is_attr);
 
     //팝업종료 처리.
     lf_closePopup();
   }
 
 
+  //입력 파라메터 설정.
+  function lf_setParam(){
+
+    //입력 카디널리티.
+    oAPP.attr.oBindDialog._UIATY = UIATY;
+    
+    //callback function.
+    oAPP.attr.oBindDialog._f_callback = f_callback;
+
+    //팝업 title 구성.
+    oAPP.attr.oBindDialog.setTitle("Data Binding / Unbinding - " + sTitle);
+
+    //광역 attr 초기화.
+    oAPP.attr.oBindDialog._is_attr = {};
+
+    //입력한 attribute key 정보가 존재하는경우.
+    if(typeof UIATK !== "undefined"){
+      //attribute 리스트에서 해당 라인 검색.
+      oAPP.attr.oBindDialog._is_attr = oAPP.attr.oModel.oData.T_ATTR.find ( a=> a.UIATK === UIATK && UIATY === UIATY );
+    }
+
+  }
+
+
   //binding 팝업 정보가 존재하는 경우.
   if(oAPP.attr.oBindDialog){
+        
+    //파라메터 설정.
+    lf_setParam();
+
     //바인딩 팝업 open 처리 하위 로직 skip.
-    oAPP.attr.oBindDialog._is_attr = is_attr;
     oAPP.attr.oBindDialog.open();
     return;
 
   }
 
-  sap.ui.getCore().loadLibrary('sap.ui.table');
-  sap.ui.getCore().loadLibrary('sap.ui.layout');
+  sap.ui.getCore().loadLibrary("sap.ui.table");
+  sap.ui.getCore().loadLibrary("sap.ui.layout");
 
   //바인딩 tree toolabar 정보.
   var oTool = new sap.m.Toolbar();
@@ -821,7 +854,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
 
 
   //tree 더블클릭 이벤트.
-  oTree.attachBrowserEvent('dblclick',function(oEvent){
+  oTree.attachBrowserEvent("dblclick",function(oEvent){
 
     //이벤트 발생 라인으로부터 sap.ui.table.Row UI 검색.
     function lf_getRowUI(oUI){
@@ -912,7 +945,7 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
   });
   oTree.addColumn(oTreeCol4);*/
 
-  oTree.bindAggregation("rows",{path:"/zTREE",template:new sap.ui.table.Row(),parameters: {arrayNames: ['zTREE']}});
+  oTree.bindAggregation("rows",{path:"/zTREE",template:new sap.ui.table.Row(),parameters: {arrayNames: ["zTREE"]}});
 
 
   //바인딩 추가속성 정보 table.
@@ -1029,7 +1062,6 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
       contentHeight:"80%",
       contentWidth:"70%",
       verticalScrolling:false,
-      title: "Data Binding / Unbinding - " + sTitle,
       titleAlignment: "Center",
       //stretch: true,
       icon: "sap-icon://journey-depart",
@@ -1050,7 +1082,8 @@ oAPP.fn.callBindPopup = function(sTitle,is_attr,f_callback){
     //}).addStyleClass("sapUiContentPadding sapUiSizeCompact");
 
 
-    oAPP.attr.oBindDialog._is_attr = is_attr;
+    //파라메터 설정.
+    lf_setParam();
 
     oAPP.attr.oBindDialog._oTree = oTree;
 

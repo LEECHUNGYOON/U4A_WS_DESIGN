@@ -748,6 +748,9 @@
       //HTML content 추가됨 flag 구성.
       is_attr.ADDSC = ls_0015.ADDSC = "HM";
 
+      //대상 라인 style 처리..
+      //oAPP.fn.attrSetLineStyle(is_attr);
+
       //default 색상 처리.
       is_attr.icon2_color = "#acaba7";
 
@@ -1115,6 +1118,12 @@
       }
     }
 
+    //클라이언트 이벤트 수집건 objid 변경.
+    oAPP.fn.attrChgClientEventOBJID(ls_uiinfo.OBJID, ls_uiinfo.OBJID_bf);
+
+    //desc 입력건 정보 objid 변경.
+    oAPP.fn.changeDescOBJID(ls_uiinfo.OBJID, ls_uiinfo.OBJID_bf);
+
     //이전 OBJID를 변경된 ID로 업데이트.
     ls_uiinfo.OBJID_bf = ls_uiinfo.OBJID;
 
@@ -1126,12 +1135,43 @@
 
 
 
+  //클라이언트 이벤트의 OBJECT ID 변경 처리.
+  oAPP.fn.attrChgClientEventOBJID = function(OBJID, OLDOBJID){
+  
+    //클라이언트 이벤트가 존재하지 않는경우 exit.
+    if(oAPP.DATA.APPDATA.T_CEVT.length === 0){return;}
+
+    //대상 OBJID의 ATTR 변경건이 존재하지 않는경우 EXIT.
+    if(oAPP.attr.prev[OBJID]._T_0015.length === 0){return;}
+
+    //이벤트 입력건, sap.ui.core.HTML의 content 프로퍼티 입력건 존재여부 확인.
+    lt_attr = oAPP.attr.prev[ls_uiinfo.OBJID]._T_0015.filter( a => a.UIATY === "2" || a.UIATK === "AT000011858" );
+
+    //이벤트, sap.ui.core.HTML의 content프로퍼티 입력건이 존재하지 않는경우 exit.
+    if(lt_attr.length === 0){return;}
+
+    for(var i=0, l=lt_attr.length; i<l; i++){
+
+      //이전 OBJECTID로 입력된 클라이언트 이벤트, HTML CONTENT 입력건 존재여부 확인.
+      var l_cevt = oAPP.DATA.APPDATA.T_CEVT.find( a=> a.OBJID === OLDOBJID + lt_attr[i].UIASN );
+
+      //존재하지 않는경우 다음건 확인.
+      if(typeof l_cevt === "undefined"){continue;}
+
+      //존재하는경우 변경된 OBJECT ID로 매핑 처리.
+      l_cevt.OBJID = OBJID + lt_attr[i].UIASN;      
+
+    }    
+
+  };
+
+
 
   //바인딩 팝업 Call Back 이벤트
-  oAPP.fn.attrBindCallBack = function(is_tree, is_attr, is_unbind){
+  oAPP.fn.attrBindCallBack = function(bIsbind, is_tree, is_attr){
 
     //unbind 처리된경우.
-    if(is_unbind === true){
+    if(bIsbind === true){
       oAPP.fn.attrUnbindAttr(is_attr);
 
       //변경 FLAG 처리.
@@ -1329,7 +1369,7 @@
     is_attr.MPROP = "";
 
     //attr 변경건이 수집됐는지 확인.
-    var l_indx = oAPP.attr.prev[is_attr.OBJID]._T_0015.findIndex( a => a.UIATK === is_attr.UIATK );
+    var l_indx = oAPP.attr.prev[is_attr.OBJID]._T_0015.findIndex( a => a.UIATK === is_attr.UIATK && a.UIATY === is_attr.UIATY);
 
     //수집된건이 존재하는경우.
     if(l_indx !== -1){
@@ -1411,25 +1451,34 @@
     } //Aggregation의 바인딩 팝업 버튼 선택시.
 
 
-    var l_func = "",l_title = "",f_callback;
+    //이벤트 영역에서 이벤트 발생한 경우.
+    if(is_attr.UIATY === "2"){
 
-    //UI Attribute Type에 따른 분기.
+      //대상 function이 존재하는경우 호출 처리.
+      if(typeof oAPP.fn.createEventPopup !== "undefined"){
+        oAPP.fn.createEventPopup(is_attr, oAPP.fn.lf_eventCallBack);
+        return;
+      }
+
+      //대상 function이 존재하지 않는경우 script 호출.
+      oAPP.fn.getScript("design/js/createEventPopup",function(){
+        oAPP.fn.createEventPopup(is_attr, oAPP.fn.lf_eventCallBack);
+      });
+
+      return;
+
+    }
+
+
+    var l_title = "";
+
     switch(is_attr.UIATY){
       case "1": //property
-        l_func = "callBindPopup";
         l_title = "Property";
-        f_callback = oAPP.fn.attrBindCallBack;
         break;
 
-      case "2": //event
-        l_func = "createEventPopup";
-        f_callback = oAPP.fn.lf_eventCallBack;
-        break;
-
-      case "3": //Aggregation
-        l_func = "callBindPopup";
+        case "3": //Aggregation
         l_title = "Aggregation";
-        f_callback = oAPP.fn.attrBindCallBack;
         break;
 
       default:
@@ -1437,17 +1486,19 @@
 
     } //UI Attribute Type에 따른 분기.
 
+
     //대상 function이 존재하는경우 호출 처리.
-    if(typeof oAPP.fn[l_func] !== "undefined"){
-      oAPP.fn[l_func](l_title, is_attr, f_callback);
+    if(typeof oAPP.fn.callBindPopup !== "undefined"){
+      oAPP.fn.callBindPopup(l_title, is_attr.UIATY, oAPP.fn.attrBindCallBack, is_attr.UIATK);
       return;
     }
 
     //대상 function이 존재하지 않는경우 script 호출.
-    oAPP.fn.getScript("design/js/" + l_func,function(){
-      oAPP.fn[l_func](l_title, is_attr, f_callback);
+    oAPP.fn.getScript("design/js/callBindPopup",function(){
+      oAPP.fn.callBindPopup(l_title, is_attr.UIATY, oAPP.fn.attrBindCallBack, is_attr.UIATK);
     });
 
+  
   }; //바인딩 & 이벤트 팝업 호출 처리 function.
 
 
@@ -1503,7 +1554,8 @@
     var l_dval = "";
 
     //기존 수집건 존재 여부 확인.
-    var l_indx = oAPP.attr.prev[is_attr.OBJID]._T_0015.findIndex( a => a.OBJID === is_attr.OBJID && a.UIATT === is_attr.UIATT);
+    var l_indx = oAPP.attr.prev[is_attr.OBJID]._T_0015.findIndex( a => a.OBJID === is_attr.OBJID &&
+      a.UIATT === is_attr.UIATT && a.UIATY === is_attr.UIATY);
 
     //이벤트에서 입력값이 변경된경우.
     if(is_attr.UIATY === "2"){
@@ -1967,7 +2019,7 @@
 
   //attr 라인에 따른 style 처리.
   oAPP.fn.attrSetLineStyle = function(is_attr){
-    console.log(is_attr);
+
     //UI 타입에 따른 로직 분기.
     switch(is_attr.UIATY){
       case "1": //프로퍼티
@@ -2593,6 +2645,24 @@
 
 
   };  //Description 복사.
+
+
+
+
+  //Description의 OBJECT ID 변경 처리.
+  oAPP.fn.changeDescOBJID = function(OBJID, OLDOBJID){
+
+    //원본 OBJID에 해당하는 Description 정보 존재 여부 확인.
+    var l_desc = oAPP.DATA.APPDATA.T_DESC.find( a=> a.OBJID === OLDOBJID );
+
+    //Description 정보가 존재하지 않는경우 exit.
+    if(typeof l_desc === "undefined"){return;}
+
+    //변경하고자 하는 OBJECT ID로 매핑.
+    l_desc.OBJID = OBJID;
+
+
+  };  //Description OBJECT ID 변경 처리.
 
 
 
