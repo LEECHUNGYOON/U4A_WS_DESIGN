@@ -884,20 +884,6 @@ oAPP.fn.callBindPopup = function(sTitle, CARDI, f_callback, UIATK){
   //tree 더블클릭 이벤트.
   oTree.attachBrowserEvent("dblclick",function(oEvent){
 
-    //이벤트 발생 라인으로부터 sap.ui.table.Row UI 검색.
-    function lf_getRowUI(oUI){
-      if(!oUI){return;}
-
-      if(oUI.getMetadata()._sClassName == "sap.ui.table.Row"){
-        return oUI;
-      }
-
-      lf_getRowUI(oUI.oParent);
-
-    } //이벤트 발생 라인으로부터 sap.ui.table.Row UI 검색.
-
-
-
     //이벤트 발생 UI 정보 얻기.
     var l_ui = oAPP.fn.getUiInstanceDOM(oEvent.target,sap.ui.getCore());
 
@@ -910,14 +896,8 @@ oAPP.fn.callBindPopup = function(sTitle, CARDI, f_callback, UIATK){
     //바인딩 정보를 얻지 못한 경우 exit.
     if(!l_ctxt){return;}
 
-    //이벤트 발생 라인으로부터 sap.ui.table.Row UI 검색.
-    var l_row = lf_getRowUI(l_ui);
-
-    //sap.ui.table.Row UI를 찾지 못한 경우 exit.
-    if(!l_row){return;}
-
     //바인딩 처리.
-    lf_bindBtnEvt(l_row.getBindingContext());
+    lf_bindBtnEvt(l_ui.getBindingContext());
 
   }); //tree 더블클릭 이벤트.
 

@@ -400,7 +400,7 @@
             oAPP.attr.prev[l_14.OBJID].__isnew = "X";
 
             //메뉴 선택 tree 위치 펼침 처리.
-            oAPP.fn.setSelectTreeItem(l_14.OBJID);            
+            oAPP.fn.setSelectTreeItem(l_14.OBJID);
 
             //변경 FLAG 처리.
             oAPP.fn.setChangeFlag();

@@ -443,6 +443,7 @@
       //검색 대상 라이브러리 정보 구성.
       var lt_lib = [];
       lt_lib.push({tabnm:"ZTU4A9011",alias:"T_9011",END:"",ERROR:""});
+      lt_lib.push({tabnm:"ZTU4A0020",alias:"T_0020",END:"",ERROR:""});
       lt_lib.push({tabnm:"ZTU4A0022",alias:"T_0022",END:"",ERROR:""});
       lt_lib.push({tabnm:"ZTU4A0023",alias:"T_0023",END:"",ERROR:""});
       lt_lib.push({tabnm:"ZTU4A0024",alias:"T_0024",END:"",ERROR:""});
@@ -613,6 +614,7 @@
     sap.ui.getCore().loadLibrary('sap.ui.layout');
     sap.ui.getCore().loadLibrary('sap.m');
     sap.ui.getCore().loadLibrary('sap.uxap');
+    sap.ui.getCore().loadLibrary('sap.f');
 
 
     var oSApp = new sap.ui.layout.Splitter();

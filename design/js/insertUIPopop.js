@@ -103,23 +103,42 @@
         oInp1.setValue(1);
       }
 
+      //AGGREGATION NAME DDLB에서 선택한 KEY를 대문자 변환 처리.
       var l_uifnd = ls_sel.UIADT.toUpperCase();
 
+      //AGGREGATION의 TYPE에 해당하는 UI 검색.
       var ls_0022 = oAPP.DATA.LIB.T_0022.find(a => a.UIFND === l_uifnd);
       if(!ls_0022){return;}
 
-      var lt_0027t = oAPP.DATA.LIB.T_0027.filter( a => a.SGOBJ === ls_0022.UIOBK);
+      //해당 UI에 입력 가능한 UI 정보 검색.
+      var lt_0027t = oAPP.DATA.LIB.T_0027.filter( a => a.SGOBJ === ls_0022.UIOBK && ( a.TOBTY === "3" || a.TOBTY === "4" || a.TOBTY === "5" ));
       if(!lt_0027t){return;}
 
       var lt_0022 = [],
           ls_0022 = {};
 
+      //입력 가능한 UI정보를 기준으로 실제 UI의 입력 가능 여부 확인.
       for(var i=0, l=lt_0027t.length; i<l; i++){
 
-        ls_0022 = oAPP.DATA.LIB.T_0022.find( a => a.UIOBK === lt_0027t[i].TGOBJ);
+        //대상 UI검색.
+        ls_0022 = oAPP.DATA.LIB.T_0022.find( a => a.UIOBK === lt_0027t[i].TGOBJ );
 
-        if(ls_0022.ISDEP === "X" || ls_0022.OBJTY === "3"){continue;}
+        //대상 UI를 찾지 못한 경우 SKIP.
+        if(typeof ls_0022 === "undefined"){continue;}
 
+        //대상 UI가 폐기된경우, UI TYPE이 Class, Final Class가 아닌경우 SKIP.
+        if(ls_0022.ISDEP === "X" || ls_0022.ISSTP === "X" || ( ls_0022.OBJTY !== "1" && ls_0022.OBJTY !== "4" )){
+          continue;
+        }
+
+        //라이브러리 정보 검색.
+        var ls_0020 = oAPP.DATA.LIB.T_0020.find( a => a.UILIK === ls_0022.UILIK );
+
+        //해당 라이브러리가 사용되지 않는경우 skip.
+        if(ls_0020.NUSED === "X"){continue;}
+
+
+        //추가 가능한 경우 해당 UI 수집 처리.
         lt_0022.push(ls_0022);
 
       }
@@ -211,20 +230,6 @@
     //table 더블클릭 이벤트.
     oTab1.attachBrowserEvent('dblclick',function(oEvent){
 
-      //이벤트 발생 라인으로부터 sap.ui.table.Row UI 검색.
-      function lf_getRowUI(oUI){
-        if(!oUI){return;}
-
-        if(oUI.getMetadata()._sClassName == "sap.ui.table.Row"){
-          return oUI;
-        }
-
-        lf_getRowUI(oUI.oParent);
-
-      } //이벤트 발생 라인으로부터 sap.ui.table.Row UI 검색.
-
-
-
       //이벤트 발생 UI 정보 얻기.
       var l_ui = oAPP.fn.getUiInstanceDOM(oEvent.target,sap.ui.getCore());
 
@@ -237,14 +242,8 @@
       //바인딩 정보를 얻지 못한 경우 exit.
       if(!l_ctxt){return;}
 
-      //이벤트 발생 라인으로부터 sap.ui.table.Row UI 검색.
-      var l_row = lf_getRowUI(l_ui);
-
-      //sap.ui.table.Row UI를 찾지 못한 경우 exit.
-      if(!l_row){return;}
-
       //선택 처리건에 대한 return.
-      lf_selectUi(l_row.getBindingContext().getProperty());
+      lf_selectUi(l_ctxt.getProperty());
 
 
     }); //tree 더블클릭 이벤트.

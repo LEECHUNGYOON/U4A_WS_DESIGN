@@ -207,11 +207,20 @@
 
     //wizard 버튼 선택 이벤트.
     oLBtn4.attachPress(function(oEvent){
+            
+      if(typeof oAPP.fn.designCallWizardPopup !== "undefined"){
+        //위자드 팝업 호출.
+        oAPP.fn.designCallWizardPopup();
+        return;
+      }
 
-      //위자드 팝업 호출.
-      oAPP.fn.designCallWizardPopup();
+      oAPP.fn.getScript("design/js/designCallWizardPopup",function(){
+        //위자드 팝업 호출.
+        oAPP.fn.designCallWizardPopup();
 
-    });
+      });
+      
+    }); //wizard 버튼 선택 이벤트.
 
 
     //context menu ui 변수.
@@ -271,25 +280,30 @@
     oLTree1.bindAggregation("rows",{path:"/zTREE",template:new sap.ui.table.Row(),parameters:{arrayNames:["zTREE"]}});
 
 
-  };
+  };  //좌측 페이지(UI Design 영역) 구성.
 
 
 
 
   /************************************************************************
-   * 위자드 팝업 호출 버튼 이벤트.
+   * 라인 선택건 점검 처리.
    * **********************************************************************
+   * @param {string} uName - wizard에서 생성처리할 UI명 구분자.
+   * @return {object} 점검 처리결과.
    ************************************************************************/
-  oAPP.fn.designCallWizardPopup = function(){
-    
+  oAPP.fn.designChkSelLine = function(uName){
+
+    var ls_ret = {SUBRC:"", MSG:""};
+
     //선택 라인 정보 얻기.
     var l_indx = oAPP.attr.ui.oLTree1.getSelectedIndex();
 
     //선택한 라인이 존재하지 않는경우 오류 메시지 처리.
     if(l_indx === -1){
+      ls_ret.SUBRC = "E";
       //073 &1 does not exist.
-      parent.showMessage(sap, 10, "E", "Selected line does not exist.");
-      return;
+      ls_ret.MSG = "Selected line does not exist.";
+      return ls_ret;
     }
 
     //선택 라인의 tree 정보 얻기.
@@ -297,46 +311,150 @@
 
     //DOCUMENT를 선택한 경우 오류 메시지 처리.
     if(ls_tree.OBJID === "ROOT"){
+      ls_ret.SUBRC = "E";
       //056	& is not the target location.
-      parent.showMessage(sap, 10, "E", "DOCUMENT is not the target location.");
-      return;
+      ls_ret.MSG = "DOCUMENT is not the target location.";
+      return ls_ret;
+
+    }
+
+    //wizard 생성 유형이 입력안된경우 점검 결과 구조 RETURN.
+    if(!uName){return ls_ret;}
+
+
+    //wizard 생성 유형이 입력된경우.
+    var l_UIOBK = "";
+    switch (uName) {
+      case "sap.m.Table":
+        l_UIOBK = "UO00447";
+        break;
+      
+      case "sap.ui.table.Table":
+        l_UIOBK = "UO01139";
+        break;
+
+      case "sap.ui.table.TreeTable":
+        l_UIOBK = "UO01142";
+        break;
+
+      case "LayoForm_01":
+        l_UIOBK = "UO01001";
+        break;
+
+      case "SimpleForm":
+        l_UIOBK = "UO01010";
+        break;
+
+      default:
+        return ls_ret;
     }
 
 
-    //application명 서버전송 데이터 구성.
-    var oFormData = new FormData();
-    oFormData.append("ACTCD", "WZD_CHKER");
+    //UI를 추가 가능한 Aggregation 존재여부 확인.
+    if(oAPP.fn.chkAggrRelation(ls_tree.UIOBK, ls_tree.OBJID, l_UIOBK).length === 0){
+      ls_ret.SUBRC = "E";
+      ls_ret.MSG = "추가 가능한 Aggregation이 존재하지 않습니다.";
 
-    //UI OBJECT KEY.
-    oFormData.append("UIOBK", ls_tree.UIOBK);
+      //오류 정보 RETURN.
+      return ls_ret;
 
-    //UI OBJECT ID.
-    oFormData.append("UIOBJ", ls_tree.OBJID);
+    }
 
-    //CONTROLLER CLASS NAME.
-    oFormData.append("CLSID", oAPP.attr.appInfo.CLSID);
+    //오류가 존재하지 않는경우 초기 구조 return.
+    return ls_ret;
 
-    //서버 호출.
-    sendAjax(oAPP.attr.servNm + "/ui_temp_wzd", oFormData, function(param){
-      //WIZARD 데이터구성에 실패한 경우.
-      if(param.RETCD === "E"){
-        //오류에 대한 메시지 처리.
-        parent.showMessage(sap, 10, "E", param.RTMSG);
-        return;
+  };  //라인 선택건 점검 처리.
+
+
+
+
+  /************************************************************************
+   * design tree의 선택한 라인 정보 얻기.
+   * **********************************************************************
+   * @return {object} 선택한 라인 정보.
+   ************************************************************************/
+  oAPP.fn.designGetSelectedTreeItem = function(){
+
+    //선택 라인 정보 얻기.
+    var l_indx = oAPP.attr.ui.oLTree1.getSelectedIndex();
+    if(l_indx === -1){return;}
+
+    //선택한 라인 정보값 return.
+    return oAPP.attr.ui.oLTree1.getContextByIndex(l_indx).getProperty();
+
+
+  };  //design tree의 선택한 라인 정보 얻기.
+
+
+
+
+  //입력 UI OBJECT가 target UI OBJECT에 추가 가능한지 여부 확인.
+  oAPP.fn.chkAggrRelation = function(tUIOBK, tOBJID, sUIOBK){
+
+    var lt_sel = [];
+
+    //입력 UI OBJECT KEY의 AGGREGATION 정보 얻기.
+    var lt_0023 = oAPP.DATA.LIB.T_0023.filter(a => a.UIOBK === tUIOBK && a.UIATY === "3" && a.ISDEP !== "X" );
+
+
+    //UI의 하위 AGGR 정보가 존재하지 않는경우 EXIT.
+    if(lt_0023.length === 0){
+      return lt_sel;
+    }
+
+    //입력 UI OBJECT의 상속관계 정보 얻기.
+    var lt_0027 = oAPP.DATA.LIB.T_0027.filter( a => a.TGOBJ === sUIOBK);
+
+    //상속관계 정보가 존재하지 않는경우 exit.
+    if(lt_0027.length === 0){
+      return lt_sel;
+    }
+
+
+    //target AGGREGATION을 기준으로 점검.
+    for(var i=0, l = lt_0023.length; i<l; i++){
+
+      //get aggregation명 얻기.
+      var l_agrnm = oAPP.fn.getUIAttrFuncName(oAPP.attr.prev[tOBJID], "3", lt_0023[i].UIATT,"_sGetter");
+
+      //해당 aggregation의 child 정보 얻기.
+      var l_child = oAPP.attr.prev[tOBJID][l_agrnm]();
+
+      //해당 aggregation에 n건 바인딩이 설정된 경우
+      //child UI가 이미 존재하는 경우 skip.
+      if(oAPP.attr.prev[tOBJID]._MODEL[lt_0023[i].UIATT] &&
+        (l_child !== null && l_child.length !== 0)){
+        continue;
       }
-      
-      //성공이 아닌경우 exit.
-      if(param.RETCD !== "S"){
-        return;
+
+      //0:1 aggregation에 이미 ui가 존재하는 경우 skip.
+      if(lt_0023[i].ISMLB === "" && l_child){
+        continue;
       }
-      
-      //template wizard 팝업 호출.
-      oAPP.fn.fnUiTempWizardPopupOpener(param);
 
-    });
+      //aggregation 타입 대문자 전환(SAP.UI.CORE.CONTROL)
+      var l_upper = lt_0023[i].UIADT.toUpperCase();
+
+      //라이브러리 테이블에서 해당 UI 검색.
+      var ls_0022 = oAPP.DATA.LIB.T_0022.find( a => a.UIFND === l_upper);
+      if(!ls_0022){continue;}
+
+      //drag UI가 drop UI의 aggregation type과 동일한경우 수집 처리.
+      if(sUIOBK === ls_0022.UIOBK){
+        lt_sel.push(lt_0023[i]);
+        continue;
+      }
+
+      ls_0027 = lt_0027.find( b => b.SGOBJ === ls_0022.UIOBK);
+      if(!ls_0027){continue;}
+      lt_sel.push(lt_0023[i]);
+
+    }
+
+    return lt_sel;
 
 
-  };  //위자드 팝업 호출.
+  };  //입력 UI OBJECT가 target UI OBJECT에 추가 가능한지 여부 확인.
 
 
 
@@ -880,27 +998,27 @@
   oAPP.fn.setOBJID = function(objid){
 
     var l_cnt = 1;
-      var l_upper = objid.toUpperCase();
-      var l_objid = l_upper + l_cnt;
+    var l_upper = objid.toUpperCase();
+    var l_objid = l_upper + l_cnt;
 
-      var l_found = false, l_stru;
+    var l_found = false, l_stru;
 
-      //design tree 정보를 ITAB 형식으로 변환.
-      var lt_0014 = oAPP.fn.parseTree2Tab(oAPP.attr.oModel.oData.zTREE);
+    //design tree 정보를 ITAB 형식으로 변환.
+    var lt_0014 = oAPP.fn.parseTree2Tab(oAPP.attr.oModel.oData.zTREE);
 
-      while(l_found !== true){
+    while(l_found !== true){
 
-        //구성한 objid와 동일건 존재여부 확인.
-        l_indx = lt_0014.findIndex( a => a.OBJID === l_objid );
-        if(l_indx === -1){
-          l_found = true;
-          return l_objid;
-        }
-
-        l_cnt += 1;
-        l_objid = l_upper + l_cnt;
-
+      //구성한 objid와 동일건 존재여부 확인.
+      l_indx = lt_0014.findIndex( a => a.OBJID === l_objid );
+      if(l_indx === -1){
+        l_found = true;
+        return l_objid;
       }
+
+      l_cnt += 1;
+      l_objid = l_upper + l_cnt;
+
+    }
 
   };  //생성한 UI명 채번
 
@@ -1029,6 +1147,15 @@
     //drop UI의 aggregation 정보 매핑.
     oAPP.fn.moveCorresponding(param, ls_embed);
     ls_embed.UIATY = "6";
+
+    //drag UI의 N건 바인딩 path 정보 확인.
+    var l_nBind = oAPP.fn.attrFindBindAggr(oAPP.attr.prev[i_drag.OBJID]);
+
+    //N건 바인딩처리 path가 존재하는경우.
+    if(typeof l_nBind !== "undefined"){
+      //unbind 처리.
+      oAPP.fn.attrUnbindAggr(oAPP.attr.prev[l_nBind.POBID],l_nBind.UIATT, l_nBind.UIATV, l_nBind.POBID);
+    }
 
     //MODEL 갱신 처리.
     oAPP.attr.oModel.refresh();
