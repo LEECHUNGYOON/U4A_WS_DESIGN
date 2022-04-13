@@ -387,6 +387,9 @@
 
                 ls_0015 = {};
 
+                //file uploader UI의 uploaderUrl 프로퍼티 예외처리.
+                oAPP.fn.attrUploadUrlException(l_14.OBJID, l_14.UIOBK);
+
             } //UI 반복 횟수만큼 그리기.
   
             //MODEL 갱신 처리.
@@ -809,6 +812,10 @@
 
             //attribute 입력건 복사 처리.
             var lt_0015 = lf_copyAttrData(ls_14, is_copied, aggrParam, bKeep);
+
+
+            //file uploader UI의 uploaderUrl 프로퍼티 예외처리.
+            oAPP.fn.attrUploadUrlException(l_14.OBJID, l_14.UIOBK);
 
 
             //부모 정보에 현재 복사처리한 UI 수집처리.

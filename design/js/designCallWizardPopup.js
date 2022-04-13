@@ -133,7 +133,7 @@
         //선택건 점검 오류가 발생한 경우 오류 FLAG, 메시지 RETURN 후 EXIT.
         if(ls_ret.SUBRC === "E"){
             fnCallback(ls_ret);
-            return 
+            return;
         }
         
         var ls_0014 = oAPP.fn.crtStru0014();
@@ -179,6 +179,7 @@
         //AGGREGATION 선택 팝업 호출 처리.
         if(typeof oAPP.fn.aggrSelectPopup !== "undefined"){
             oAPP.fn.aggrSelectPopup(ls_0014, ls_tree, lf_aggrCallback);
+            return;
 
         }
     
@@ -299,7 +300,6 @@
 
         ls_0015.APPID = oAPP.attr.appInfo.APPID;
         ls_0015.GUINR = oAPP.attr.appInfo.GUINR;
-        ls_0015.OBJID = 
         ls_0015.UIATV = UIATV;
         ls_0015.ISBND = ISBND;
         

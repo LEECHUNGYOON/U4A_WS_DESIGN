@@ -2262,6 +2262,85 @@
 
 
 
+
+  //sap.m.UploadCollection, sap.ui.unified.FileUploader UI의 uploadUrl 프로퍼티 예외처리.
+  oAPP.fn.attrUploadUrlException = function(OBJID, UIOBK){
+
+    if(UIOBK !== "UO01180" && UIOBK !== "UO00469"){return;}
+
+    var l_UIATK = "";
+    switch (UIOBK) {
+      case "UO00469": //sap.m.UploadCollection
+        l_UIATK = "AT000006316";
+        break;
+
+      case "UO01180": //sap.ui.unified.FileUploader
+        l_UIATK = "AT000013501";
+        break;
+    
+      default:
+        return;
+
+    }
+
+    //uploadUrl 프로퍼티 수집건 존재여부 확인.
+    var ls_0015 = oAPP.attr.prev[OBJID]._T_0015.find( a => a.UIATK === l_UIATK );
+
+    //수집건이 존재하는경우.
+    if(ls_0015){
+      //바인딩 처리된경우 EXIT.
+      if(ls_0015.UIATV !== "" && ls_0015.ISBND === "X"){
+        return;
+      }
+
+      //수집건은 존재하나 값이 존재하지 않는경우.
+      if(ls_0015.UIATV === ""){
+        ls_0015.UIAT = "/zu4a_srs/" + oAPP.attr.appInfo.APPID.toLocaleLowerCase();
+        return;
+      }
+
+      //uploadUrl 프로퍼티의 값이 U4A에서 기본 세팅한 값이 아닌경우 EXIT.
+      if(ls_0015.UIATV.indexOf("/zu4a_srs/") === -1){
+        return;
+      }
+
+      // '/zu4a_srs/' + appliciaton id 조합 에서 /zu4a_srs/ 부분을 제외
+      var l_appid = ls_0015.UIATV.replace(/\/zu4a_srs\//i, "").toUpperCase();
+
+      //기존의 프로퍼티에 등록한 application id와 현재 application id가 다른경우.
+      if(l_appid !== oAPP.attr.appInfo.APPID){
+        //현재 application id로 매핑 처리.
+        ls_0015.UIAT = "/zu4a_srs/" + oAPP.attr.appInfo.APPID.toLocaleLowerCase();
+      }
+
+      return;
+    }
+
+    //sap.m.Label의 text property 정보 검색.
+    var ls_0023 = oAPP.DATA.LIB.T_0023.find( a=> a.UIATK === l_UIATK );
+
+    ls_0015 = oAPP.fn.crtStru0015();
+
+    oAPP.fn.moveCorresponding(ls_0023, ls_0015);
+
+    var ls_0022 = oAPP.DATA.LIB.T_0022.find( a => a.UIOBK === UIOBK );
+
+    ls_0015.APPID = oAPP.attr.appInfo.APPID;
+    ls_0015.GUINR = oAPP.attr.appInfo.GUINR;
+    ls_0015.OBJID = OBJID;
+    ls_0015.UILIK = ls_0022.UILIK;
+    ls_0015.UIATV = "/zu4a_srs/" + oAPP.attr.appInfo.APPID.toLocaleLowerCase();
+
+
+    //uploadUrl 프로퍼티 수집 처리.
+    oAPP.attr.prev[OBJID]._T_0015.push(ls_0015);
+
+
+  };  //sap.m.UploadCollection, sap.ui.unified.FileUploader UI의 uploadUrl 프로퍼티 예외처리.
+
+
+
+
   //선택한 UI에 해당하는 attribute 리스트 업데이트 처리.
   oAPP.fn.updateAttrList = function(UIOBK,OBJID){
 
@@ -2286,6 +2365,9 @@
       oAPP.fn.getServerEventList();
 
     }
+
+    //file uploader UI의 uploaderUrl 프로퍼티 예외처리.
+    oAPP.fn.attrUploadUrlException(OBJID, UIOBK);
 
 
     //UI에 해당하는 property, event, Aggregation 정보 얻기.

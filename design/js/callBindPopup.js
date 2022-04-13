@@ -433,8 +433,8 @@ oAPP.fn.callBindPopup = function(sTitle, CARDI, f_callback, UIATK){
       lt_split = is_tree.MPROP.split("|");
     }
 
-    //nozero 가능 항목.
-    var l_nozero = "IbsNP";
+    //nozero 불가능 항목.
+    var l_nozero = "Cg";
 
     //number format 가능항목.
     var l_numfmt = "IP";
@@ -552,7 +552,7 @@ oAPP.fn.callBindPopup = function(sTitle, CARDI, f_callback, UIATK){
           ls_mprop.sel_vis = true;
 
           //Nozero 가능항목에 속하지 않는 타입인경우 입력필드 잠금 처리.
-          if(l_nozero.indexOf(is_tree.TYPE_KIND) === -1){
+          if(l_nozero.indexOf(is_tree.TYPE_KIND) !== -1){
             ls_mprop.edit = false;
           }
 
