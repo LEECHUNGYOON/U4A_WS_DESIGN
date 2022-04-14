@@ -1,4 +1,18 @@
-//바인딩 팝업 처리 function.
+
+/************************************************************************
+   * 바인딩 팝업 처리 function.
+   * **********************************************************************
+   * @param {string} sTitle - 바인딩 팝업 TITLE.
+   * @param {string} CARDI - 바인딩 가능여부
+   *                          T : TABLE만 가능.
+   *                          S : STRUCTURE만 가능
+   *                          F : 일반 필드만 가능
+   *                          R : RANGE TABLE만 가능
+   *                          ST : STRING_TABLE 만 가능.
+   * @param {function} f_callback - 바인딩팝업에서 선택한 라인정보를 받아
+   *                                처리하는 callback function
+   * @param {string} UIATK - attribute 영역에서 선택한 UI ATTRIBUTE KEY값.
+   ************************************************************************/
 oAPP.fn.callBindPopup = function(sTitle, CARDI, f_callback, UIATK){
 
   //팝업 종료 function.
@@ -25,8 +39,40 @@ oAPP.fn.callBindPopup = function(sTitle, CARDI, f_callback, UIATK){
       switch(it_tree[i].KIND){
         case "T": //TABLE인경우.
 
+          //range table 바인딩 처리건 여부 확인.
+          if(lf_chkRangeTable(it_tree[i]) === true){
+            //해당 table이 range table이며, 현재 range table을 바인딩 처리하고자 하는경우.
+            it_tree[i].enable = true;
+            it_tree[i].stat_src = "sap-icon://status-positive";
+            it_tree[i].stat_color = "#01DF3A";
+
+            if(it_tree[i].CHILD === oAPP.attr.oBindDialog._is_attr.UIATV){
+              it_tree[i].stat_src = "sap-icon://accept";
+            }
+
+            continue;
+          }
+
+          //STRING_TABLE 바인딩 처리건 여부 확인.
+          if(lf_chkStringTable(it_tree[i]) === true){
+            //해당 table이 STRING_TABLE이며, 현재 STRING_TABLE을 바인딩 처리하고자 하는경우.
+            it_tree[i].enable = true;
+            it_tree[i].stat_src = "sap-icon://status-positive";
+            it_tree[i].stat_color = "#01DF3A";
+
+            if(it_tree[i].CHILD === oAPP.attr.oBindDialog._is_attr.UIATV){
+              it_tree[i].stat_src = "sap-icon://accept";
+            }
+
+            continue;
+
+          }
+
           //property에서 바인딩 팝업 호출시 n건 바인딩 path와 현재 path가 동일한 경우 하위 탐색.
-          if(oAPP.attr.oBindDialog._CARDI === "F" && ( l_path && l_path.substr(0,it_tree[i].CHILD.length) === it_tree[i].CHILD)){
+          if((oAPP.attr.oBindDialog._CARDI === "F" ||
+              oAPP.attr.oBindDialog._CARDI === "R" ||
+              oAPP.attr.oBindDialog._CARDI === "ST" ) && 
+             ( l_path && l_path.substr(0,it_tree[i].CHILD.length) === it_tree[i].CHILD)){
 
             var lt_child = l_model.oData.TREE.filter( a => a.PARENT === it_tree[i].CHILD );
             lf_setBindEnable(lt_child, l_path, l_model, it_tree[i].KIND);
@@ -132,6 +178,8 @@ oAPP.fn.callBindPopup = function(sTitle, CARDI, f_callback, UIATK){
 
   } //바인딩 가능여부 flag 처리.
 
+
+
   //서버에서 바인딩 attr 정보 얻은 이후 popup open
   function lf_openPopup(){
 
@@ -230,6 +278,56 @@ oAPP.fn.callBindPopup = function(sTitle, CARDI, f_callback, UIATK){
     },"");  //바인딩 필드 정보 검색.
 
   } //서버에서 바인딩 attr 정보 얻은 이후 popup open
+
+
+
+  
+  //STRING_TABLE 여부 확인.
+  function lf_chkStringTable(is_tree){
+
+    //STRING_TABLE 바인딩 처리용으로 호출되지 않은경우 EXIT.
+    if(oAPP.attr.oBindDialog._CARDI !== "ST"){return;}
+
+    //TABLE이 아닌경우 EXIT.
+    if(is_tree.KIND !== "T"){return;}
+
+    //현재 라인이 STRING_TABLE인경우 STRING_TABLE FLAG RETURN.
+    if(is_tree.EXP_TYP === "STR_TAB"){
+      return true;
+    }
+
+  }  //STRING_TABLE 여부 확인.
+
+
+
+
+  //range table 여부 확인.
+  function lf_chkRangeTable(is_tree){
+
+    //바인딩 팝업 호출시 RANGE 처리용으로 호출하지 않은경우 EXIT.
+    if(oAPP.attr.oBindDialog._CARDI !== "R"){return;}
+
+    //TABLE이 아닌경우 EXIT.
+    if(is_tree.KIND !== "T"){return;}
+
+    //현재 table의 하위 필드 정보 검색.
+    var lt_filter = oAPP.attr.oBindDialog._oModel.oData.TREE.filter( a => a.PARENT === is_tree.CHILD );
+
+    //child가 4건이 아닌경우 exit.
+    if(lt_filter.length !== 4){return;}
+
+    //SIGN, OPTION, LOW, HIGH 필드가 아닌 필드 검색.
+    var l_indx = lt_filter.findIndex( a => a.NTEXT !== "SIGN" && a.NTEXT !== "OPTION" 
+      &&  a.NTEXT !== "LOW" && a.NTEXT !== "HIGH");
+
+    //SIGN, OPTION, LOW, HIGH 이외의 필드가 존재하지 않는경우.
+    if(l_indx === -1){
+      //range table flag return
+      return true;
+    }
+
+  } //range table 여부 확인.
+
 
 
 
@@ -499,7 +597,7 @@ oAPP.fn.callBindPopup = function(sTitle, CARDI, f_callback, UIATK){
           ls_mprop.sel_vis = true;
 
           //구조(TAB) 안에 있는 필드 중 CUKY, UNIT 타입이 없으면 잠김.
-          lt_filt = it_parent.filter( a => a.DATATYPE === "CUKY" || a.DATATYPE === "UNIT")
+          lt_filt = it_parent.filter( a => a.DATATYPE === "CUKY" || a.DATATYPE === "UNIT");
 
           //금액, UNIT 참조필드가 존재하지 않는경우 화면 잠금 처리.
 
@@ -789,6 +887,8 @@ oAPP.fn.callBindPopup = function(sTitle, CARDI, f_callback, UIATK){
 
       switch (CARDI) {
         case "F":
+        case "R":
+        case "ST":
           l_UIATY = "1";
           break;
         
@@ -1079,7 +1179,11 @@ oAPP.fn.callBindPopup = function(sTitle, CARDI, f_callback, UIATK){
         new sap.m.Button({
           type: "Reject",
           icon: "sap-icon://decline",
-          press: lf_closePopup
+          press: function(){
+            lf_closePopup(); 
+            //001	Cancel operation
+            parent.showMessage(sap,10, "I", "Cancel operation");
+          }
         }),
       ],
       content: [oSpt1

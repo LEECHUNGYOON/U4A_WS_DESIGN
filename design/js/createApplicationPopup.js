@@ -25,7 +25,7 @@
 
       //application 생성전 입력값 점검.
       function lf_chkValue(){
-        var ls_appl = oModel.getProperty('/CREATE');
+        var ls_appl = oModel.getProperty("/CREATE");
 
         //valueState 바인딩 필드 초기화.
         lf_resetValueStateField(ls_appl);
@@ -34,16 +34,16 @@
 
         //Web Application Name 이 입력되지 않은경우.
         if(ls_appl.APPNM === ""){
-          ls_appl.APPNM_stat = 'Error';
-          ls_appl.APPNM_stxt = 'Application Name is required entry value.';
+          ls_appl.APPNM_stat = "Error";
+          ls_appl.APPNM_stxt = "Application Name is required entry value.";
           l_err = true;
         }
 
 
         //Package가 입력되지 않은 경우.
         if(ls_appl.PACKG === ""){
-          ls_appl.PACKG_stat = 'Error';
-          ls_appl.PACKG_stxt = 'Package is required entry value.';
+          ls_appl.PACKG_stat = "Error";
+          ls_appl.PACKG_stxt = "Package is required entry value.";
           l_err = true;
         }
 
@@ -54,15 +54,15 @@
 
         //개발 패키지를 입력한경우 CTS번호를 입력하지 않은경우.
         if(ls_appl.PACKG !== "$TMP" && ls_appl.PACKG !== "" && ls_appl.REQNR === ""){
-          ls_appl.REQNR_stat = 'Error';
-          ls_appl.REQNR_stxt = 'If not a local object, Request No. is required entry value.';
+          ls_appl.REQNR_stat = "Error";
+          ls_appl.REQNR_stxt = "If not a local object, Request No. is required entry value.";
           l_err = true;
         }
 
         //입력값에 오류 사항이 존재하는 경우 exit.
         if(l_err === true){
           oModel.setData({"CREATE":ls_appl});
-          parent.showMessage(sap, 20, 'E', 'Check input value.');
+          parent.showMessage(sap, 20, "E", "Check input value.");
           return l_err;
         }
 
@@ -77,8 +77,8 @@
           is_appl.PACKG.substr(0,1) !== "Y" &&
           is_appl.PACKG.substr(0,1) !== "Z"){
 
-            is_appl.PACKG_stat = 'Error';
-            is_appl.PACKG_stxt = 'Standard package cannot be entered.';
+            is_appl.PACKG_stat = "Error";
+            is_appl.PACKG_stxt = "Standard package cannot be entered.";
 
             //오류 flag return.
             return true;
@@ -222,7 +222,7 @@
       oInpPack.attachChange(function(){
 
         //화면 입력정보 얻기.
-        var l_create = oModel.getProperty('/CREATE');
+        var l_create = oModel.getProperty("/CREATE");
 
         //오류 출력 필드 초기화.
         lf_resetValueStateField(l_create);
@@ -233,7 +233,7 @@
 
         //패키지명이 입력되지 않은경우 exit.
         if(l_create.PACKG === ""){
-          oModel.setProperty('/CREATE', l_create);
+          oModel.setProperty("/CREATE", l_create);
           return;
         }
         
@@ -244,13 +244,13 @@
         if(l_create.PACKG === "$TMP"){
           l_create.REQNR = "";   //기존 입력 Request No. 초기화.
           l_create.REQTX = "";   //기존 입력 Request Desc. 초기화.
-          oModel.setProperty('/CREATE', l_create);
+          oModel.setProperty("/CREATE", l_create);
           return;
         }
 
         //standard package를 입력한 경우.
         if(lf_chkPackageStandard(l_create) === true){
-          oModel.setProperty('/CREATE', l_create);
+          oModel.setProperty("/CREATE", l_create);
           return;
         }
 
@@ -363,7 +363,7 @@
 
       //application 생성처리를 위한 서버 호출.
       function lf_createAppData(){
-        var l_create = oModel.getProperty('/CREATE');
+        var l_create = oModel.getProperty("/CREATE");
         var l_appdata = {};
         l_appdata.APPID = appid;
         l_appdata.APPNM = l_create.APPNM;
@@ -379,15 +379,15 @@
         oFormData.append("APPDATA", JSON.stringify(l_appdata));
 
         //application 생성을 위한 서버 호출.
-        sendAjax(parent.getServerPath() + '/createAppData',oFormData, function(ret){
+        sendAjax(parent.getServerPath() + "/createAppData",oFormData, function(ret){
           
           //application 생성중 오류가 발생한 경우.
           if(ret.RETCD === "E"){
             //오류 메시지 출력.
-            parent.showMessage(sap, 20, 'E', ret.RTMSG);
+            parent.showMessage(sap, 20, "E", ret.RTMSG);
 
             //wait off 처리.
-            parent.setBusy('');
+            parent.setBusy("");
 
             return;
           }
@@ -410,19 +410,19 @@
         var oFormData = new FormData();
         oFormData.append("PACKG", is_create.PACKG);
 
-        sendAjax(parent.getServerPath() + '/chkPackage',oFormData, function(ret){
+        sendAjax(parent.getServerPath() + "/chkPackage",oFormData, function(ret){
 
           //잘못된 PACKAGE를 입력한 경우.
           if(ret.ERFLG === "X"){
-            is_create.PACKG_stat = 'Error'; 
+            is_create.PACKG_stat = "Error"; 
             is_create.PACKG_stxt = ret.ERMSG;
-            oModel.setProperty('/CREATE', is_create);
+            oModel.setProperty("/CREATE", is_create);
 
             //오류 메시지 처리.
-            parent.showMessage(sap, 20, 'E', ret.ERMSG);
+            parent.showMessage(sap, 20, "E", ret.ERMSG);
 
             //wait off 처리.
-            parent.setBusy('');
+            parent.setBusy("");
             
             return;
           }
@@ -442,10 +442,10 @@
           }
 
           //모델 갱신 처리.
-          oModel.setProperty('/CREATE', is_create);
+          oModel.setProperty("/CREATE", is_create);
 
           //wait off 처리.
-          parent.setBusy('');
+          parent.setBusy("");
 
         });
 

@@ -3,7 +3,7 @@
   oAPP.fn.callUIInsertPopup = function(UIOBK, retFunc){
 
     //Aggregation Name DDLB 바인딩 정보 구성.
-    var lt_sel = oAPP.DATA.LIB.T_0023.filter(a => a.UIOBK === UIOBK && a.UIATY === "3");
+    var lt_sel = oAPP.DATA.LIB.T_0023.filter(a => a.UIOBK === UIOBK && a.UIATY === "3" && a.ISDEP !== "X" );
 
     if(lt_sel.length === 0){
       parent.showMessage(sap,10,"W", "입력 가능한 Aggregation이 존재하지 않습니다.");
@@ -19,9 +19,9 @@
     lt_sel.splice(0,0,ls_sel);
 
 
-    sap.ui.getCore().loadLibrary('sap.ui.layout');
-    sap.ui.getCore().loadLibrary('sap.ui.table');
-    sap.ui.getCore().loadLibrary('sap.m');
+    sap.ui.getCore().loadLibrary("sap.ui.layout");
+    sap.ui.getCore().loadLibrary("sap.ui.table");
+    sap.ui.getCore().loadLibrary("sap.m");
 
     var oDlg = new sap.m.Dialog({resizable:true,draggable:true,
       contentWidth:"50%",contentHeight:"60%",verticalScrolling:false});
@@ -115,7 +115,8 @@
       if(!lt_0027t){return;}
 
       var lt_0022 = [],
-          ls_0022 = {};
+          ls_0022 = {},
+          ls_list = {};
 
       //입력 가능한 UI정보를 기준으로 실제 UI의 입력 가능 여부 확인.
       for(var i=0, l=lt_0027t.length; i<l; i++){
@@ -137,9 +138,15 @@
         //해당 라이브러리가 사용되지 않는경우 skip.
         if(ls_0020.NUSED === "X"){continue;}
 
+        ls_list.UICON = oAPP.fn.fnGetSapIconPath(ls_0022.UICON);
+        ls_list.UIOBJ = ls_0022.UIOBJ;
+        ls_list.UIOMD = ls_0022.UIOMD;
+        ls_list.UIOBK = ls_0022.UIOBK;
+
 
         //추가 가능한 경우 해당 UI 수집 처리.
-        lt_0022.push(ls_0022);
+        lt_0022.push(ls_list);
+        ls_list = {};
 
       }
 
@@ -177,7 +184,7 @@
       }
 
       //문자 제거.
-      l_val = l_val.replace(/[^0-9.]/g, '');
+      l_val = l_val.replace(/[^0-9.]/g, "");
 
       //숫자로 변환 처리.
       l_val = parseInt(l_val);
@@ -208,7 +215,7 @@
     oInp2.attachChange(function(){
         var l_val = this.getValue();
 
-        var l_bind = oTab1.getBinding('rows');
+        var l_bind = oTab1.getBinding("rows");
         if(!l_bind){return;}
 
         var l_filter;
@@ -228,7 +235,7 @@
       visibleRowCountMode:"Auto",layoutData:new sap.m.FlexItemData({growFactor:1})});
 
     //table 더블클릭 이벤트.
-    oTab1.attachBrowserEvent('dblclick',function(oEvent){
+    oTab1.attachBrowserEvent("dblclick",function(oEvent){
 
       //이벤트 발생 UI 정보 얻기.
       var l_ui = oAPP.fn.getUiInstanceDOM(oEvent.target,sap.ui.getCore());
@@ -254,8 +261,8 @@
     var oCol1 = new sap.ui.table.Column({hAlign:"Center",width:"80px"});
     oTab1.addColumn(oCol1);
 
-    var oIcon1 = new sap.ui.core.Icon();
-    oCol1.setTemplate(oIcon1);
+    var oImage = new sap.m.Image({src:"{UICON}",width:"19px"});
+    oCol1.setTemplate(oImage);
 
     var oLab4 = new sap.m.Label({design: "Bold",text: "Img"});
     oCol1.setLabel(oLab4);
@@ -297,7 +304,7 @@
     oCol5.setTemplate(oIcon2);
 
     var oRow1 = new sap.ui.table.Row();
-    oTab1.bindAggregation('rows',{path:"/T_LIST",template:oRow1});
+    oTab1.bindAggregation("rows",{path:"/T_LIST",template:oRow1});
 
     //확인 버튼
     var oBtn1 = new sap.m.Button({icon: "sap-icon://accept",text: "Confirm",type: "Accept"});
@@ -309,7 +316,7 @@
 
       //선택한 라인이 없는경우 오류 처리.
       if(l_sidx === -1){
-        parent.showMessage(sap, 20, 'E', '라인을 선택해 주십시오.');
+        parent.showMessage(sap, 20, "E", "라인을 선택해 주십시오.");
         return;
       }
             
@@ -326,6 +333,8 @@
     oBtn2.attachPress(function(){
       oDlg.close();
       oDlg.destroy();
+      //001	Cancel operation
+      parent.showMessage(sap,10, "I", "Cancel operation");
     });
 
     oDlg.open();
@@ -345,7 +354,7 @@
 
 
       //리스트 선택정보(22번 테이블 구조)
-      l_ret.E_UIOBJ = is_UI;
+      l_ret.E_UIOBJ = oAPP.DATA.LIB.T_0022.find( a=> a.UIOBK === is_UI.UIOBK );
 
       //리스트에서 선택한 ui가 갖고 있는 aggr 정보(23번 테이블)
       l_ret.E_AGGRT = oAPP.DATA.LIB.T_0023.filter(a => a.UIOBK === l_ret.E_UIOBJ.UIOBK && a.UIATY === "3" && a.ISDEP !== "X");

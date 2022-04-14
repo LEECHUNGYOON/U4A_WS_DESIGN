@@ -1629,6 +1629,19 @@
       case "1": //property
         l_title = "Data Binding / Unbinding - Property";
         l_CARDI = "F";
+
+        //SELECT OPTION2의 VALUE에 바인딩처리 하는경우.
+        if(is_attr.UIATK === "EXT00001161"){
+          //RANGE TABLE만 바인딩 가능 FLAG 처리.
+          l_CARDI = "R";
+        }
+
+        //프로퍼티가 ARRAY로 입력 가능한 경우, 프로퍼티 타입이 숫자 유형이 아니면.
+        if(is_attr.ISMLB === "X" && (is_attr.UIADT !== "int" && is_attr.UIADT !== "float")){
+          //STRING_TABLE 바인딩 가능 FLAG 처리.
+          l_CARDI = "ST";
+        }
+
         break;
 
         case "3": //Aggregation

@@ -149,8 +149,8 @@
 
         //ROOT(DOCUMENT)영역인경우 모든 CONTEXT MENU 비활성 처리.
         if(OBJID === "ROOT"){
-            oModel.setProperty('/lcmenu',ls_menu);
-            oAPP.attr.oModel.setProperty('/lcmenu',ls_menu);
+            oModel.setProperty("/lcmenu",ls_menu);
+            oAPP.attr.oModel.setProperty("/lcmenu",ls_menu);
 
             //TREE ITEM 선택처리.
             oAPP.fn.setSelectTreeItem(OBJID);
@@ -162,14 +162,14 @@
             ls_menu.enab01 = true; //ui추가 가능
 
             //복사된건 history 존재여부에 따른 붙여넣기 메뉴 활성화 여부 설정.
-            ls_menu.enab07 = oAPP.fn.isExistsCopyData('U4AWSuiDesignArea');
+            ls_menu.enab07 = oAPP.fn.isExistsCopyData("U4AWSuiDesignArea");
 
         }
 
         //APP에서 menu 호출한 경우 편집 여부에 따라 UI추가, UI붙여넣기 메뉴만 사용 가능.
         if(OBJID === "APP"){
-            oModel.setProperty('/lcmenu',ls_menu);
-            oAPP.attr.oModel.setProperty('/lcmenu',ls_menu);
+            oModel.setProperty("/lcmenu",ls_menu);
+            oAPP.attr.oModel.setProperty("/lcmenu",ls_menu);
 
             //TREE ITEM 선택처리.
             oAPP.fn.setSelectTreeItem(OBJID);
@@ -179,8 +179,8 @@
         //DOCUMENT, APP가 아닌 영역에서 CONTEXT MENU 호출시 display 상태인경우 메뉴 비활성 처리.
         if(oAPP.attr.oModel.oData.IS_EDIT === false){
             ls_menu.enab06 = true; //copy 가능
-            oModel.setProperty('/lcmenu',ls_menu);
-            oAPP.attr.oModel.setProperty('/lcmenu',ls_menu);
+            oModel.setProperty("/lcmenu",ls_menu);
+            oAPP.attr.oModel.setProperty("/lcmenu",ls_menu);
 
             //TREE ITEM 선택처리.
             oAPP.fn.setSelectTreeItem(OBJID);
@@ -207,7 +207,7 @@
         ls_menu.enab06 = true;   //ui copy 활성화.
 
         //복사된건 history 존재여부에 따른 붙여넣기 메뉴 활성화 여부 설정.
-        ls_menu.enab07 = oAPP.fn.isExistsCopyData('U4AWSuiDesignArea');
+        ls_menu.enab07 = oAPP.fn.isExistsCopyData("U4AWSuiDesignArea");
 
         //부모의 child정보가 1건인경우.
         if(l_parent.zTREE.length === 1){
@@ -226,8 +226,8 @@
         }
 
         //context menu 정보 바인딩.
-        oModel.setProperty('/lcmenu',ls_menu);
-        oAPP.attr.oModel.setProperty('/lcmenu',ls_menu);
+        oModel.setProperty("/lcmenu",ls_menu);
+        oAPP.attr.oModel.setProperty("/lcmenu",ls_menu);
 
         //context menu를 호출한 UI 선택 처리.
         oAPP.fn.setSelectTreeItem(OBJID);
@@ -890,7 +890,7 @@
             //이동 가능한 aggregation 정보가 존재하지 않는경우.
             if(typeof param === "undefined"){
                 //오류 메시지 출력.
-                parent.showMessage(sap, 10, 'I', '이동 가능한 aggregation이 존재하지 않습니다.');
+                parent.showMessage(sap, 10, "I", "이동 가능한 aggregation이 존재하지 않습니다.");
                 return;                
             }
 

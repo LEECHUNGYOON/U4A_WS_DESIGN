@@ -31,7 +31,7 @@
     
     //TREE TABLE이 아닌 다른 영역을 더블클릭 이후 ROW 선택시
     // 선택되지 않는 문제 해결을 위한 예외처리 로직.
-    oLTree1.attachBrowserEvent('click',function(){
+    oLTree1.attachBrowserEvent("click",function(){
         window.getSelection().removeAllRanges();
     });
       
@@ -242,7 +242,7 @@
     
     
     //context menu 호출 이벤트.
-    oLTree1.attachBrowserEvent('contextmenu', function(oEvent){
+    oLTree1.attachBrowserEvent("contextmenu", function(oEvent){
 
       var l_ui = oAPP.fn.getUiInstanceDOM(oEvent.target, sap.ui.getCore());
       if(!l_ui){return;}

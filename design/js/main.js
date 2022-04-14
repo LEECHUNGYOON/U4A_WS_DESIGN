@@ -182,13 +182,13 @@
     oAPP.fn.setTreeJson = function(oModel, path, child, parent, treePath){
 
       //"stru/table" 형식인경우 stru부분 발췌.
-      var l_ppath = path.substr(0,path.lastIndexOf('/'));
+      var l_ppath = path.substr(0,path.lastIndexOf("/"));
 
       //원본 table 정보 얻기.
-      var lt_org = oModel.getProperty('/' + path);
+      var lt_org = oModel.getProperty("/" + path);
 
       //stru에 해당하는 정보 얻기.
-      var tm2 = oModel.getProperty('/' + l_ppath);
+      var tm2 = oModel.getProperty("/" + l_ppath);
 
       //원본 table 정보가 존재하지 않는경우.
       if(!lt_org || lt_org.length === 0){
@@ -274,7 +274,7 @@
 
         //미리보기 html 정보가 로드되지 않은경우.
         if(!oAPP.attr.ui.frame){
-          oAPP.attr.ui.frame = document.getElementById('prevHTML');
+          oAPP.attr.ui.frame = document.getElementById("prevHTML");
 
           var l_info = parent.getUserInfo();
 
@@ -348,7 +348,7 @@
         //DB 검색에 실패한 경우.
         if(param.ERROR === "X"){
           is_tab.ERROR = param.ERROR;
-          showMessage(sap, 20, 'E', 'Fail to Library load.');
+          showMessage(sap, 20, "E", "Fail to Library load.");
           return;
         }
 
@@ -377,7 +377,7 @@
 
           //라이브러리 정보에 실제 라이브러리명 필드를 추가하여 매핑 처리(sap/m/Input -> sap.m.Input)
           for(var i=0, l=oAPP.DATA.LIB.T_0022.length; i<l; i++){
-            oAPP.DATA.LIB.T_0022[i].LIBNM = oAPP.DATA.LIB.T_0022[i].UIOMD.replace(/\//g, '.');
+            oAPP.DATA.LIB.T_0022[i].LIBNM = oAPP.DATA.LIB.T_0022[i].UIOMD.replace(/\//g, ".");
           }
 
           //어플리케이션 정보 구성을 위한 서버 호출.
@@ -425,7 +425,7 @@
          oAPP.attr.oModel.refresh();
 
          //wait off 처리.
-         parent.setBusy('');
+         parent.setBusy("");
 
          return;
 
@@ -611,10 +611,10 @@
     if(!oAPP.attr.oArea){return;}
 
 
-    sap.ui.getCore().loadLibrary('sap.ui.layout');
-    sap.ui.getCore().loadLibrary('sap.m');
-    sap.ui.getCore().loadLibrary('sap.uxap');
-    sap.ui.getCore().loadLibrary('sap.f');
+    sap.ui.getCore().loadLibrary("sap.ui.layout");
+    sap.ui.getCore().loadLibrary("sap.m");
+    sap.ui.getCore().loadLibrary("sap.uxap");
+    sap.ui.getCore().loadLibrary("sap.f");
 
 
     var oSApp = new sap.ui.layout.Splitter();

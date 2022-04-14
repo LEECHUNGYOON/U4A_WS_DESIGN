@@ -21,8 +21,8 @@ oAPP.fn.createEventPopup = function(is_attr, f_callBack){
   var oModel = new sap.ui.model.json.JSONModel();
   oDlg.setModel(oModel);
 
-  sap.ui.getCore().loadLibrary('sap.ui.table');
-  sap.ui.getCore().loadLibrary('sap.ui.layout');
+  sap.ui.getCore().loadLibrary("sap.ui.table");
+  sap.ui.getCore().loadLibrary("sap.ui.layout");
 
   var oForm = new sap.ui.layout.form.Form({
     editable:true,
@@ -69,27 +69,27 @@ oAPP.fn.createEventPopup = function(is_attr, f_callBack){
   oBtn1.attachPress(function(){
 
     var l_erflag = false;
-    var ls_event = oModel.getProperty('/event');
+    var ls_event = oModel.getProperty("/event");
 
     //메소드명 대문자 변환 처리.
     ls_event.meth = ls_event.meth.toUpperCase();
 
-    ls_event.meth_stat = 'None';
-    ls_event.meth_text = '';
-    ls_event.desc_stat = 'None';
-    ls_event.desc_text = '';
+    ls_event.meth_stat = "None";
+    ls_event.meth_text = "";
+    ls_event.desc_stat = "None";
+    ls_event.desc_text = "";
 
     //이벤트 메소드명을 입력하지 않은경우.
     if(ls_event.meth === ""){
-      ls_event.meth_stat = 'Error';
-      ls_event.meth_text = 'Method Name dose not exits.';
+      ls_event.meth_stat = "Error";
+      ls_event.meth_text = "Method Name dose not exits.";
       l_erflag = true;  //오류 flag 매핑.
     }
 
     //이벤트 메소드 description을 입력하지 않은경우.
     if(ls_event.desc === ""){
-      ls_event.desc_stat = 'Error';
-      ls_event.desc_text = 'Description dose not exists.';
+      ls_event.desc_stat = "Error";
+      ls_event.desc_text = "Description dose not exists.";
       l_erflag = true;  //오류 flag 매핑.
     }
 
@@ -105,8 +105,8 @@ oAPP.fn.createEventPopup = function(is_attr, f_callBack){
     //이벤트 중복건 존재 여부 확인.
     if(oAPP.attr.T_EVT && oAPP.attr.T_EVT.findIndex( a => a.KEY === l_event) !== -1){
 
-      ls_event.meth_stat = 'Error';
-      ls_event.meth_text = 'Method Name dose not exits.';
+      ls_event.meth_stat = "Error";
+      ls_event.meth_text = "Method Name dose not exits.";
       l_erflag = true;  //오류 flag 매핑.
 
     }
@@ -114,14 +114,14 @@ oAPP.fn.createEventPopup = function(is_attr, f_callBack){
     //메소드명에 특수문자가 입력된 경우.
     var reg = /[^\w]/;
     if(reg.test(ls_event.meth) === true){
-      ls_event.meth_stat = 'Error';
-      ls_event.meth_text = 'Special characters are not allowed.';
+      ls_event.meth_stat = "Error";
+      ls_event.meth_text = "Special characters are not allowed.";
       l_erflag = true;  //오류 flag 매핑.
     }
 
     //오류건이 존재하는 경우.
     if(l_erflag === true){
-      oModel.setProperty('/event', ls_event);
+      oModel.setProperty("/event", ls_event);
       parent.showMessage(sap, 20, "E", "Check valid value.");
       return;
     }
@@ -142,9 +142,9 @@ oAPP.fn.createEventPopup = function(is_attr, f_callBack){
     sendAjax(oAPP.attr.servNm + "/createEventMethod", oFormData, function(param){
       //오류가 발생한 경우.
       if(param.RETCD === "E"){
-        ls_event.meth_stat = 'Error';
+        ls_event.meth_stat = "Error";
         ls_event.meth_text = param.RTMSG;
-        oModel.setProperty('/event', ls_event);
+        oModel.setProperty("/event", ls_event);
         return;
       }
 
@@ -166,7 +166,7 @@ oAPP.fn.createEventPopup = function(is_attr, f_callBack){
       lf_dialogClose();
 
 
-    },'',false);
+    },"",false);
 
 
   });
@@ -226,7 +226,7 @@ oAPP.fn.getServerEventList = function(){
 
       }
 
-    },'',false);
+    },"",false);
 
 
 };

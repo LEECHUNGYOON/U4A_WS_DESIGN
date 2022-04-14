@@ -31,12 +31,12 @@ oAPP.fn.callF4HelpPopup = function(I_SHLPNAME, I_SHLP_DEF, IT_SHLP, IT_FIELDDESC
 
       //data type에따른 검색필드 분기.
       switch (it_fdesc[i].DATATYPE){
-        case 'D':
+        case "D":
           // DATE TYPE인경우.
           var oSFld = new sap.m.DatePicker({valueFormat:"yyyyMMdd",displayFormat:"yyyy.MM.dd"});
           break;
 
-        case 'T':
+        case "T":
           // TIME인경우.
           var oSFld = new sap.m.TimePicker({valueFormat:"HHmmss",displayFormat:"HH:mm:ss"});
           break;
@@ -54,12 +54,12 @@ oAPP.fn.callF4HelpPopup = function(I_SHLPNAME, I_SHLP_DEF, IT_SHLP, IT_FIELDDESC
       var l_path = it_fdesc[i].FIELDNAME;
 
       //필드명에 /가 있다면 x로 변환 처리.
-      if(l_path.indexOf('/') !== -1){
-        l_path = l_path.replace(/\//g, 'x');
+      if(l_path.indexOf("/") !== -1){
+        l_path = l_path.replace(/\//g, "x");
       }
 
       //검색조건 필드 바인딩 처리.
-      oSFld.bindProperty(l_prop,{path:'/param/' + l_path});
+      oSFld.bindProperty(l_prop,{path:"/param/" + l_path});
 
       //form에 검색필드 추가.
       oForm.addContent(oSFld);
@@ -131,8 +131,8 @@ oAPP.fn.callF4HelpPopup = function(I_SHLPNAME, I_SHLP_DEF, IT_SHLP, IT_FIELDDESC
       var l_path = it_fdesc[i].FIELDNAME;
 
       //필드명에 /가 있다면 x로 변환 처리.
-      if(l_path.indexOf('/') !== -1){
-        l_path = l_path.replace(/\//g, 'X');
+      if(l_path.indexOf("/") !== -1){
+        l_path = l_path.replace(/\//g, "X");
       }
 
       //TABLE CELL 출력 TEXT UI.
@@ -219,7 +219,7 @@ oAPP.fn.callF4HelpPopup = function(I_SHLPNAME, I_SHLP_DEF, IT_SHLP, IT_FIELDDESC
           var Ltxt = param.TEXT[0].VALUE;
 
           //~Message 처리
-          parent.showMessage(sap, 10, 'E', Ltxt);
+          parent.showMessage(sap, 10, "E", Ltxt);
         }
 
         oTable.setBusy(false);
@@ -300,9 +300,9 @@ oAPP.fn.callF4HelpPopup = function(I_SHLPNAME, I_SHLP_DEF, IT_SHLP, IT_FIELDDESC
     l_isMulti = true;
   }
 
-  sap.ui.getCore().loadLibrary('sap.m');
-  sap.ui.getCore().loadLibrary('sap.ui.layout');
-  sap.ui.getCore().loadLibrary('sap.ui.table');
+  sap.ui.getCore().loadLibrary("sap.m");
+  sap.ui.getCore().loadLibrary("sap.ui.layout");
+  sap.ui.getCore().loadLibrary("sap.ui.table");
 
   //dialog width
   var l_width =  "80%";
@@ -337,7 +337,7 @@ oAPP.fn.callF4HelpPopup = function(I_SHLPNAME, I_SHLP_DEF, IT_SHLP, IT_FIELDDESC
   oDialog.addStyleClass("sapUiSizeCompact");
 
   //window에서 실행된건이 아닌경우 false 처리.
-  var l_val = sap.ui.Device.os.name !== 'win' || false;
+  var l_val = sap.ui.Device.os.name !== "win" || false;
 
   oDialog.setStretchOnPhone(l_val);
   oDialog.setStretch(l_val);

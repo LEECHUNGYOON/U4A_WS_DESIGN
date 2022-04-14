@@ -158,7 +158,7 @@
             var l_dom = this.getDomRef();
 
             //동적 input tag 생성.
-            var l_inp = document.createElement('input');
+            var l_inp = document.createElement("input");
 
             //생성한 input의 value에 복사대상 text 매핑.
             l_inp.value = ls_icon.src;
@@ -170,7 +170,7 @@
             l_inp.select();
 
             //복사 기능 수행.
-            document.execCommand('copy');
+            document.execCommand("copy");
 
             //임시로 추가했던 input tag 제거 처리.
             l_dom.removeChild(l_inp);

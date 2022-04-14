@@ -76,6 +76,8 @@
     oBtn2.attachPress(function(){
       oDlg1.close();
       oDlg1.destroy();
+      //001	Cancel operation
+      parent.showMessage(sap,10, "I", "Cancel operation");
     });
 
     oDlg1.open();
