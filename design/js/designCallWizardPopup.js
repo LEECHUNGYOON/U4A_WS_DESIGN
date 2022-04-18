@@ -76,6 +76,7 @@
      * 위자드 팝업 callback 처리.
      * **********************************************************************
      * @param {object} oReturn - wizard 팝업에서 선택한 정보.
+     * @param {function} fnCallback - callback function.
      ************************************************************************/
     oAPP.fn.designWizardCallback = function(oReturn, fnCallback){
 
@@ -185,6 +186,7 @@
     
         oAPP.fn.getScript("design/js/aggrSelectPopup",function(){
             oAPP.fn.aggrSelectPopup(ls_0014, ls_tree, lf_aggrCallback);
+
         });
 
         
@@ -193,6 +195,15 @@
 
 
 
+
+    /************************************************************************
+     * UI 라인정보 생성.
+     * **********************************************************************
+     * @param {object} is_parent - design tree의 부모 정보
+     * @param {string} UIOBK - 생성 UI OBJECT KEY.
+     * @param {string} UIATK - 부모에 추가될 Aggregation attribute key
+     * @param {Array} T_0015 - 생성할 UI에 추가할 attribute 정보.
+     ************************************************************************/
     oAPP.fn.createUiLine = function(is_parent, UIOBK, UIATK, T_0015){
 
         //SAP.M.TABLE 라인 추가를 위한 라인 정보 생성.
@@ -283,12 +294,18 @@
 
         return l_14;
 
-    };
+    };  //UI 라인정보 생성.
 
 
 
 
-
+    /************************************************************************
+     * UI attribute 정보 생성.
+     * **********************************************************************
+     * @param {string} UIATK - 생성할 attribute key
+     * @param {string} UIATV - attribute에 입력할 값.
+     * @param {string} ISBND - 바인딩 처리여부
+     ************************************************************************/
     oAPP.fn.setUiAttr = function(UIATK, UIATV, ISBND){
 
         var ls_0015 = oAPP.fn.crtStru0015();
@@ -305,13 +322,16 @@
         
         return ls_0015;
 
-    };
+    };  //UI attribute 정보 생성.
+
+
 
 
     /************************************************************************
      * wizard sap.m.Table 생성 처리.
      * **********************************************************************
      * @param {object} oReturn - wizard 팝업에서 선택한 정보.
+     * @param {object} aggr - 부모에 추가될 영역의 aggregation 정보.
      ************************************************************************/
     oAPP.fn.designWizardMTable = function(oReturn, aggr){
 
@@ -384,7 +404,12 @@
 
 
 
-    //sap.ui.table.Table.
+    /************************************************************************
+     * sap.ui.table.Table 생성 처리.
+     * **********************************************************************
+     * @param {object} oReturn - wizard 팝업에서 선택한 정보.
+     * @param {object} aggr - 부모에 추가될 영역의 aggregation 정보.
+     ************************************************************************/
     oAPP.fn.designWizardUiTable = function(oReturn, aggr){
 
         //선택한 라인의 tree 정보 얻기.
@@ -455,7 +480,12 @@
 
 
 
-    //sap.ui.table.TreeTable.
+    /************************************************************************
+     * sap.ui.table.TreeTable 생성 처리.
+     * **********************************************************************
+     * @param {object} oReturn - wizard 팝업에서 선택한 정보.
+     * @param {object} aggr - 부모에 추가될 영역의 aggregation 정보.
+     ************************************************************************/
     oAPP.fn.designWizardUiTreeTable = function(oReturn, aggr){
 
         //선택한 라인의 tree 정보 얻기.
@@ -536,7 +566,12 @@
 
 
 
-    //sap.ui.layout.form.Form
+    /************************************************************************
+     * sap.ui.layout.form.Form 생성 처리.
+     * **********************************************************************
+     * @param {object} oReturn - wizard 팝업에서 선택한 정보.
+     * @param {object} aggr - 부모에 추가될 영역의 aggregation 정보.
+     ************************************************************************/
     oAPP.fn.designWizardUiLayotForm01 = function(oReturn, aggr){
 
         //선택한 라인의 tree 정보 얻기.
@@ -585,7 +620,7 @@
             //sap.ui.table.Column UI에 UI 생성 처리.
             oAPP.fn.createUiLine(ls_elem, ls_ddlb.VAL2, "AT000012619", lt_0015);
 
-        }
+        }   //wizard에서 선택한 필드를 기준으로 UI 생성 처리.
 
 
         //모델 갱신 처리.
@@ -610,7 +645,12 @@
 
 
 
-    //sap.ui.layout.form.SimpleForm
+    /************************************************************************
+     * sap.ui.layout.form.SimpleForm 생성 처리.
+     * **********************************************************************
+     * @param {object} oReturn - wizard 팝업에서 선택한 정보.
+     * @param {object} aggr - 부모에 추가될 영역의 aggregation 정보.
+     ************************************************************************/
     oAPP.fn.designWizardUiLayotSimpleForm = function(oReturn, aggr){
 
         //선택한 라인의 tree 정보 얻기.
@@ -649,7 +689,7 @@
             //sap.ui.table.Column UI에 UI 생성 처리.
             oAPP.fn.createUiLine(ls_form, ls_ddlb.VAL2, "AT000012729", lt_0015);
 
-        }
+        }   //wizard에서 선택한 필드를 기준으로 UI 생성 처리.
 
 
         //모델 갱신 처리.

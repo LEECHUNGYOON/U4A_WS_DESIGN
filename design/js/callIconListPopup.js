@@ -57,12 +57,6 @@
             //UI를 찾지 못한 경우 exit.
             if(typeof l_ui === "undefined"){return;}
 
-            //UI의 meta정보를 얻기.
-            var l_meta = l_ui.getMetadata();
-
-            //text UI를 더블클릭한 경우 exit(text를 영역잡기 위한 더블클릭일 수 있으므로)
-            if(l_meta._sClassName === "sap.m.Text"){return;}
-
             //해당 ui의 바인딩 정보 얻기.
             var l_ctxt = l_ui.getBindingContext();
 
@@ -154,26 +148,8 @@
             //버튼선택 라인의 바인딩정보에 해당하는 값 얻기.
             var ls_icon = this.getBindingContext().getProperty();
 
-            //이벤트 발생한 버튼의 dom 정보 얻기.
-            var l_dom = this.getDomRef();
-
-            //동적 input tag 생성.
-            var l_inp = document.createElement("input");
-
-            //생성한 input의 value에 복사대상 text 매핑.
-            l_inp.value = ls_icon.src;
-
-            //버튼 dom에 input을 임시로 추가.
-            l_dom.appendChild(l_inp);
-
-            //input 선택 처리.
-            l_inp.select();
-
-            //복사 기능 수행.
-            document.execCommand("copy");
-
-            //임시로 추가했던 input tag 제거 처리.
-            l_dom.removeChild(l_inp);
+            //icon src 복사 처리.
+            parent.setClipBoardTextCopy(ls_icon.src);
 
             //메시지 처리.
             parent.showMessage(sap, 10, "I", ls_icon.src + " copied.");

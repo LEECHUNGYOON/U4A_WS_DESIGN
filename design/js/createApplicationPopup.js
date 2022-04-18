@@ -465,8 +465,13 @@
             icon: "sap-icon://accept",
             press : function(){
 
+              //wait on 처리.
+              parent.setBusy("X");
+
               //application 생성 처리전 입력값 점검.
               if( lf_chkValue() === true){
+                //wait off 처리.
+                parent.setBusy("");
                 return;
               }
 

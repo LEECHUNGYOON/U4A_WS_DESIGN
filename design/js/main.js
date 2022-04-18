@@ -607,13 +607,12 @@
 
 
 
-
+    //workbench 화면을 구성할 UI가 존재하지 않는경우 exit.
     if(!oAPP.attr.oArea){return;}
 
 
     sap.ui.getCore().loadLibrary("sap.ui.layout");
-    sap.ui.getCore().loadLibrary("sap.m");
-    sap.ui.getCore().loadLibrary("sap.uxap");
+    sap.ui.getCore().loadLibrary("sap.m");    
     sap.ui.getCore().loadLibrary("sap.f");
 
 
@@ -625,7 +624,7 @@
     oSApp.setModel(oAPP.attr.oModel);
 
     //좌측 페이지(UI Design 영역)
-    var oLPage = new sap.m.Page({showHeader:false,layoutData:new sap.ui.layout.SplitterLayoutData({size:"25%",minSize:200})});
+    var oLPage = new sap.m.Page({showHeader:false,layoutData:new sap.ui.layout.SplitterLayoutData({size:"25%",minSize:300})});
     oSApp.addContentArea(oLPage);
 
     //가운데 페이지(미리보기 영역)
@@ -633,7 +632,7 @@
     oSApp.addContentArea(oMPage);
 
     //우측 페이지(attribute 영역)
-    var oRPage = new sap.m.Page({showHeader:false,enableScrolling:false,layoutData:new sap.ui.layout.SplitterLayoutData({size:"30%"})});
+    var oRPage = new sap.f.DynamicPage({preserveHeaderStateOnScroll:true,layoutData:new sap.ui.layout.SplitterLayoutData({size:"30%",minSize:300})});
     oSApp.addContentArea(oRPage);
 
 

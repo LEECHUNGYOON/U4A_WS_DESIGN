@@ -16,7 +16,11 @@
 
   //미리보기 화면 UI의 프로퍼티 변경 처리.
   oAPP.fn.previewUIsetProp = function(is_attr){
+    
+    //프로퍼티가 아닌경우 exit. 
     if(is_attr.UIATY !== "1"){return;}
+
+    //최상위인 경우 exit.
     if(is_attr.OBJID === "ROOT"){return;}
 
     //styleClass 프로퍼티에 값을 입력한 경우.
@@ -26,8 +30,10 @@
       return;
     }
 
-    //external property의 경우 exit.
-    if(is_attr.UIATK.substr(0,3) === "EXT"){return;}
+    //dragAble, dropAble 프로퍼티의 경우 처리할건이 존재하지 않기에 exit 처리.
+    if(is_attr.UIASN === "DRAGABLE" || is_attr.UIASN === "DROPABLE"){
+      return;
+    }
 
     //default property
     var l_uiaty = "1";
@@ -60,11 +66,11 @@
          break;
 
        case "int":
-         l_prop = parseInt(is_attr.UIATV);
+         l_prop = parseInt(is_attr.UIATV) || 0;
          break;
 
        case "float":
-         l_prop = parseFloat(is_attr.UIATV);
+         l_prop = parseFloat(is_attr.UIATV) || 0;
          break;
 
        default:

@@ -1,5 +1,12 @@
 (function(){
 
+  //UI 생성 최대 갯수.
+  const CV_MAX_CNT = 100;
+
+  //UI 생성 갯수 INPUT의 maxLength
+  const CV_MAX_LEN = 3;
+
+  //UI 생성 팝업
   oAPP.fn.callUIInsertPopup = function(UIOBK, retFunc){
 
     //Aggregation Name DDLB 바인딩 정보 구성.
@@ -169,7 +176,7 @@
     oFrmElem2.setLabel(oLab2);
 
     //UI 추가 건수 입력필드.
-    var oInp1 = new sap.m.Input({type:"Number",maxLength:2,value:1});
+    var oInp1 = new sap.m.Input({type:"Number", maxLength:CV_MAX_LEN, value:1,description:"Max : " + CV_MAX_CNT});
     oFrmElem2.addField(oInp1);
 
     //UI 추가 건수 입력필드 변경 이벤트.
@@ -180,6 +187,7 @@
       //입력값이 공백인경우 DEFAULT 1로 설정 후 EXIT.
       if(l_val === ""){
         oInp1.setValue(1);
+        oInp2.focus();
         return;
       }
 
@@ -190,12 +198,14 @@
       l_val = parseInt(l_val);
 
       //10건이상을 입력했다면 MAX 10으로 설정.
-      if(l_val > 10){
-        l_val = 10;
+      if(l_val > CV_MAX_CNT){
+        l_val = CV_MAX_CNT;
       }
 
       //세팅된 값을 재 매핑 처리.
       oInp1.setValue(l_val);
+
+      oInp2.focus();
 
     }); //UI 추가 건수 입력필드 변경 이벤트.
 
