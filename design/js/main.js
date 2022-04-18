@@ -88,7 +88,11 @@
           return;
       }
 
-      return l_meta[l_getfunc](UIATT)[param];
+      try{
+        return l_meta[l_getfunc](UIATT)[param];
+      }catch(e){
+
+      }
 
     };  //UI의 attribute(property, event, aggregation, assosication)에 해당하는 펑션 이름 얻기.
 

@@ -89,7 +89,11 @@
     }
 
     //UI.setProperty(value); 처리.
-    oAPP.attr.prev[is_attr.OBJID][l_propnm](l_prop);
+    try{
+      oAPP.attr.prev[is_attr.OBJID][l_propnm](l_prop);
+    }catch(e){
+      
+    }
 
   };  //미리보기 화면 UI의 프로퍼티 변경 처리.
 
