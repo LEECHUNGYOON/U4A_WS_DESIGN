@@ -1056,10 +1056,10 @@
         l_parent.zTREE.splice(l_dragIndex,0,i_drop);
 
         //drag건 미리보기 위치이동.
-        oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drag.OBJID, i_drag.POBID, i_drag.UIATT, l_dropIndex, i_drag.UIOBK);
+        oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drag.OBJID, i_drag.UILIB, i_drag.POBID, i_drag.PUIOK, i_drag.UIATT, l_dropIndex, i_drag.UIOBK);
 
         //drop건 미리보기 위치이동.
-        oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drop.OBJID, i_drop.POBID, i_drop.UIATT,l_dragIndex, i_drop.UIOBK);
+        oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drop.OBJID, i_drop.UILIB, i_drop.POBID, i_drop.PUIOK, i_drop.UIATT,l_dragIndex, i_drop.UIOBK);
 
         //drop index가 drag index보다 큰경우.
       }else{
@@ -1077,10 +1077,10 @@
         l_parent.zTREE.splice(l_dropIndex,0,i_drag);
 
         //drop건 미리보기 위치이동.
-        oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drop.OBJID, i_drop.POBID, i_drop.UIATT, l_dragIndex, i_drop.UIOBK);
+        oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drop.OBJID, i_drop.UILIB, i_drop.POBID, i_drop.PUIOK, i_drop.UIATT, l_dragIndex, i_drop.UIOBK);
 
         //drag건 미리보기 위치이동.
-        oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drag.OBJID, i_drag.POBID, i_drag.UIATT, l_dropIndex, i_drag.UIOBK);
+        oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drag.OBJID, i_drag.UILIB, i_drag.POBID, i_drag.PUIOK, i_drag.UIATT, l_dropIndex, i_drag.UIOBK);
 
       }      
 
@@ -1168,7 +1168,7 @@
     var l_indx = i_drop.zTREE.filter( a => a.UIATT === i_drag.UIATT );
 
     //미리보기 갱신 처리.
-    oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drag.OBJID, i_drag.POBID, i_drag.UIATT, l_indx.length, i_drag.ISMLB, i_drag.UIOBK);
+    oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(i_drag.OBJID, i_drag.UILIB, i_drag.POBID, i_drag.PUIOK, i_drag.UIATT, l_indx.length, i_drag.ISMLB, i_drag.UIOBK);
 
     //drag한 UI 선택 처리.
     oAPP.fn.setSelectTreeItem(i_drag.OBJID);
@@ -1573,7 +1573,7 @@
           oAPP.fn.delDesc(it_tree[i].OBJID);
 
           //미리보기에 해당 UI삭제 처리.
-          oAPP.attr.ui.frame.contentWindow.delUIObjPreView(it_tree[i].OBJID, it_tree[i].POBID, it_tree[i].UIATT, it_tree[i].ISMLB, it_tree[i].UIOBK);
+          oAPP.attr.ui.frame.contentWindow.delUIObjPreView(it_tree[i].OBJID, it_tree[i].POBID, it_tree[i].PUIOK, it_tree[i].UIATT, it_tree[i].ISMLB, it_tree[i].UIOBK);
 
           //UI수집건에 해당 UI 제거 처리.
           delete oAPP.attr.prev[it_tree[i].OBJID];

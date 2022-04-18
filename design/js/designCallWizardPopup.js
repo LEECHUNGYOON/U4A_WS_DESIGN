@@ -83,6 +83,9 @@
         //aggregation 선택 팝업 callback function.
         function lf_aggrCallback(aggr){
 
+            //busy dialog open.
+            oAPP.common.fnSetBusyDialog(true);
+
             //wizard 생성 유형에 따른 분기.
             switch (oReturn.uName) {
                 case "sap.m.Table":
@@ -289,7 +292,7 @@
 
         //미리보기 UI 추가
         oAPP.attr.ui.frame.contentWindow.addUIObjPreView(l_14.OBJID, l_14.UIOBK, l_14.UILIB, 
-            l_14.UIFND, l_14.POBID, l_14.UIATT, lt_0015);
+            l_14.UIFND, l_14.POBID, l_14.PUIOK, l_14.UIATT, lt_0015);
         
 
         return l_14;

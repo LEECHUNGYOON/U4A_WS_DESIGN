@@ -378,7 +378,7 @@
 
 
                 //미리보기 UI 추가
-                oAPP.attr.ui.frame.contentWindow.addUIObjPreView(l_14.OBJID, l_14.UIOBK, l_14.LIBNM, l_14.UIFND, l_14.POBID, param.E_EMB_AGGR.UIATT);
+                oAPP.attr.ui.frame.contentWindow.addUIObjPreView(l_14.OBJID, l_14.UIOBK, l_14.LIBNM, l_14.UIFND, l_14.POBID, l_14.PUIOK, param.E_EMB_AGGR.UIATT);
 
 
                 //UI 생성건 수집 처리.
@@ -478,7 +478,7 @@
             var ls_tree = oAPP.fn.getTreeData(l_OBJID);
 
             //미리보기 화면 UI 제거.
-            oAPP.attr.ui.frame.contentWindow.delUIObjPreView(ls_tree.OBJID, ls_tree.POBID, ls_tree.UIATT, ls_tree.ISMLB, ls_tree.UIOBK);
+            oAPP.attr.ui.frame.contentWindow.delUIObjPreView(ls_tree.OBJID, ls_tree.POBID, ls_tree.PUIOK, ls_tree.UIATT, ls_tree.ISMLB, ls_tree.UIOBK);
 
             //삭제 이후 이전 선택처리 정보 얻기.
             var l_prev = oAPP.fn.designGetPreviousTreeItem(ls_tree.OBJID);
@@ -573,7 +573,7 @@
         //AGGREGATION상에서 위치가 변경된경우.
         if(l_indx1 !== l_indx2){
             //미리보기 갱신 처리.
-            oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(ls_tree.OBJID, ls_tree.POBID, ls_tree.UIATT,l_indx2, ls_tree.UIOBK);
+            oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(ls_tree.OBJID, ls_tree.UILIB, ls_tree.POBID, ls_tree.PUIOK, ls_tree.UIATT, l_indx2, ls_tree.UIOBK);
 
             //미리보기 ui 선택.
             oAPP.attr.ui.frame.contentWindow.selPreviewUI(ls_tree.OBJID);
@@ -815,7 +815,7 @@
 
 
             //file uploader UI의 uploaderUrl 프로퍼티 예외처리.
-            oAPP.fn.attrUploadUrlException(l_14.OBJID, l_14.UIOBK);
+            oAPP.fn.attrUploadUrlException(ls_14.OBJID, ls_14.UIOBK);
 
 
             //부모 정보에 현재 복사처리한 UI 수집처리.
@@ -833,7 +833,8 @@
             lf_copyClientEvent(ls_14.OBJID, is_copied);
 
             //미리보기 UI 추가
-            oAPP.attr.ui.frame.contentWindow.addUIObjPreView(ls_14.OBJID, ls_14.UIOBK, ls_14.UILIB, ls_14.UIFND, ls_14.POBID, ls_14.UIATT, lt_0015, it_ua018, it_ua032);
+            oAPP.attr.ui.frame.contentWindow.addUIObjPreView(ls_14.OBJID, ls_14.UIOBK, ls_14.UILIB, 
+                ls_14.UIFND, ls_14.POBID, ls_14.PUIOK, ls_14.UIATT, lt_0015, it_ua018, it_ua032, lt_ua026);
 
             if(is_copied.zTREE.length === 0){
                 return aggrParam ? ls_14 : undefined;
@@ -856,8 +857,16 @@
             
             //공통코드 미리보기 UI Property 고정값 정보 검색.
             lt_ua018 = oAPP.DATA.LIB.T_9011.filter( a=> a.CATCD === "UA018");
+            
+            //부모 UI에 추가 불필요 대상 UI 정보 검색.
+            lt_ua026 = oAPP.DATA.LIB.T_9011.filter( a=> a.CATCD === "UA026" && a.FLD02 !== "X" );
 
+            //UI 프로퍼티 고정값 설정 정보 검색.
+            lt_ua030 = oAPP.DATA.LIB.T_9011.filter( a=> a.CATCD === "UA030" && a.FLD06 !== "X" );
+
+            //UI 프로퍼티 type 예외처리 정보 검색.
             lt_ua032 = oAPP.DATA.LIB.T_9011.filter( a=> a.CATCD === "UA032" && a.FLD06 !== "X" );
+
 
             //복사한 UI 붙여넣기 처리.
             var ls_14 = lf_setPasteCopiedData(ls_tree, i_cdata, param, lt_ua018, lt_ua032, bKeep);

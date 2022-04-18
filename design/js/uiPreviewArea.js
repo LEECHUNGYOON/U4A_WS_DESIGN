@@ -49,7 +49,12 @@
     //바인딩 처리된 경우.
     if(is_attr.ISBND === "X"){
       //대상 프로퍼티 초기화 처리.
-      oAPP.attr.prev[is_attr.OBJID][l_propnm]();
+      try{
+        oAPP.attr.prev[is_attr.OBJID][l_propnm]();
+      }catch(e){
+        
+      }
+      
       return;
     }
 
@@ -88,11 +93,27 @@
       
     }
 
+    //sap.ui.core.HTML의 content 프로퍼티 입력값인경우.
+    if(is_attr.UIATK === "AT000011858"){
+      //HTML CONTENT 입력건 검색.
+      var ls_cevt = oAPP.DATA.APPDATA.T_CEVT.find( a => a.OBJID === is_attr.OBJID + is_attr.UIASN && a.OBJTY === "HM" );
+
+      var l_UIATV = "";
+
+      if(typeof ls_cevt !== "undefined"){
+        l_UIATV = ls_cevt.DATA;
+      }
+
+      oAPP.attr.prev[is_attr.OBJID][l_propnm](l_UIATV);
+      return;
+
+    }
+
     //UI.setProperty(value); 처리.
     try{
       oAPP.attr.prev[is_attr.OBJID][l_propnm](l_prop);
     }catch(e){
-      
+
     }
 
   };  //미리보기 화면 UI의 프로퍼티 변경 처리.
@@ -179,6 +200,108 @@
     return l_find.substr(1,l_find.length-2);
 
   };  //sap.ui.core.HTML UI의 content 프로퍼티 입력건 검색.
+
+
+
+
+  //미리보기 예외처리 UI 추가 draw 처리.
+  oAPP.fn.prevDrawExceptionUi = function(UIOBK, OBJID){
+
+    //AppContain, IFrame UI에 대한 미리보기 추가 draw 처리.
+    if(oAPP.fn.prevSetUiExcepMark(UIOBK, OBJID)){return;}
+
+
+    //am radar chart 미리보기 화면 그리기 처리.
+    if(oAPP.fn.prevAmRadarChartsDraw(UIOBK, OBJID)){return;}
+
+
+  };  //미리보기 예외처리 UI 추가 draw 처리.
+
+
+
+
+  //am radar chart 미리보기 화면 그리기.
+  oAPP.fn.prevAmRadarChartsDraw = function(UIOBK, OBJID){
+
+    //AmRadarCharts가 아닌경우 EXIT.
+    if(UIOBK !== "UO99985"){return;}
+
+    //UI, AM CHART UI가 구성되지 않은경우 EXIT.
+    if(!oAPP.attr.prev[OBJID] && !oAPP.attr.prev[OBJID]._c){
+      return;
+    }
+
+    var oChart = oAPP.attr.prev[OBJID]._c;
+    
+    //미리보기에 출력할 차트 DATA 구성.
+    oChart.dataProvider = [{"f1": "sample01","f2": 10},{"f1": "sample02","f2": 20},{"f1": "sample03","f2": 30}];
+
+    oChart.categoryField = "f1";
+
+    var grph = new oAPP.attr.ui.frame.contentWindow.AmCharts.AmGraph();
+
+    //RADAR 그래프 정보 생성.
+    grph.valueField = "f2";
+    grph.bullet = "round";
+    grph.fillColors = "#678BC7";
+    grph.fillAlphas = "0.5";
+    grph.lineAlphas = 1;
+    grph.lineThickness = 1;
+    grph.lineColor = "#678BC7";
+    grph.title = "graph1";
+    oChart.addGraph(grph);
+    oChart.validateData();
+    oChart.validateNow();
+
+    //function 호출처의 하위로직 skip을 위한 flag return.
+    return true;
+
+  };  //am radar chart 미리보기 화면 그리기.
+
+
+
+
+  //미리보기 예외처리 UI 표시.
+  oAPP.fn.prevSetUiExcepMark = function(UIOBK, OBJID){
+
+    var l_text = "";
+    switch(UIOBK){
+      case "UO99993": //AppContain
+        l_text = "Application Container";
+        break;
+
+      case "UO99996": //IFrame
+        l_text = "IFRAME";
+        break;
+
+      default:
+        return;
+    }
+
+    //onAfterRendering에서 dom에 text를 직접 매핑 처리.
+    oAPP.attr.prev[OBJID].addEventDelegate({onAfterRendering:function(e){
+
+      //dom 정보 얻기.
+      var l_dom = e.srcControl.getDomRef();
+
+      //dom 정보를 얻지 못한 경우 exit.
+      if(!l_dom){return;}
+
+      //구성한 text 매핑.
+      l_dom.innerHTML = l_text;
+
+      //text 가운데 정렬.
+      l_dom.style.textAlign = "center";
+
+    }});
+
+    //function 호출처의 하위로직 skip을 위한 flag return.
+    return true;
+
+
+  }; //미리보기 예외처리 UI 표시.
+
+
 
 
 })();
