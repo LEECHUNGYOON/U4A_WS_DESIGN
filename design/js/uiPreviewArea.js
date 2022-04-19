@@ -12,6 +12,56 @@
   };  //가운데 페이지(미리보기 영역) 구성
 
 
+
+
+  //프로퍼티 설정 skip 처리 항목.
+  oAPP.fn.prevSkipProp = function(is_attr){
+
+    switch (is_attr.UIATK) {
+      case "EXT00001188": //selectOption2 F4HelpID
+      case "EXT00001189": //selectOption2 F4HelpReturnFIeld
+      case "EXT00001190": //sap.m.Tree  Parent
+      case "EXT00001191": //sap.m.Tree  Child
+      case "EXT00001192": //sap.ui.table.TreeTable  Parent
+      case "EXT00001193": //sap.ui.table.TreeTable  Child
+      case "EXT00001213": //sap.m.App ChgAppToNavCont
+      case "EXT00001214": //sap.m.NavContainer ChgAppToNavCont
+      case "EXT00001347": //sap.ui.table.Table  autoGrowing
+      case "EXT00001348": //sap.m.Table autoGrowing
+      case "EXT00001349": //sap.m.List  autoGrowing
+      case "EXT00001499": //sap.m.TreeItemBase  expandable
+      case "EXT00001500": //sap.m.TreeItemBase  expandedIcon
+      case "EXT00001501": //sap.m.TreeItemBase  collapsedIcon
+      case "EXT00001502": //sap.m.TreeItemBase  treeIconColor
+      case "EXT00001503": //sap.m.StandardTreeItem  expandable
+      case "EXT00001504": //sap.m.StandardTreeItem  expandedIcon
+      case "EXT00001505": //sap.m.StandardTreeItem  collapsedIcon
+      case "EXT00001506": //sap.m.StandardTreeItem  treeIconColor
+      case "EXT00001507": //sap.m.CustomTreeItem  expandable
+      case "EXT00001508": //sap.m.CustomTreeItem  expandedIcon
+      case "EXT00001509": //sap.m.CustomTreeItem  collapsedIcon
+      case "EXT00001510": //sap.m.CustomTreeItem  treeIconColor
+      case "EXT00001511": //sap.ui.table.Column rowSpanProperty
+      case "EXT00001512": //sap.ui.table.Column rowSpanAlign
+      case "EXT00001530": //sap.ui.table.Column colSpanProperty
+      case "EXT00001531": //sap.ui.table.Column colSpanAlign
+      case "EXT00002289": //sap.ui.table.Table autoColumnResize
+      case "EXT00002373": //sap.m.Dialog noEscClose
+      case "EXT00002374": //sap.m.Page  useBackToTopButton
+      case "EXT00002378": //sap.uxap.ObjectPageLayout useBackToTopButton
+      case "EXT00002379": //sap.f.DynamicPage useBackToTopButton
+      case "EXT00002382": //sap.ui.table.Column markCellColor
+      case "EXT00002394": //sap.m.Input preventKeypad
+        
+        return true;
+    
+      default:
+        break;
+    }
+
+    
+
+  };  //프로퍼티 설정 skip 처리 항목.
   
 
   //미리보기 화면 UI의 프로퍼티 변경 처리.
@@ -215,6 +265,22 @@
     if(oAPP.fn.prevAmRadarChartsDraw(UIOBK, OBJID)){return;}
 
 
+    //am radar chart 미리보기 화면 그리기 처리.
+    if(oAPP.fn.prevAmSerialChartStackDraw(UIOBK, OBJID)){return;}
+
+
+    //Am Serial Chart Composite 미리보기 화면 그리기 처리.
+    if(oAPP.fn.prevAmSerialChartCompositeDraw(UIOBK, OBJID)){return;}
+
+
+    //Am Serial Chart 미리보기 화면 그리기 처리.
+    if(oAPP.fn.prevAmSerialChartDraw(UIOBK, OBJID)){return;}
+
+
+    ////Am Pie Chart 미리보기 화면 그리기 처리.
+    if(oAPP.fn.prevAmPieChartDraw(UIOBK, OBJID)){return;}
+
+
   };  //미리보기 예외처리 UI 추가 draw 처리.
 
 
@@ -258,6 +324,192 @@
 
   };  //am radar chart 미리보기 화면 그리기.
 
+
+
+
+  //Am Serial Chart Stack 미리보기 화면 그리기.
+  oAPP.fn.prevAmSerialChartStackDraw = function(UIOBK, OBJID){
+
+    //AmSerialChartStack가 아닌경우 EXIT.
+    if(UIOBK !== "UO99987"){return;}
+
+    //UI, AM CHART UI가 구성되지 않은경우 EXIT.
+    if(!oAPP.attr.prev[OBJID] && !oAPP.attr.prev[OBJID]._c){
+      return;
+    }
+
+    var oChart = oAPP.attr.prev[OBJID]._c;
+    
+    //미리보기에 출력할 차트 DATA 구성.
+    oChart.dataProvider = [{"f1":"sample01","f2":10,"f3":30},
+      {"f1":"sample02","f2":20,"f3":20},{"f1":"sample03","f2":30,"f3":10}];
+
+    oChart.categoryField = "f1";
+
+    var axis = new oAPP.attr.ui.frame.contentWindow.AmCharts.ValueAxis();
+    axis.stackType = "regular";
+    oChart.addValueAxis(axis);
+
+    var grph = new oAPP.attr.ui.frame.contentWindow.AmCharts.AmGraph();
+
+    //누적막대 그래프 정보 생성.
+    grph.valueField = "f2";
+    grph.fillColors = "#678BC7";
+    grph.fillAlphas = "1";
+    grph.lineAlphas = 1;
+    grph.lineThickness = 1;
+    grph.lineColor = "#678BC7";
+    grph.title = "graph1";
+    grph.type = "column";    
+    oChart.addGraph(grph);
+
+    var grph = new oAPP.attr.ui.frame.contentWindow.AmCharts.AmGraph();
+
+    //누적막대 그래프 정보 생성.
+    grph.valueField = "f3";
+    grph.fillColors = "#925ACE";
+    grph.fillAlphas = "1";
+    grph.lineAlphas = 1;
+    grph.lineThickness = 1;
+    grph.lineColor = "#925ACE";
+    grph.title = "graph2";
+    grph.type = "column";
+    oChart.addGraph(grph);
+
+    oChart.validateData();
+    oChart.validateNow();
+
+    //function 호출처의 하위로직 skip을 위한 flag return.
+    return true;
+
+  };  //Am Serial Chart Stack 미리보기 화면 그리기.
+
+
+
+
+  //Am Serial Chart Composite 미리보기 화면 그리기.
+  oAPP.fn.prevAmSerialChartCompositeDraw = function(UIOBK, OBJID){
+
+    //AmSerialChartComposite가 아닌경우 EXIT.
+    if(UIOBK !== "UO99988"){return;}
+
+    //UI, AM CHART UI가 구성되지 않은경우 EXIT.
+    if(!oAPP.attr.prev[OBJID] && !oAPP.attr.prev[OBJID]._c){
+      return;
+    }
+
+    var oChart = oAPP.attr.prev[OBJID]._c;
+    
+    //미리보기에 출력할 차트 DATA 구성.
+    oChart.dataProvider = [{"f1":"sample01","f2":10,"f3":30},
+      {"f1":"sample02","f2":20,"f3":20},{"f1":"sample03","f2":30,"f3":10}];
+
+    oChart.categoryField = "f1";
+
+    var grph = new oAPP.attr.ui.frame.contentWindow.AmCharts.AmGraph();
+
+    //막대 그래프 정보 생성.
+    grph.valueField = "f2";
+    grph.fillColors = "#678BC7";
+    grph.fillAlphas = "1";
+    grph.lineAlphas = 1;
+    grph.lineThickness = 1;
+    grph.lineColor = "#678BC7";
+    grph.title = "graph1";
+    grph.type = "column";    
+    oChart.addGraph(grph);
+
+    var grph = new oAPP.attr.ui.frame.contentWindow.AmCharts.AmGraph();
+
+    //꺾은선 그래프 정보 생성.
+    grph.valueField = "f3";
+    grph.lineAlphas = 1;
+    grph.lineThickness = 5;
+    grph.lineColor = "#925ACE";
+    grph.title = "graph2";
+    grph.type = "line";
+    oChart.addGraph(grph);
+
+    oChart.validateData();
+    oChart.validateNow();
+
+    //function 호출처의 하위로직 skip을 위한 flag return.
+    return true;
+
+  };  //Am Serial Chart Composite 미리보기 화면 그리기.
+
+
+
+
+  //Am Serial Chart 미리보기 화면 그리기.
+  oAPP.fn.prevAmSerialChartDraw = function(UIOBK, OBJID){
+
+    //AmSerialChart가 아닌경우 EXIT.
+    if(UIOBK !== "UO99990"){return;}
+
+    //UI, AM CHART UI가 구성되지 않은경우 EXIT.
+    if(!oAPP.attr.prev[OBJID] && !oAPP.attr.prev[OBJID]._c){
+      return;
+    }
+
+    var oChart = oAPP.attr.prev[OBJID]._c;
+    
+    //미리보기에 출력할 차트 DATA 구성.
+    oChart.dataProvider = [{"f1":"sample01","f2":10,"f3":30},
+      {"f1":"sample02","f2":20,"f3":20},{"f1":"sample03","f2":30,"f3":10}];
+
+    oChart.categoryField = "f1";
+
+    var grph = new oAPP.attr.ui.frame.contentWindow.AmCharts.AmGraph();
+
+    //RADAR 그래프 정보 생성.
+    grph.valueField = "f2";
+    grph.fillColors = "#678BC7";
+    grph.fillAlphas = "1";
+    grph.lineAlphas = 1;
+    grph.lineThickness = 1;
+    grph.lineColor = "#678BC7";
+    grph.title = "graph1";
+    grph.type = "column";    
+    oChart.addGraph(grph);
+    
+    oChart.validateData();
+    oChart.validateNow();
+
+    //function 호출처의 하위로직 skip을 위한 flag return.
+    return true;
+
+  };  //Am Serial Chart 미리보기 화면 그리기.
+
+
+
+
+  //Am Pie Chart 미리보기 화면 그리기.
+  oAPP.fn.prevAmPieChartDraw = function(UIOBK, OBJID){
+
+    //AmPieChart가 아닌경우 EXIT.
+    if(UIOBK !== "UO99989"){return;}
+
+    //UI, AM CHART UI가 구성되지 않은경우 EXIT.
+    if(!oAPP.attr.prev[OBJID] && !oAPP.attr.prev[OBJID]._c){
+      return;
+    }
+
+    var oChart = oAPP.attr.prev[OBJID]._c;
+    
+    //미리보기에 출력할 차트 DATA 구성.
+    oChart.dataProvider = [{"f1": "sample01","f2": 10},{"f1": "sample02","f2": 20},{"f1": "sample03","f2": 30}];
+
+    oChart.titleField = "f1";
+    oChart.valueField = "f2";
+ 
+    oChart.validateData();
+    oChart.validateNow();
+
+    //function 호출처의 하위로직 skip을 위한 flag return.
+    return true;
+
+  };  //Am Pie Chart 미리보기 화면 그리기.
 
 
 

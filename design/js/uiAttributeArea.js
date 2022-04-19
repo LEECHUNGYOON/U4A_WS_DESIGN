@@ -325,6 +325,9 @@
     //select option2의 F4HelpID 프로퍼티의 팝업 호출 처리.
     if(oAPP.fn.attrSelOption2F4HelpID(is_attr)){return;}
 
+    //select option2의 F4HelpReturnFIeld 프로퍼티의 예외 처리.
+    if(oAPP.fn.attrSelOption2F4HelpReturnFIeld(is_attr)){return;}
+
     //HTML UI의 content 프로퍼티에 바인딩 처리시 점검.
     if(oAPP.fn.attrChkHTMLContent(is_attr, true, oAPP.fn.attrBindProp)){return;}
 
@@ -476,8 +479,15 @@
     //sap.ui.core.HTML UI의 content 프로퍼티의 icon선택시 HTML source 팝업 호출.
     if(oAPP.fn.attrChkHTMLContent(is_attr, false, oAPP.fn.attrHTMLConentPopup)){return;}
 
+    //select option2 UI의 예외처리.
+    if(oAPP.fn.attrSelOption2F4HelpIDDel(is_attr)){return;}
+    
+    //u4a.m.UsageArea의 AppID프로퍼티 삭제 예외처리.
+    if(oAPP.fn.attrAppF4Del(is_attr)){return;}
+
     //property help DOCUMENT 팝업 호출.
-    if(oAPP.fn.attrPropHelpPopup(is_attr)){return;}    
+    if(oAPP.fn.attrPropHelpPopup(is_attr)){return;}
+
 
   };  //property Help document, client event icon에 대한 처리.
 
@@ -1991,20 +2001,22 @@
 
     //appcontainer callback 이벤트.
     function lf_appCallback(param){
+
+      //APPLICATION ID 매핑.
       is_attr.UIATV = param.APPID;
 
-      //AppID 입력값 변경 처리.
-      oAPP.fn.attrChgAttrVal(is_attr);
+      //ATTR 변경처리.
+      oAPP.fn.attrChangeProc(is_attr, "INPUT");
 
       //AppDescript 프로퍼티 정보 얻기.
-      var l_find = oAPP.attr.oModel.oData.T_ATTR.find( a=> a.UIATK === "EXT00000031");
-      if(typeof l_find === "undefined"){return;}
+      var ls_desc = oAPP.attr.oModel.oData.T_ATTR.find( a=> a.UIATK === "EXT00000031");
+      if(typeof ls_desc === "undefined"){return;}
 
-      //AppDescript 입력값 변경 처리.
-      oAPP.fn.attrChgAttrVal(l_find);
+      //APPLICATION DESC 정보 매핑.
+      ls_desc.UIATV = param.APPNM;
 
-      //model 갱신 처리.
-      oAPP.attr.oModel.refresh();
+      //ATTR 변경처리.
+      oAPP.fn.attrChangeProc(ls_desc, "INPUT");
 
     } //appcontainer callback 이벤트.
 
@@ -2012,19 +2024,52 @@
 
     //application f4 help 팝업 호출.
     if (typeof oAPP.fn.fnAppF4PopupOpen !== "undefined") {
-        oAPP.fn.fnAppF4PopupOpen(l_opt, lf_appCallback);
-        return;
+      oAPP.fn.fnAppF4PopupOpen(l_opt, lf_appCallback);
+      //하위로직 skip처리를 위한 flag return
+      return true;
     }
 
     //js load후 application f4 help 팝업 호출.
     oAPP.loadJs("fnAppF4PopupOpen", function() {
-        oAPP.fn.fnAppF4PopupOpen(l_opt, lf_appCallback);
+      oAPP.fn.fnAppF4PopupOpen(l_opt, lf_appCallback);
     });
 
     //하위로직 skip처리를 위한 flag return
     return true;
 
-  };
+  };  //appcontainer 호출 이벤트.
+
+
+
+  //u4a.m.UsageArea의 AppID프로퍼티 삭제 예외처리.
+  oAPP.fn.attrAppF4Del = function(is_attr){
+    
+    //appcontainer의 AppID 프로퍼티가 아닌경우 exit.
+    if(is_attr.UIATK !== "EXT00000030"){return;}
+
+    //입력값 초기화 처리.
+    is_attr.UIATV = "";
+
+    //ATTR 변경처리.
+    oAPP.fn.attrChangeProc(is_attr, "INPUT");
+
+    //AppDescript 프로퍼티 정보 얻기.
+    var ls_desc = oAPP.attr.oModel.oData.T_ATTR.find( a=> a.UIATK === "EXT00000031");
+    if(typeof ls_desc === "undefined"){return;}
+
+    //APPLICATION DESC 정보 초기화.
+    ls_desc.UIATV = "";
+
+    //ATTR 변경처리.
+    oAPP.fn.attrChangeProc(ls_desc, "INPUT");
+
+    //하위로직 skip처리를 위한 flag return
+    return true;
+
+
+  };  //u4a.m.UsageArea의 AppID프로퍼티 삭제 예외처리.
+
+
 
 
   //tree의 parent, child 바인딩시 점검.
@@ -2071,7 +2116,7 @@
 
     }
 
-  };
+  };  //tree의 parent, child 바인딩시 점검.
 
 
 
@@ -2083,15 +2128,24 @@
     if(is_attr.UIATK !== "EXT00001188"){return;}
     
     //f4 help callback function.
-    function lf_returnDOC(a){
+    function lf_returnDOC(param){
+
+      //F4 HELP에서 입력한 값매핑.
+      is_attr.UIATV = param.SHLPNAME;
+
+      //attribute 입력건에 대한 미리보기, attr 라인 style 등에 대한 처리.
+      oAPP.fn.attrChangeProc(is_attr);
 
     } //f4 help callback function.
+
+
 
     //f4 help팝업을 load한경우.
     if(typeof oAPP.fn.callF4HelpPopup !== "undefined"){
       //f4 help 팝업 호출.
       oAPP.fn.callF4HelpPopup("DD_SHLP","DD_SHLP",[],[],lf_returnDOC);
-      return;
+      //하위로직 skip처리를 위한 flag return
+      return true;
     }
 
     //f4help 팝업을 load하지 못한경우.
@@ -2106,6 +2160,71 @@
   };  //select option2의 F4HelpID 프로퍼티의 팝업 호출 처리.
 
 
+
+
+  //select option2의 F4HelpReturnFIeld 프로퍼티의 팝업 호출 처리.
+  oAPP.fn.attrSelOption2F4HelpReturnFIeld = function(is_attr){
+    
+    //selectOption2의 F4HelpReturnFIeld프로퍼티가 아닌경우 exit.
+    if(is_attr.UIATK !== "EXT00001189"){return;}
+    
+
+    //하위로직 skip처리를 위한 flag return
+    return true;
+
+  };  //select option2의 F4HelpReturnFIeld 프로퍼티의 팝업 호출 처리.
+
+
+
+
+  //select option2의 F4HelpID, F4HelpReturnFIeld 프로퍼티의 예외처리.
+  oAPP.fn.attrSelOption2F4HelpIDDel = function(is_attr){
+    //F4HelpID, F4HelpReturnFIeld 프로퍼티가 아닌경우 EXIT.
+    if(is_attr.UIATK !== "EXT00001188" && is_attr.UIATK !== "EXT00001189"){
+      return;
+    }
+
+    //F4HelpID프로퍼티인경우.
+    if(is_attr.UIATK === "EXT00001188"){
+
+      //기존 입력건 초기화.
+      is_attr.UIATV = "";
+
+      //attribute 입력건에 대한 미리보기, attr 라인 style 등에 대한 처리.
+      oAPP.fn.attrChangeProc(is_attr);
+
+      //F4HelpReturnFIeld ATTRIBUTE 검색.
+      var ls_attr = oAPP.attr.oModel.oData.T_ATTR.find( a => a.UIATK === "EXT00001189" );
+
+      if(typeof ls_attr !== "undefined"){
+        //F4HelpReturnFIeld 입력건 초기화.
+        ls_attr.UIATV = "";
+
+        //attribute 입력건에 대한 미리보기, attr 라인 style 등에 대한 처리.
+        oAPP.fn.attrChangeProc(ls_attr);
+
+      }
+
+      //function 호출처 skip을 위한 flag return.
+      return true;
+
+    }
+
+    //F4HelpReturnFIeld 프로퍼티 인경우.
+    if(is_attr.UIATK === "EXT00001189"){
+      //기존 입력건 초기화.
+      is_attr.UIATV = "";
+
+      //attribute 입력건에 대한 미리보기, attr 라인 style 등에 대한 처리.
+      oAPP.fn.attrChangeProc(is_attr);
+
+      //function 호출처 skip을 위한 flag return.
+      return true;
+
+    }
+
+
+  };  //select option2의 F4HelpReturnFIeld 프로퍼티의 팝업 호출 처리.
 
 
   //visible, editable등의 attribute 처리 전용 바인딩 필드 생성 처리.
@@ -2572,7 +2691,7 @@
       return;
     }
 
-    //sap.m.Label의 text property 정보 검색.
+    //uploadUrl property 정보 검색.
     var ls_0023 = oAPP.DATA.LIB.T_0023.find( a=> a.UIATK === l_UIATK );
 
     ls_0015 = oAPP.fn.crtStru0015();
@@ -2937,7 +3056,7 @@
 
     //바인딩된 정보를 기준으로 부모를 탐색하며 N건 바인딩 여부 확인.
     for(var i=0,l=lt_0015.length; i<l; i++){
-
+            
       //N건 바인딩 처리되어 parent에 현재 UI를 추가한 경우 exit.
       if(lf_getParentAggrModel(lt_0015[i].UIATV, oUi._EMBED_AGGR, oUi._parent) === true){
         return;

@@ -162,7 +162,7 @@ oAPP.fn.callF4HelpPopup = function(I_SHLPNAME, I_SHLP_DEF, IT_SHLP, IT_FIELDDESC
     var oFormData = new FormData();
     oFormData.append("trgubun", "D");
 
-    oFormData.append("SHLPNAME", I_SHLPNAME);
+    oFormData.append("_SHLPNAME", I_SHLPNAME);
 
     //~default 단일 서칭 헬프
     var l_f4sub = l_f4_def;
@@ -179,10 +179,10 @@ oAPP.fn.callF4HelpPopup = function(I_SHLPNAME, I_SHLP_DEF, IT_SHLP, IT_FIELDDESC
     }
 
     //구성한 현재 F4 HELP명 수집.
-    oFormData.append("SHLPSUB", l_f4sub);
+    oFormData.append("_SHLPSUB", l_f4sub);
 
     //~MAX ROW
-    oFormData.append("MAXROWS", ZF4SH_input01.getValue());
+    oFormData.append("_MAXROWS", ZF4SH_input01.getValue());
 
     //검색조건 입력정보 수집.
     for(var i in ZF4searchModle.oData.param){
@@ -244,7 +244,7 @@ oAPP.fn.callF4HelpPopup = function(I_SHLPNAME, I_SHLP_DEF, IT_SHLP, IT_FIELDDESC
     oFormData.append("trgubun", "F");
 
     //대표 f4 help명.
-    oFormData.append("SHLPNAME", I_SHLPNAME);
+    oFormData.append("_SHLPNAME", I_SHLPNAME);
 
     //현재 선택한 F4 HELP명.
     var l_f4sub = l_f4_def;
@@ -262,7 +262,7 @@ oAPP.fn.callF4HelpPopup = function(I_SHLPNAME, I_SHLP_DEF, IT_SHLP, IT_FIELDDESC
     }
 
     //현재 선택한 f4 help명수집.
-    oFormData.append("SHLPSUB", l_f4sub);
+    oFormData.append("_SHLPSUB", l_f4sub);
 
 
     //f4 help 필드정보 검색.
