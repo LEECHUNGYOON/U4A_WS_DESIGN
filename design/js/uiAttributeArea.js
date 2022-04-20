@@ -300,6 +300,9 @@
     //DDLB 변경 라인 STYLE 처리.
     oAPP.fn.attrSetLineStyle(is_attr);
 
+    //입력필드 입력 가능여부 처리.
+    oAPP.fn.setAttrEditable(is_attr);
+
     //미리보기 화면의 대상 ui의 프로퍼티 변경처리.
     oAPP.fn.previewUIsetProp(is_attr);
 
@@ -345,7 +348,7 @@
     //이벤트 팝업 호출 처리건
     if(oAPP.fn.attrCallEventPopup(is_attr)){return;}
 
-    //프로퍼티 바인딩 처리건
+    //aggregation 바인딩 처리건
     if(oAPP.fn.attrBindAggr(is_attr)){return;}
 
   };  //바인딩팝업, 서버이벤트 호출 icon에 대한 처리.
@@ -358,6 +361,9 @@
 
     //해당 라인이 이벤트 라인이 아닌경우 exit.
     if(is_attr.UIATY !== "2"){return;}
+
+    //현재 이벤트 영역이 편집 불가능하다면 exit.
+    if(is_attr.edit !== true){return;}
 
     //화면이 편집상태가 아닌경우 exit.
     if(oAPP.attr.oModel.oData.IS_EDIT !== true){
@@ -1025,7 +1031,7 @@
 
       }
 
-    });
+    }); //클라이언트 스크립트 호출 FUNCTION 호출.
 
 
     //function 사용처의 하위로직 skip을 위한 flag return.
@@ -1072,6 +1078,9 @@
 
     //이벤트건이 아닌경우 exit.
     if(is_attr.UIATY !== "2"){return;}
+
+    //현재 이벤트 영역이 편집 불가능하다면 exit.
+    if(is_attr.edit !== true){return;}
 
     //OBJID + 이벤트명 대문자 로 client이벤트 script ID 구성.
     var l_objid = is_attr.OBJID + is_attr.UIASN;
@@ -1492,6 +1501,16 @@
 
 
   };  //프로퍼티 바인딩 처리.
+
+
+
+  //프로퍼티 바인딩 해제 처리.
+  oAPP.fn.attrSetUnbindProp = function(is_bInfo, is_attr){
+
+
+
+  };  //프로퍼티 바인딩 해제 처리.
+
 
 
 
@@ -2543,14 +2562,14 @@
 
   
   //attribute 항목의 DDLB 정보 구성.
-  oAPP.fn.attrSetDDLBList = function(VALKY, UIATY, DEFVL){
+  oAPP.fn.attrSetDDLBList = function(VALKY, UIATY, DEFVL, it_ddlb){
     var lt_ddlb = [],
         ls_ddlb = {};
 
     //attribute가 이벤트건인경우.
     if(UIATY === "2"){
       //서버이벤트 항목 return.
-      return oAPP.attr.T_EVT;
+      return it_ddlb;
 
     }
 
@@ -2829,6 +2848,41 @@
 
 
 
+  //서버 이벤트 항목 검색.
+  oAPP.fn.getServerEventList = function(){
+
+    var lt_ddlb = [{KEY:"",TEXT:"",DESC:""}];
+
+    //클래스명 서버 전송 데이터에 구성.
+    var oFormData = new FormData();
+    oFormData.append("CLSNM", oAPP.attr.appInfo.CLSID);
+
+
+    //컨트롤러 클래스의 서버 이벤트 항목 정보 검색.
+    sendAjax(oAPP.attr.servNm + "/getServerEventList", oFormData, function(param){
+        if(param.RETCD !== "S"){return;}
+
+        var ls_evt_DDLB = {};
+
+        for(var i=0, l=param.EVTLT.length; i<l; i++){
+
+          ls_evt_DDLB.KEY = ls_evt_DDLB.TEXT = param.EVTLT[i].EVTNM;
+          ls_evt_DDLB.DESC = param.EVTLT[i].DESC;
+          lt_ddlb.push(ls_evt_DDLB);
+          ls_evt_DDLB = {};
+
+        }
+
+      },"",false);
+      
+      //ddlb 구성건 return.
+      return lt_ddlb;
+
+  };  //서버 이벤트 항목 검색.
+
+
+
+
   //선택한 UI에 해당하는 attribute 리스트 업데이트 처리.
   oAPP.fn.updateAttrList = function(UIOBK, OBJID){
     
@@ -2842,21 +2896,9 @@
       oAPP.fn.updateDOCAttrList(OBJID);
       return;
     }
-
-
-    //대상 function이 존재하지 않는경우 script 호출.
-    if(typeof oAPP.fn.getServerEventList === "undefined"){
-
-      oAPP.fn.getScript("design/js/createEventPopup",function(){
-        //서버 이벤트 항목 검색.
-        oAPP.fn.getServerEventList();
-      },true);
-
-    }else{
-      //서버 이벤트 항목 검색.
-      oAPP.fn.getServerEventList();
-
-    }
+    
+    //서버 이벤트 항목 검색.
+    var lt_ddlb = oAPP.fn.getServerEventList();
 
     //file uploader UI의 uploaderUrl 프로퍼티 예외처리.
     oAPP.fn.attrUploadUrlException(OBJID, UIOBK);
@@ -2892,7 +2934,7 @@
         ls_0015.sel_visb = true;
 
         //DDLB 항목 구성.
-        ls_0015.T_DDLB = oAPP.fn.attrSetDDLBList(lt_0023[i].VALKY, ls_0015.UIATY, lt_0023[i].DEFVL);
+        ls_0015.T_DDLB = oAPP.fn.attrSetDDLBList(lt_0023[i].VALKY, ls_0015.UIATY, lt_0023[i].DEFVL, lt_ddlb);
 
       }else if(lt_0023[i].ISLST === ""){
         //DDLB출력건이 아닌경우 input visible

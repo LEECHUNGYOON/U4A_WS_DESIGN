@@ -95,13 +95,19 @@ oAPP.fn.callBindPopup = function(sTitle, CARDI, f_callback, UIATK){
 
           //aggregation인경우 첫번째 만나는 TABLE은 선택 가능 처리 후 하위 정보 활성화 SKIP.
           if(oAPP.attr.oBindDialog._CARDI === "T"){
-            it_tree[i].enable = true;
-            it_tree[i].stat_src = "sap-icon://status-positive";
-            it_tree[i].stat_color = "#01DF3A";
+            //현재 path의 하위 정보 얻기.
+            var l_indx = l_model.oData.TREE.findIndex( a => a.PARENT === it_tree[i].CHILD );
+
+            //하위 필드 정보가 존재하는경우.
+            if(l_indx !== -1){
+              it_tree[i].enable = true;
+              it_tree[i].stat_src = "sap-icon://status-positive";
+              it_tree[i].stat_color = "#01DF3A";
+            }            
 
             if(it_tree[i].CHILD === oAPP.attr.oBindDialog._is_attr.UIATV){
               it_tree[i].stat_src = "sap-icon://accept";
-            }
+            }            
 
             continue;
           }
@@ -381,7 +387,7 @@ oAPP.fn.callBindPopup = function(sTitle, CARDI, f_callback, UIATK){
 
   //이전 바인딩 정보가 존재하는경우 해당 라인 펼침 & 선택 처리
   function lf_setSelectTreeItem(){
-    debugger;
+
     var lt_split = [],
         L_UIATV = "";
 

@@ -44,12 +44,15 @@ oAPP.fn.createEventPopup = function(is_attr, f_callBack){
       //이벤트명 prefix 추가.
       l_event = "EV_" + l_event;
     }
+    
+    //서버 이벤트 항목 검색.
+    var lt_ddlb = oAPP.fn.getServerEventList();
 
     //이벤트 중복건 존재 여부 확인.
-    if(oAPP.attr.T_EVT && oAPP.attr.T_EVT.findIndex( a => a.KEY === l_event) !== -1){
+    if(lt_ddlb.findIndex( a => a.KEY === l_event) !== -1){
 
       ls_event.meth_stat = "Error";
-      ls_event.meth_text = "Method Name dose not exits.";
+      ls_event.meth_text = "Method name is duplicated.";
       l_erflag = true;  //오류 flag 매핑.
 
     }
@@ -274,6 +277,7 @@ oAPP.fn.createEventPopup = function(is_attr, f_callBack){
     //busy dialog open.
     oAPP.common.fnSetBusyDialog(true);
 
+
     //입력값 점검 오류가 발생한 경우 exit.
     if(lf_chkInputVal() === true){
       // //wait off 처리.
@@ -314,42 +318,3 @@ oAPP.fn.createEventPopup = function(is_attr, f_callBack){
 };  // 이벤트 생성 팝업 호출.
 
 
-//서버 이벤트 항목 검색.
-oAPP.fn.getServerEventList = function(){
-
-  if(!oAPP.attr.T_EVT){
-    oAPP.attr.T_EVT = [{KEY:"",TEXT:"",DESC:""}];
-  }
-
-  //클래스명 서버 전송 데이터에 구성.
-  var oFormData = new FormData();
-  oFormData.append("CLSNM", oAPP.attr.appInfo.CLSID);
-
-
-  //컨트롤러 클래스의 서버 이벤트 항목 정보 검색.
-  sendAjax(oAPP.attr.servNm + "/getServerEventList", oFormData, function(param){
-      if(param.RETCD !== "S"){return;}
-
-      var ls_evt_DDLB = {};
-
-      for(var i=0, l=param.EVTLT.length; i<l; i++){
-
-        //ddlb 항목 수집건 존재 여부 확인.
-        var l_find = oAPP.attr.T_EVT.findIndex( a => a.KEY === param.EVTLT[i].EVTNM);
-
-        //수집건 항목이 존재시 skip.
-        if(l_find !== -1){
-          continue;
-        }
-
-        ls_evt_DDLB.KEY = ls_evt_DDLB.TEXT = param.EVTLT[i].EVTNM;
-        ls_evt_DDLB.DESC = param.EVTLT[i].DESC;
-        oAPP.attr.T_EVT.push(ls_evt_DDLB);
-        ls_evt_DDLB = {};
-
-      }
-
-    },"",false);
-
-
-};
