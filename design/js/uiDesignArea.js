@@ -17,7 +17,7 @@
 
       //데이터 출력 라인을 선택하지 않은경우 exit.
       if(!oEvent.mParameters.rowBindingContext){return;}
-
+      
       //선택 라인 정보 얻기.
       var ls_tree = oEvent.mParameters.rowBindingContext.getProperty();
 
@@ -26,6 +26,17 @@
 
     }); //tree item 선택 이벤트.
 
+
+    
+    //tree 라인선택 예외처리.
+    oLTree1.attachRowSelectionChange(function(oEvent){
+      //라인선택이 해제 안된경우 EXIT.
+      if(this.getSelectedIndex() !== -1){return;}
+
+      //라인 선택이 해제 된경우 이벤트 발생 라인 선택 처리.
+      this.setSelectedIndex(oEvent.mParameters.rowIndex);
+      
+    }); //tree 라인선택 예외처리.
     
 
     
@@ -509,6 +520,10 @@
       //drag 종료시 drop 불가능 css 제거 처리.
       lt_item[i].removeStyleClass("u4aWsDisableTreeDrop");
     }
+
+    //미리보기 영역 drop 영역 표시 잔상 제거.
+    oAPP.attr.ui.frame.contentWindow.prevClearDropEffect();
+    
 
   };  //drag 종료 처리.
 
@@ -1150,6 +1165,7 @@
 
     //drag UI의 N건 바인딩 path 정보 확인.
     var l_nBind = oAPP.fn.attrFindBindAggr(oAPP.attr.prev[i_drag.OBJID]);
+    
 
     //N건 바인딩처리 path가 존재하는경우.
     if(typeof l_nBind !== "undefined"){
@@ -1493,6 +1509,28 @@
   //drop 처리 function.
   oAPP.fn.UIDrop = function(oEvent, i_OBJID){
 
+    //DnD 가능여부 확인.
+    function lf_chkDnDpossible(it_tree, OBJID){
+      
+      if(it_tree.length === 0){return;}
+      
+      //drag UI의 child에 drop UI가 존재하는지 여부 확인.
+      var l_indx =  it_tree.findIndex( a=> a.OBJID === OBJID );
+
+      //존재하는경우 이동불가 flag return.
+      if(l_indx !== -1){return true;}
+
+      //존재하지 않는경우 하위를 탐색하며 drop UI가 존재하는지 여부 확인.
+      for(var i=0, l=it_tree.length; i<l; i++){
+        //재귀호출을 통해 drop UI가 존재하는경우.
+        if(lf_chkDnDpossible(it_tree[i].zTREE, OBJID)){
+          //이동불가 flag return.
+          return true;
+        }
+      }
+
+    } //DnD 가능여부 확인.
+
     if(!i_OBJID){return;}
 
     //미리보기 영역에서 drag처리한 UI명 얻기.
@@ -1512,11 +1550,19 @@
       return;
     }
 
+    //DRAG UI와 DROP UI의 이동 가능 여부 점검.
+    if(lf_chkDnDpossible(l_drag.zTREE, l_drop.OBJID)){
+      return;
+    }
+
+
+    //aggregation 선택 팝업 호출 처리.
     if(typeof oAPP.fn.aggrSelectPopup !== "undefined"){
       oAPP.fn.aggrSelectPopup(l_drag, l_drop, oAPP.fn.drop_cb);
       return;
     }
 
+    //aggregation 선택 팝업 호출 처리.
     oAPP.fn.getScript("design/js/aggrSelectPopup",function(){
       oAPP.fn.aggrSelectPopup(l_drag, l_drop, oAPP.fn.drop_cb);
     });

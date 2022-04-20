@@ -363,6 +363,8 @@
 
       //application 생성처리를 위한 서버 호출.
       function lf_createAppData(){
+        
+
         var l_create = oModel.getProperty("/CREATE");
         var l_appdata = {};
         l_appdata.APPID = appid;
@@ -380,6 +382,9 @@
 
         //application 생성을 위한 서버 호출.
         sendAjax(parent.getServerPath() + "/createAppData",oFormData, function(ret){
+
+          //busy dialog close.
+          oAPP.common.fnSetBusyDialog(false);
           
           //application 생성중 오류가 발생한 경우.
           if(ret.RETCD === "E"){
@@ -398,7 +403,7 @@
           //dialog 종료 처리.
           lf_closeDialog();
 
-        });
+        },"");
 
       } //application 생성처리를 위한 서버 호출.
 
@@ -406,11 +411,17 @@
 
       function lf_chkPackage(is_create){
         //application명 서버전송 데이터 구성.
+        
+        //busy dialog open.
+        oAPP.common.fnSetBusyDialog(true);
 
         var oFormData = new FormData();
         oFormData.append("PACKG", is_create.PACKG);
 
         sendAjax(parent.getServerPath() + "/chkPackage",oFormData, function(ret){
+
+          //busy dialog close.
+          oAPP.common.fnSetBusyDialog(false);
 
           //잘못된 PACKAGE를 입력한 경우.
           if(ret.ERFLG === "X"){
@@ -420,9 +431,6 @@
 
             //오류 메시지 처리.
             parent.showMessage(sap, 20, "E", ret.ERMSG);
-
-            //wait off 처리.
-            parent.setBusy("");
             
             return;
           }
@@ -444,10 +452,8 @@
           //모델 갱신 처리.
           oModel.setProperty("/CREATE", is_create);
 
-          //wait off 처리.
-          parent.setBusy("");
 
-        });
+        },"");
 
       }
 
@@ -465,13 +471,13 @@
             icon: "sap-icon://accept",
             press : function(){
 
-              //wait on 처리.
-              parent.setBusy("X");
+              //busy dialog true.
+              oAPP.common.fnSetBusyDialog(true);
 
               //application 생성 처리전 입력값 점검.
               if( lf_chkValue() === true){
-                //wait off 처리.
-                parent.setBusy("");
+                //busy dialog close.
+                oAPP.common.fnSetBusyDialog(false);
                 return;
               }
 

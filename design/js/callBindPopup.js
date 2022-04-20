@@ -381,7 +381,7 @@ oAPP.fn.callBindPopup = function(sTitle, CARDI, f_callback, UIATK){
 
   //이전 바인딩 정보가 존재하는경우 해당 라인 펼침 & 선택 처리
   function lf_setSelectTreeItem(){
-
+    debugger;
     var lt_split = [],
         L_UIATV = "";
 
@@ -418,6 +418,9 @@ oAPP.fn.callBindPopup = function(sTitle, CARDI, f_callback, UIATK){
     //aggregation에서 바인딩 팝업 호출한경우 TABLE 필드 타입.
     if(oAPP.attr.oBindDialog._CARDI === "T"){
       l_KIND = "T";
+
+    }else if(oAPP.attr.oBindDialog._CARDI === "S"){
+      l_KIND = "S";
     }
 
     //TREE를 하위로 탐색하며 바인딩 PATH에 해당하는건 EXPAND, 라인 선택 처리.

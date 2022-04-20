@@ -400,7 +400,7 @@
             l_bind._buildTree(0,oAPP.fn.designGetTreeItemCount());
 
             //신규로 생성된 UI의 미리보기에서 UI 선택 처리를 위한 FLAG 처리.
-            oAPP.attr.prev[l_14.OBJID].__isnew = "X";
+            //oAPP.attr.prev[l_14.OBJID].__isnew = "X";
 
             //메뉴 선택 tree 위치 펼침 처리.
             oAPP.fn.setSelectTreeItem(l_14.OBJID);
@@ -810,6 +810,9 @@
             //부모 UI OBJECT ID 매핑 처리.
             ls_14.PUIOK = is_parent.UIOBK;
 
+            ls_14.chk = false;
+            ls_14.chk_visible = true;
+
             //attribute 입력건 복사 처리.
             var lt_0015 = lf_copyAttrData(ls_14, is_copied, aggrParam, bKeep);
 
@@ -880,7 +883,7 @@
 
             
             //붙여넣기한 UI의 신규 생성됨 flag 처리.
-            oAPP.attr.prev[ls_14.OBJID].__isnew = "X";
+            //oAPP.attr.prev[ls_14.OBJID].__isnew = "X";
 
             //붙여넣기한 UI 선택 처리.
             oAPP.fn.setSelectTreeItem(ls_14.OBJID);

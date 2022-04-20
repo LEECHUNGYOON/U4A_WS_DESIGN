@@ -91,8 +91,12 @@ oAPP.fn.createEventPopup = function(is_attr, f_callBack){
   //서버이벤트 생성 처리.
   function lf_createEventMethod(REQNO){
 
-    //wait on 처리.
-    parent.setBusy("X");
+    // //wait on 처리.
+    // parent.setBusy("X");
+    
+    //busy dialog open.
+    oAPP.common.fnSetBusyDialog(true);
+
 
     //화면에서 입력한 값 얻기.
     var ls_event = oModel.getProperty("/event");
@@ -130,8 +134,11 @@ oAPP.fn.createEventPopup = function(is_attr, f_callBack){
     //서버 생성 처리.
     sendAjax(oAPP.attr.servNm + "/createEventMethod", oFormData, function(param){
 
-      //wait off 처리.
-      parent.setBusy("");
+      // //wait off 처리.
+      // parent.setBusy("");
+      
+      //busy dialog close.
+      oAPP.common.fnSetBusyDialog(false);
 
       //오류가 발생한 경우, eval 처리 script가 존재하지 않는경우.
       if(param.RETCD === "E" && typeof param.SCRIPT === "undefined"){
@@ -261,13 +268,19 @@ oAPP.fn.createEventPopup = function(is_attr, f_callBack){
   //이벤트 생성 이벤트
   oBtn1.attachPress(function(){
     
-    //wait on 처리.
-    parent.setBusy("X");
+    // //wait on 처리.
+    // parent.setBusy("X");
+    
+    //busy dialog open.
+    oAPP.common.fnSetBusyDialog(true);
 
     //입력값 점검 오류가 발생한 경우 exit.
     if(lf_chkInputVal() === true){
-      //wait off 처리.
-      parent.setBusy("");
+      // //wait off 처리.
+      // parent.setBusy("");
+      
+      //busy dialog close.
+      oAPP.common.fnSetBusyDialog(false);
       return;
     }
 

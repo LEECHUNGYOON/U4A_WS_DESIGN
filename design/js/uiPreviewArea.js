@@ -159,6 +159,22 @@
 
     }
 
+
+    //프로퍼티 입력값 정합성 점검.
+    if(oAPP.fn.chkValidProp(is_attr) === false){
+      //입력 불가능한 프로퍼티를 입력한 경우.
+
+      //프로퍼티 정보 검색.
+      var ls_0023 = oAPP.DATA.LIB.T_0023.find( a=> a.UIATK === is_attr.UIATK );
+
+      //프로퍼티 정보를 찾은경우.
+      if(ls_0023){
+        //해당 프로퍼티의 default value를 매핑.
+        l_prop = ls_0023.DEFVL;
+      }
+
+    }
+
     //UI.setProperty(value); 처리.
     try{
       oAPP.attr.prev[is_attr.OBJID][l_propnm](l_prop);

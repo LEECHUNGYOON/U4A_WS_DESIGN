@@ -108,7 +108,7 @@
      * **********************************************************************
      ************************************************************************/
     //attribute table UI.
-    var oRTab1 = new sap.m.Table({mode:"SingleSelectMaster",alternateRowColors:true});
+    var oRTab1 = new sap.m.Table({mode:"SingleSelectMaster", alternateRowColors:true});
     oRPage.setContent(oRTab1);
     oAPP.attr.ui.oRTab1 = oRTab1;
 
@@ -130,11 +130,11 @@
     oRTab1.addColumn(oRCol2);
 
     //attribute 첫번째 아이콘(바인딩, 서버 이벤트)
-    var oRCol3 = new sap.m.Column({width:"25px",hAlign:"Center"});
+    var oRCol3 = new sap.m.Column({width:"40px",hAlign:"Center"});
     oRTab1.addColumn(oRCol3);
 
     //attribute 두번째 아이콘(프로퍼티 help, 클라이언트 이벤트)
-    var oRCol4 = new sap.m.Column({width:"25px",hAlign:"Center"});
+    var oRCol4 = new sap.m.Column({width:"40px",hAlign:"Center"});
     oRTab1.addColumn(oRCol4);
 
     //attribute 출력 List Item.
@@ -173,7 +173,7 @@
 
     //Attribute DDLB UI
     var oRSel1 = new sap.m.ComboBox({showSecondaryValues:true,width:"100%",selectedKey:"{UIATV}",
-      editable:"{edit}",visible:"{sel_visb}",enabled:"{/IS_EDIT}",tooltip:"{UIATV}",
+      editable:"{edit}",visible:"{sel_visb}",enabled:"{/IS_EDIT}",tooltip:"{UIATV}",value:"{comboval}",
       valueState:"{valst}",valueStateText:"{valtx}"});
 
     //DDLB 선택 이벤트.
@@ -233,6 +233,8 @@
     var oRIcon2 = new sap.ui.core.Icon({src:"{icon2_src}",color:"{icon2_color}",visible:"{icon2_visb}"});
     oRListItem1.addCell(oRIcon2);
 
+    oRIcon2.addStyleClass("sapUiLargeMarginEnd");
+
     //help(script 이벤트) 아이콘 선택 이벤트
     oRIcon2.attachPress(function(oEvent){
       //property Help document, client event icon에 대한 처리.
@@ -257,15 +259,18 @@
    * @param {string} uityp - 이벤트 발생 UI의 유형(DDLB, INPUT, CHECK)
    ************************************************************************/
   oAPP.fn.attrChange = function(is_attr, uityp){
+    
+    //오류 표현 필드 초기화 처리.
+    oAPP.fn.attrClearErrorField();
 
     //document의 attr에 대한 처리.
     if(oAPP.fn.attrDocumentProc(is_attr)){return;}
     
     //autoGrowing 프로퍼티 변경건 예외처리.
-    if(oAPP.attrChangeAutoGrowingProp(is_attr)){return;}
+    if(oAPP.fn.attrChangeAutoGrowingProp(is_attr)){return;}
 
     //dropAble 프로퍼티 변경건 예외처리.
-    if(oAPP.attrChangeDropAbleProp(is_attr)){return;}
+    if(oAPP.fn.attrChangeDropAbleProp(is_attr)){return;}
 
 
     //attribute 입력건에 대한 미리보기, attr 라인 style 등에 대한 처리.
@@ -302,7 +307,7 @@
     if(bSkipRefresh){return;}
 
     //모델 갱신 처리.
-    oAPP.attr.oModel.refresh(true);
+    oAPP.attr.oModel.refresh();
 
   };  //attribute 입력건에 대한 미리보기, attr 라인 style 등에 대한 처리.
 
@@ -315,6 +320,9 @@
    * @param {string} uityp - 이벤트 발생 UI의 유형(DDLB, INPUT, CHECK)
    ************************************************************************/
   oAPP.fn.attrIcon1Proc = function(is_attr){
+
+    //오류 표현 필드 초기화 처리.
+    oAPP.fn.attrClearErrorField(true);
 
     //appcontainer의 AppID 프로퍼티인경우 f4 help 팝업 호출.
     if(oAPP.fn.attrAppf4Popup(is_attr)){return;}
@@ -473,6 +481,9 @@
    ************************************************************************/
    oAPP.fn.attrIcon2Proc = function(is_attr){
 
+    //오류 표현 필드 초기화 처리.
+    oAPP.fn.attrClearErrorField(true);
+
     //선택한 라인이 이벤트인경우.
     if(oAPP.fn.attrClientEventPopup(is_attr)){return;}
 
@@ -599,7 +610,7 @@
    * @return {boolean} autoGrowing프로퍼티 변경건인경우 function 호출처의
    * 하위로직 skip을 위한 true값 return.
    ************************************************************************/
-  oAPP.attrChangeAutoGrowingProp = function(is_attr){
+  oAPP.fn.attrChangeAutoGrowingProp = function(is_attr){
 
     //autoGrowing 프로퍼티 변경건이 아닌경우 EXIT.
     if(is_attr.UIATK !== "EXT00001347" && //sap.ui.table.Table
@@ -661,7 +672,7 @@
    * @return {boolean} dropAble프로퍼티 변경건인경우 function 호출처의
    * 하위로직 skip을 위한 true값 return.
    ************************************************************************/
-   oAPP.attrChangeDropAbleProp = function(is_attr){
+   oAPP.fn.attrChangeDropAbleProp = function(is_attr){
 
     //dropAble 프로퍼티 변경건이 아닌경우 EXIT.
     if(is_attr.UIASN !== "DROPABLE"){
@@ -1232,6 +1243,9 @@
     //프로퍼티가 아닌경우, 바인딩처리한경우 exit.
     if(is_attr.UIATY !== "1" || is_attr.ISBND === "X"){return;}
 
+    //DDLB 출력 대상 라인인경우 EXIT.
+    if(is_attr.ISLST === "X"){return;}
+
     //enum정보가 구성된경우 exit.
     if(typeof is_attr.T_DDLB !== "undefined" && is_attr.T_DDLB.length !== 0){return;}
 
@@ -1267,6 +1281,9 @@
 
   //프로퍼티 f4 help 호출 처리.
   oAPP.fn.attrCallValueHelp = function(oEvent, is_attr){
+
+    //오류 표현 필드 초기화 처리.
+    oAPP.fn.attrClearErrorField(true);
 
     //DOCUMENT의 f4 help 호출건인경우 하위 로직 skip.
     if(oAPP.fn.attrCallValueHelpDOC(is_attr)){return;}
@@ -1465,6 +1482,16 @@
 
 
   };  //바인딩 처리.
+
+
+
+
+  //프로퍼티 바인딩 처리.
+  oAPP.fn.attrSetBindProp = function(is_bInfo, is_attr){
+
+
+
+  };  //프로퍼티 바인딩 처리.
 
 
 
@@ -1747,6 +1774,9 @@
     //PROPERTY가 아닌경우, 바인딩처리된경우 EXIT. 
     if(is_attr.UIATY !== "1" || is_attr.ISBND === "X"){return;}
 
+    //DDLB 출력 대상 라인인경우 EXIT.
+    if(is_attr.ISLST === "X"){return;}
+
     //DDLB가 설정된 경우 EXIT.
     if(typeof is_attr.T_DDLB !== "undefined" && is_attr.T_DDLB.length !== 0){return;}
 
@@ -1886,6 +1916,9 @@
       if(l_indx !== -1){
         //해당 이벤트 매핑.
         oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].UIATV = is_attr.UIATV;
+        oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].ISBND = is_attr.ISBND;
+        oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].MPROP = is_attr.MPROP;
+        oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].ADDSC = is_attr.ADDSC;
         return;
       }
 
@@ -1903,8 +1936,13 @@
 
     } //ATTRIBUTE 수집처리.
 
-    debugger;
 
+
+    //COMBO BOX에 입력한 값이 존재하는경우, COMBO BOX의 선택건이 없다면.
+    if(is_attr.comboval !== "" && is_attr.UIATV === ""){
+      //COMBO BOX에 입력값 초기화.
+      is_attr.comboval = "";
+    }
 
     //기존 수집건 존재 여부 확인.
     var l_indx = oAPP.attr.prev[is_attr.OBJID]._T_0015.findIndex( a => a.OBJID === is_attr.OBJID &&
@@ -1967,6 +2005,13 @@
 
     }
 
+
+    //프로퍼티 입력건 정합성 점검.
+    if(oAPP.fn.chkValidProp(is_attr) === false){
+      //입력 불가능한 값인경우 default 값으로 변경 처리.
+      is_attr.UIATV = l_dval;
+    }
+
     //default 값과 동일한 경우 수집항목이 존재하지 않는경우 exit.
     if(l_dval === is_attr.UIATV && l_indx === -1){
       return;
@@ -1992,6 +2037,60 @@
   }; //property, event, Aggregation 입력값 처리.
 
 
+
+
+  //입력값이 프로퍼티 유형에 맞는지 점검.
+  oAPP.fn.chkValidProp = function(is_attr){
+
+    //프로퍼티가 아닌경우, 바인딩 처리건인경우 EXIT.
+    if(is_attr.UIATY !== "1" && is_attr.ISBND === "X"){return;}
+
+    var l_val = is_attr.UIATV;
+
+    switch(is_attr.UIADT.toUpperCase()){
+      case "BOOLEAN":
+
+        //입력값이 true인경우.
+        if(is_attr.UIATV === "true"){
+          l_val = true;          
+
+        //입력값이 false 이거나 값이 입력되지 않은경우.
+        }else if(is_attr.UIATV === "false" || is_attr.UIATV === ""){
+          l_val = false;
+        
+        }
+
+        break;
+
+      case "INT":
+        //int로 변환처리.
+        l_val = Number(is_attr.UIATV);
+
+        if(isNaN(l_val)){
+          return false;
+        }
+        break;
+
+      case "FLOAT":
+        //float로 변환 처리.
+        l_val = Number(is_attr.UIATV);
+
+        if(isNaN(l_val)){
+          return false;
+        }
+
+        break;
+
+    }
+
+    var l_type = sap.ui.base.DataType.getType(is_attr.UIADT);
+    if(!l_type){return;}
+
+    //입력값 가능여부 return. true: 가능, false: 불가능.
+    return l_type.isValid(l_val);
+
+
+  };  //입력값이 프로퍼티 유형에 맞는지 점검.
 
 
   //appcontainer 호출 이벤트.
@@ -2267,6 +2366,20 @@
   };  //visible, editable등의 attribute 처리 전용 바인딩 필드 생성 처리.
 
 
+  
+  //오류 필드 초기화 처리.
+  oAPP.fn.attrClearErrorField = function(bRefresh){
+
+    for(var i=0, l=oAPP.attr.oModel.oData.T_ATTR.length; i<l; i++){
+      oAPP.attr.oModel.oData.T_ATTR[i].valst = undefined;
+      oAPP.attr.oModel.oData.T_ATTR[i].valtx = undefined;
+    }
+
+    if(!bRefresh){return;}
+
+    oAPP.attr.oModel.refresh();
+
+  };  //오류 필드 초기화 처리.
 
 
   //DOCUMENT에 대한 ATTR 정보 구성.
@@ -2718,6 +2831,9 @@
 
   //선택한 UI에 해당하는 attribute 리스트 업데이트 처리.
   oAPP.fn.updateAttrList = function(UIOBK, OBJID){
+    
+    //이전 선택건 초기화 처리.
+    oAPP.attr.ui.oRTab1.removeSelections();
 
     oAPP.attr.oModel.oData.T_ATTR = [];
 
@@ -2759,6 +2875,8 @@
       ls_0015.GUINR = oAPP.attr.appInfo.GUINR;
       ls_0015.OBJID = OBJID;
       ls_0015.UIATV = lt_0023[i].DEFVL;
+
+      ls_0015.comboval = "";
 
       //visible, editable등의 attribute 처리 전용 바인딩 필드 생성 처리.
       oAPP.fn.attrCreateAttrBindField(ls_0015);
@@ -3118,8 +3236,11 @@
          l_meta._sClassName === "sap.ui.table.Table" ||
          l_meta._sClassName === "sap.ui.table.TreeTable"){
 
-         //rows에 바인딩 처리됐는지 확인.
-         return oAPP.fn.getParentAggrBind(oUI._parent, "rows");
+          //상위 부모의 columns에 바인딩 처리안된경우 rows aggregation으로 판단.
+          if(typeof oUI._parent._MODEL["columns"] === "undefined"){
+            //rows에 바인딩 처리됐는지 확인.
+            return oAPP.fn.getParentAggrBind(oUI._parent, "rows");
+          }
 
         }
 

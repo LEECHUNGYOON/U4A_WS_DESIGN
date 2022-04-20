@@ -566,12 +566,10 @@
 
       }
 
-      var lt_0015 = [];
 
       //UI에 구성한 attr 정보 수집 처리.
-      for(var i in oAPP.attr.prev){
-        lt_0015 = lt_0015.concat(oAPP.attr.prev[i]._T_0015);
-      }
+      var lt_0015 = oAPP.fn.getAttrChangedData();
+
 
       return {"TU4A0010":ls_0010,
               "YU4A0014":lt_0014,
@@ -586,6 +584,41 @@
 
     };  //UI 저장 정보 구성.
    
+
+
+
+    //attribute의 변경된건 수집 처리.
+    oAPP.fn.getAttrChangedData = function(){
+      //UI에 구성한 attr 정보 수집 처리.
+      var lt_0015 = [];
+
+      //생성한 UI를 기준으로 ATTRIBUTE 수집건 취합.
+      for(var i in oAPP.attr.prev){
+        
+        //attribute 수집건이 존재하지 않는경우 skip.
+        if(oAPP.attr.prev[i]._T_0015.length === 0){continue;}
+
+        //attribute 수집건을 기준으로 ZYU4A0015 정보 구성.
+        for(var j=0, l2= oAPP.attr.prev[i]._T_0015.length; j<l2; j++){
+          
+          //ZSU4A0015 구조 생성.
+          var ls_0015 = oAPP.fn.crtStru0015();
+
+          //수집건을 생성한 구조에 옮김.
+          oAPP.fn.moveCorresponding(oAPP.attr.prev[i]._T_0015[j], ls_0015);
+
+          //RETURN 처리 결과에 수집.
+          lt_0015.push(ls_0015);
+
+        }        
+
+      }
+
+      //수집된 정보 return 처리.
+      return lt_0015;
+
+    };  //attribute의 변경된건 수집 처리.
+
 
 
 

@@ -393,8 +393,8 @@
         var l_bind = oAPP.attr.ui.oLTree1.getBinding();
         l_bind._buildTree(0,oAPP.fn.designGetTreeItemCount());
 
-        //신규로 생성된 UI의 미리보기에서 UI 선택 처리를 위한 FLAG 처리.
-        oAPP.attr.prev[ls_tab.OBJID].__isnew = "X";
+        ////신규로 생성된 UI의 미리보기에서 UI 선택 처리를 위한 FLAG 처리.
+        //oAPP.attr.prev[ls_tab.OBJID].__isnew = "X";
 
         //메뉴 선택 tree 위치 펼침 처리.
         oAPP.fn.setSelectTreeItem(ls_tab.OBJID);
@@ -468,8 +468,8 @@
         var l_bind = oAPP.attr.ui.oLTree1.getBinding();
         l_bind._buildTree(0,oAPP.fn.designGetTreeItemCount());
 
-        //신규로 생성된 UI의 미리보기에서 UI 선택 처리를 위한 FLAG 처리.
-        oAPP.attr.prev[ls_tab.OBJID].__isnew = "X";
+        ////신규로 생성된 UI의 미리보기에서 UI 선택 처리를 위한 FLAG 처리.
+        //oAPP.attr.prev[ls_tab.OBJID].__isnew = "X";
 
         //메뉴 선택 tree 위치 펼침 처리.
         oAPP.fn.setSelectTreeItem(ls_tab.OBJID);
@@ -554,8 +554,8 @@
         var l_bind = oAPP.attr.ui.oLTree1.getBinding();
         l_bind._buildTree(0,oAPP.fn.designGetTreeItemCount());
 
-        //신규로 생성된 UI의 미리보기에서 UI 선택 처리를 위한 FLAG 처리.
-        oAPP.attr.prev[ls_tab.OBJID].__isnew = "X";
+        ////신규로 생성된 UI의 미리보기에서 UI 선택 처리를 위한 FLAG 처리.
+        //oAPP.attr.prev[ls_tab.OBJID].__isnew = "X";
 
         //메뉴 선택 tree 위치 펼침 처리.
         oAPP.fn.setSelectTreeItem(ls_tab.OBJID);
@@ -633,8 +633,8 @@
         var l_bind = oAPP.attr.ui.oLTree1.getBinding();
         l_bind._buildTree(0,oAPP.fn.designGetTreeItemCount());
 
-        //신규로 생성된 UI의 미리보기에서 UI 선택 처리를 위한 FLAG 처리.
-        oAPP.attr.prev[ls_form.OBJID].__isnew = "X";
+        ////신규로 생성된 UI의 미리보기에서 UI 선택 처리를 위한 FLAG 처리.
+        //oAPP.attr.prev[ls_tab.OBJID].__isnew = "X";
 
         //메뉴 선택 tree 위치 펼침 처리.
         oAPP.fn.setSelectTreeItem(ls_form.OBJID);
@@ -702,8 +702,8 @@
         var l_bind = oAPP.attr.ui.oLTree1.getBinding();
         l_bind._buildTree(0,oAPP.fn.designGetTreeItemCount());
 
-        //신규로 생성된 UI의 미리보기에서 UI 선택 처리를 위한 FLAG 처리.
-        oAPP.attr.prev[ls_form.OBJID].__isnew = "X";
+        ////신규로 생성된 UI의 미리보기에서 UI 선택 처리를 위한 FLAG 처리.
+        //oAPP.attr.prev[ls_tab.OBJID].__isnew = "X";
 
         //메뉴 선택 tree 위치 펼침 처리.
         oAPP.fn.setSelectTreeItem(ls_form.OBJID);
