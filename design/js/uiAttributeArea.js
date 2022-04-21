@@ -2071,7 +2071,7 @@
   oAPP.fn.chkValidProp = function(is_attr){
 
     //프로퍼티가 아닌경우, 바인딩 처리건인경우 EXIT.
-    if(is_attr.UIATY !== "1" && is_attr.ISBND === "X"){return;}
+    if(is_attr.UIATY !== "1" || is_attr.ISBND === "X"){return;}
 
     var l_val = is_attr.UIATV;
 
