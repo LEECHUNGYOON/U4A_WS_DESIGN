@@ -8,6 +8,32 @@
       "framespacing=0 marginheight=0 marginwidth=0 ></iframe></div>"});
     oMPage.addContent(oMfrm1);
 
+    var oTool = new sap.m.Toolbar();
+    oMPage.setCustomHeader(oTool);
+
+    var oTitle = new sap.m.Title({text:"preview"});
+    oTool.addContent(oTitle);
+
+    oTool.addContent(new sap.m.ToolbarSpacer());
+
+    var oBtn = new sap.m.Button({icon:"sap-icon://refresh"});
+    oTool.addContent(oBtn);
+
+    oBtn.attachPress(function(){
+      oSlid.setValue(1);
+      oAPP.attr.ui.frame.contentWindow.setPreviewZoom(1);
+    })
+
+    var oSlid = new sap.m.Slider({width:"200px",min:0.1,max:2,step:0.1,value:1});
+    oTool.addContent(oSlid);
+
+    //slider변경 이벤트
+    oSlid.attachChange(function(){
+
+      oAPP.attr.ui.frame.contentWindow.setPreviewZoom(this.getValue());
+
+    });
+
 
   };  //가운데 페이지(미리보기 영역) 구성
 

@@ -6,7 +6,7 @@
         //MENU UI생성.
         var oMenu1 = new this.sap.m.Menu({title:"{/lcmenu/title}"});
 
-        var oModel = new this.sap.ui.model.json.JSONModel();        
+        var oModel = new this.sap.ui.model.json.JSONModel();      
 
         //context menu popover에 모델 설정.
         oMenu1.setModel(oModel);
@@ -18,7 +18,7 @@
 
             //메뉴 선택 후 popup종료 처리.
             oAPP.fn.contextMenuClosePopup(oMenu1);
-            
+
         }); //menu item 선택 이벤트.
 
         //UI 추가 메뉴
@@ -116,7 +116,7 @@
 
             case "M07": //paste 메뉴.
                 oAPP.fn.contextMenuUiPaste();
-                break;                                                                                                        
+                break;
 
         }
 
@@ -446,7 +446,7 @@
 
 
     //contet menu UI삭제 메뉴 선택 이벤트.
-    oAPP.fn.contextMenuDeleteUI = function(){  
+    oAPP.fn.contextMenuDeleteUI = function(){
   
         //선택라인의 삭제대상 OBJECT 제거 처리.
         function lf_deleteTreeLine(is_tree){

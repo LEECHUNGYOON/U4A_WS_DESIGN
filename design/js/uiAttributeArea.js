@@ -2571,14 +2571,14 @@
 
   
   //attribute 항목의 DDLB 정보 구성.
-  oAPP.fn.attrSetDDLBList = function(VALKY, UIATY, DEFVL, it_ddlb){
+  oAPP.fn.attrSetDDLBList = function(VALKY, UIATY, DEFVL){
     var lt_ddlb = [],
         ls_ddlb = {};
 
     //attribute가 이벤트건인경우.
     if(UIATY === "2"){
       //서버이벤트 항목 return.
-      return it_ddlb;
+      return oAPP.attr.T_EVT;
 
     }
 
@@ -2907,7 +2907,7 @@
     }
     
     //서버 이벤트 항목 검색.
-    var lt_ddlb = oAPP.fn.getServerEventList();
+    oAPP.attr.T_EVT = oAPP.fn.getServerEventList();
 
     //file uploader UI의 uploaderUrl 프로퍼티 예외처리.
     oAPP.fn.attrUploadUrlException(OBJID, UIOBK);
@@ -2943,7 +2943,7 @@
         ls_0015.sel_visb = true;
 
         //DDLB 항목 구성.
-        ls_0015.T_DDLB = oAPP.fn.attrSetDDLBList(lt_0023[i].VALKY, ls_0015.UIATY, lt_0023[i].DEFVL, lt_ddlb);
+        ls_0015.T_DDLB = oAPP.fn.attrSetDDLBList(lt_0023[i].VALKY, ls_0015.UIATY, lt_0023[i].DEFVL);
 
       }else if(lt_0023[i].ISLST === ""){
         //DDLB출력건이 아닌경우 input visible
