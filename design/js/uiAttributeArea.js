@@ -1591,11 +1591,13 @@
 
       if(!oParent){return;}
 
+      //N건 바인딩 정보가 존재하지 않는경우 상위 UI를 탐색.
       if(jQuery.isEmptyObject(oParent._BIND_AGGR) === true){
         lf_findModelBindParent(oParent._parent);
         return;
       }
 
+      //N건 바인딩 정보가 존재하는경우 입력 UI가 존재하는지 여부 확인.
       for(var i in oParent._BIND_AGGR){
 
         //현재 UI가 N건 바인딩 처리됐는지 확인.
@@ -1605,16 +1607,17 @@
         if(l_indx === -1){continue;}
 
         //부모의 N건 바인딩 수집건에서 현재 UI 제거 처리.
-        oParent._BIND_AGGR[i].splice(0, l_indx);
+        oParent._BIND_AGGR[i].splice(l_indx, 1);
         return;
 
       }
 
+      //N건 바인딩 정보에 입력 UI가 존재하지 않는경우 상위 UI 탐색.
       lf_findModelBindParent(oParent._parent);
 
     }
 
-
+    //상위 부모를 탐색하며 n건 바인딩 UI 수집건 제거.
     lf_findModelBindParent(oAPP.attr.prev[is_attr.OBJID]._parent);
 
 
@@ -3182,7 +3185,10 @@
         //row Aggregation에 N건 바인딩 처리됐는지 여부 판단.
         if(parent.getMetadata()._sClassName === "sap.ui.table.Column"){
 
-          return lf_getParentAggrModel(UIATV, "rows", parent._parent);
+          //ui table(tree table의 columns에 바인딩처리가 안된경우.)
+          if(!l_parent._parent._MODEL["coloums"]){
+            return lf_getParentAggrModel(UIATV, "rows", parent._parent);
+          }
 
         }
 
@@ -3222,7 +3228,7 @@
 
     //바인딩된 정보를 기준으로 부모를 탐색하며 N건 바인딩 여부 확인.
     for(var i=0,l=lt_0015.length; i<l; i++){
-            
+      
       //N건 바인딩 처리되어 parent에 현재 UI를 추가한 경우 exit.
       if(lf_getParentAggrModel(lt_0015[i].UIATV, oUi._EMBED_AGGR, oUi._parent) === true){
         return;

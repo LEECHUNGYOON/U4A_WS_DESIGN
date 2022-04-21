@@ -1165,17 +1165,21 @@
 
     debugger;
     //현재 UI가 N건 바인딩 처리 됐는지 여부 확인.
-    var l_path = oAPP.fn.getParentAggrBind(oAPP.attr.prev[i_drag.OBJID], param.UIATT);
+    var l_path = oAPP.fn.getParentAggrBind(oAPP.attr.prev[i_drag.OBJID]);
 
 
     //drop ui의 N건 바인딩 여부 확인.
     var l_path2 = oAPP.fn.getParentAggrBind(oAPP.attr.prev[i_drop.OBJID], param.UIATT);
 
+    var l_unbind = false;
+
     //n건 바인딩 정보가 존재하는경우.
     if(l_path && l_path !== "" && l_path !== l_path2){
-      //TREE라인을 기준으로 N건 바인딩 해제 처리.
-      oAPP.fn.designUnbindUi(i_drag, l_path);
+      l_unbind = true;
     }
+
+    //TREE라인을 기준으로 N건 바인딩 해제 처리.
+    oAPP.fn.designUnbindUi(i_drag, l_path, l_unbind);
 
 
     //MODEL 갱신 처리.
@@ -1193,6 +1197,9 @@
       i_drag.PUIOK, i_drag.UIATT, l_indx.length, i_drag.ISMLB, i_drag.UIOBK);
 
     
+    //현재 UI의 N건 바인딩 처리시 변경된 부모에 현재 UI 매핑 처리.
+    oAPP.fn.setModelBind(oAPP.attr.prev[i_drag.OBJID]);
+    
     //drag한 UI 선택 처리.
     oAPP.fn.setSelectTreeItem(i_drag.OBJID);
 
@@ -1208,7 +1215,7 @@
 
 
   //입력 TREE라인을 기준으로 N건 바인딩 해제 처리.
-  oAPP.fn.designUnbindUi = function(is_tree, i_path){
+  oAPP.fn.designUnbindUi = function(is_tree, i_path, bUnbind){
 
     if(!oAPP.attr.prev[is_tree.OBJID]){return;}
 
@@ -1220,7 +1227,7 @@
     if(is_tree.zTREE.length !== 0){
       //child를 탐색하면서 바인딩 해제 처리.
       for(var i=0, l=is_tree.zTREE.length; i<l; i++){
-        oAPP.fn.designUnbindUi(is_tree.zTREE[i], i_path);
+        oAPP.fn.designUnbindUi(is_tree.zTREE[i], i_path, bUnbind);
       }
 
     }
@@ -1234,6 +1241,8 @@
       if(oAPP.attr.prev[is_tree.OBJID]._T_0015[i].UIATV.substr(0,i_path.length) === i_path){
         //해당 UI의 바인딩처리 수집건 제거 처리.        
         oAPP.fn.attrUnbindProp(oAPP.attr.prev[is_tree.OBJID]._T_0015[i]);
+
+        if(!bUnbind){return;}
 
         //현재 라인 제거 처리.
         oAPP.attr.prev[is_tree.OBJID]._T_0015.splice(i, 1);
