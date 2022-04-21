@@ -1171,10 +1171,12 @@
     //drop ui의 N건 바인딩 여부 확인.
     var l_path2 = oAPP.fn.getParentAggrBind(oAPP.attr.prev[i_drop.OBJID], param.UIATT);
 
+    //DEFAULT 바인딩 수집건 유지.
     var l_unbind = false;
 
-    //n건 바인딩 정보가 존재하는경우.
+    //n건 바인딩 정보가 존재하는경우. 이동 대상 ui의 path와 다르다면.
     if(l_path && l_path !== "" && l_path !== l_path2){
+      //바인딩 수집건 제거 flag.
       l_unbind = true;
     }
 
@@ -1242,7 +1244,7 @@
         //해당 UI의 바인딩처리 수집건 제거 처리.        
         oAPP.fn.attrUnbindProp(oAPP.attr.prev[is_tree.OBJID]._T_0015[i]);
 
-        if(!bUnbind){return;}
+        if(!bUnbind){continue;}
 
         //현재 라인 제거 처리.
         oAPP.attr.prev[is_tree.OBJID]._T_0015.splice(i, 1);

@@ -3186,7 +3186,7 @@
         if(parent.getMetadata()._sClassName === "sap.ui.table.Column"){
 
           //ui table(tree table의 columns에 바인딩처리가 안된경우.)
-          if(!l_parent._parent._MODEL["coloums"]){
+          if(!parent._parent._MODEL["coloums"]){
             return lf_getParentAggrModel(UIATV, "rows", parent._parent);
           }
 
