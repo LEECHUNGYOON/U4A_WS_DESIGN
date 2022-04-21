@@ -786,12 +786,12 @@
 
       //클라이언트 이벤트 SOURCE TYPE 초기화.
       ls_attr.ADDSC = "";
+      
+      //UI에 수집되어있는 해당 이벤트 삭제.
+      oAPP.fn.attrDelClientEvent(ls_attr, "JS");
 
       //클라이언트 수집건 여부 확인 후 삭제.
       oAPP.fn.attrChgAttrVal(ls_attr, "DDLB");
-
-      //UI에 수집되어있는 해당 이벤트 삭제.
-      oAPP.fn.attrDelClientEvent(ls_attr, "JS");
 
       //해당 라인의 style 처리.
       oAPP.fn.attrSetLineStyle(ls_attr);
@@ -886,6 +886,9 @@
 
       //클라이언트 이벤트 SOURCE TYPE 초기화.
       ls_drop.ADDSC = "";
+
+      //drop의 클라이언트 이벤트 삭제 처리.
+      oAPP.fn.attrDelClientEvent(ls_drop, "JS");
 
       //attribute 입력건에 대한 미리보기, attr 라인 style 등에 대한 처리.
       oAPP.fn.attrChangeProc(ls_drop, "INPUT", true);
@@ -1445,7 +1448,9 @@
     //추가속성정의
     is_attr.MPROP = "";
 
+    //프로퍼티인경우, 바인딩 추가 속성 정의가 존재하는경우.
     if(is_attr.UIATY === "1" && is_tree.MPROP !== ""){
+      //바인딩 추가 속성 정의값 매핑.
       is_attr.MPROP = is_tree.MPROP;
     }
 
@@ -1579,11 +1584,12 @@
 
 
 
-
   //n건 바인딩한 프로퍼티 해제 처리.
   oAPP.fn.attrUnbindProp = function(is_attr){
 
     function lf_findModelBindParent(oParent){
+
+      if(!oParent){return;}
 
       if(jQuery.isEmptyObject(oParent._BIND_AGGR) === true){
         lf_findModelBindParent(oParent._parent);

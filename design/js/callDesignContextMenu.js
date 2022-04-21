@@ -312,6 +312,18 @@
                 parent.showMessage(sap, 10, "W", "The object is already specified in Aggrigation.");
             }
 
+            //공통코드 미리보기 UI Property 고정값 정보 검색.
+            lt_ua018 = oAPP.DATA.LIB.T_9011.filter( a=> a.CATCD === "UA018");
+            
+            //부모 UI에 추가 불필요 대상 UI 정보 검색.
+            lt_ua026 = oAPP.DATA.LIB.T_9011.filter( a=> a.CATCD === "UA026" && a.FLD02 !== "X" );
+
+            //UI 프로퍼티 고정값 설정 정보 검색.
+            lt_ua030 = oAPP.DATA.LIB.T_9011.filter( a=> a.CATCD === "UA030" && a.FLD06 !== "X" );
+
+            //UI 프로퍼티 type 예외처리 정보 검색.
+            lt_ua032 = oAPP.DATA.LIB.T_9011.filter( a=> a.CATCD === "UA032" && a.FLD06 !== "X" );
+
             //UI 반복 횟수만큼 그리기.
             for(var i=0; i<l_cnt; i++){
 
@@ -378,19 +390,17 @@
 
 
                 //미리보기 UI 추가
-                oAPP.attr.ui.frame.contentWindow.addUIObjPreView(l_14.OBJID, l_14.UIOBK, l_14.LIBNM, l_14.UIFND, l_14.POBID, l_14.PUIOK, param.E_EMB_AGGR.UIATT);
+                oAPP.attr.ui.frame.contentWindow.addUIObjPreView(l_14.OBJID, l_14.UIOBK, l_14.LIBNM, 
+                    l_14.UIFND, l_14.POBID, l_14.PUIOK, param.E_EMB_AGGR.UIATT, [ls_0015], lt_ua018, lt_ua032, lt_ua030, lt_ua026);
 
-
-                //UI 생성건 수집 처리.
-                oAPP.attr.prev[l_14.OBJID]._T_0015 = [];
-                oAPP.attr.prev[l_14.OBJID]._T_0015.push(ls_0015);
-
+                //aggregation 정보 초기화.
                 ls_0015 = {};
 
                 //file uploader UI의 uploaderUrl 프로퍼티 예외처리.
                 oAPP.fn.attrUploadUrlException(l_14.OBJID, l_14.UIOBK);
 
             } //UI 반복 횟수만큼 그리기.
+            
   
             //MODEL 갱신 처리.
             oAPP.attr.oModel.refresh();
@@ -713,6 +723,21 @@
 
             for(var i=0, l=is_copied._T_0015.length; i<l; i++){
                 
+                //바인딩 정보를 유지 안하는경우.
+                if(bKeep !== true){
+
+                    //바인딩 처리된건인경우 skip.
+                    if(is_copied._T_0015[i].ISBND === "X" && is_copied._T_0015[i].UIATV !== ""){
+                        continue;
+                    }
+
+                    //서버 이벤트가 존재하는경우 skip.
+                    if(is_copied._T_0015[i].UIATY === "2" && is_copied._T_0015[i].UIATV !== ""){
+                        continue;
+                    }
+
+                }
+
                 //프로퍼티 구조 신규 생성.
                 var ls_15 = oAPP.fn.crtStru0015();
 
@@ -734,39 +759,14 @@
 
                 }
 
-                //바인딩, 서버이벤트를 동일하게 유지하는경우.
-                if(bKeep === true){
-                    //프로퍼티 복사건 재수집 처리.
-                    lt_0015.push(ls_15);
-                    continue;
-                }
-
-                //바인딩, 서버이벤트를 초기화 하는경우 하위로직 수행.
-
-                //복사된 값에 바인딩 처리가 된경우.
-                if(ls_15.ISBND === "X" && ls_15.UIATV !== ""){
-                    //바인딩 flag 필드 초기화.                        
-                    ls_15.ISBND = "";
-
-                    //바인딩 값 초기화.
-                    ls_15.UIATV = "";
-
-                }
-
-                //이벤트의 경우 서버이벤트가 존재시.
-                if(ls_15.UIATY === "2" && ls_15.UIATV !== ""){
-                    //서버이벤트 초기화.
-                    ls_15.UIATV = "";
-                }
-
                 //프로퍼티 복사건 재수집 처리.
                 lt_0015.push(ls_15);
-
+                
             }
 
             return lt_0015;
 
-        }
+        }   //UI의 attr 정보 복사 처리.
 
 
         //복사된 ui를 붙여넣기 처리.
@@ -837,12 +837,16 @@
 
             //미리보기 UI 추가
             oAPP.attr.ui.frame.contentWindow.addUIObjPreView(ls_14.OBJID, ls_14.UIOBK, ls_14.UILIB, 
-                ls_14.UIFND, ls_14.POBID, ls_14.PUIOK, ls_14.UIATT, lt_0015, it_ua018, it_ua032, lt_ua026);
+                ls_14.UIFND, ls_14.POBID, ls_14.PUIOK, ls_14.UIATT, lt_0015, it_ua018, it_ua032, lt_ua030, lt_ua026);
 
+
+            //복사한 데이터의 CHILD 정보가 존재하지 않는경우.
             if(is_copied.zTREE.length === 0){
+                //aggrParam 파라메터가 존재하는경우 현재 구성한 라인정보 RETURN.
                 return aggrParam ? ls_14 : undefined;
             }
 
+            //복사한 데이터의 CHILD정보가 존재하는경우 하위를 탐색하며 라인 정보 구성.
             for(var i=0, l=is_copied.zTREE.length; i<l; i++){
                 lf_setPasteCopiedData(ls_14, is_copied.zTREE[i], undefined, it_ua018, it_ua032, bKeep);
 
