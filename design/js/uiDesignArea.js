@@ -421,7 +421,6 @@
       return lt_sel;
     }
 
-
     //target AGGREGATION을 기준으로 점검.
     for(var i=0, l = lt_0023.length; i<l; i++){
 
@@ -431,6 +430,7 @@
       //해당 aggregation의 child 정보 얻기.
       var l_child = oAPP.attr.prev[tOBJID][l_agrnm]();
 
+
       //해당 aggregation에 n건 바인딩이 설정된 경우
       //child UI가 이미 존재하는 경우 skip.
       if(oAPP.attr.prev[tOBJID]._MODEL[lt_0023[i].UIATT] &&
@@ -439,7 +439,9 @@
       }
 
       //0:1 aggregation에 이미 ui가 존재하는 경우 skip.
-      if(lt_0023[i].ISMLB === "" && l_child){
+      //l_child._OBJID를 판단하는 이유는 공통코드 UA050항목에 의해
+      //강제로 추가된 CHILD UI인경우 SKIP 처리를 하지 않기 위함.
+      if(lt_0023[i].ISMLB === "" && l_child && typeof l_child._OBJID !== "undefined" ){
         continue;
       }
 
@@ -1134,6 +1136,11 @@
 
     //DRAG UI의 부모에서 DRAG UI정보 제거.
     l_parent.zTREE.splice(l_indx, 1);
+    
+    var lt_ua050 = oAPP.DATA.LIB.T_9011.filter( a=> a.CATCD === "UA050" && a.FLD08 !== "X" );
+        
+    //자식 UI가 필수인 UI에 자식이 없는경우 강제추가 예외처리.
+    oAPP.attr.ui.frame.contentWindow.setChildUiException(l_parent.UIOBK, l_parent.OBJID, l_parent.zTREE, lt_ua050);
 
     if(typeof i_drop.zTREE === "undefined"){
       i_drop.zTREE = [];
@@ -1141,6 +1148,7 @@
 
     //drop의 CHILD 영역에 DRAG UI를 추가.
     i_drop.zTREE.push(i_drag);
+
 
     //DRAG UI의 부모정보 변경.
     i_drag.POBID = i_drop.OBJID;
@@ -1218,6 +1226,8 @@
 
   //입력 TREE라인을 기준으로 N건 바인딩 해제 처리.
   oAPP.fn.designUnbindUi = function(is_tree, i_path, bUnbind){
+
+    if(!i_path){return;}
 
     if(!oAPP.attr.prev[is_tree.OBJID]){return;}
 
