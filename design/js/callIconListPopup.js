@@ -173,6 +173,14 @@
         oDlg.open();
 
 
+        //dialog open 이후 이벤트.
+        oDlg.attachAfterOpen(function(){
+            //검색조건에 focus 처리.
+            oSearch.focus();
+
+        });
+
+
     };  //아이콘 리스트 팝업.
 
 })();

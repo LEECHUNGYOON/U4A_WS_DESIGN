@@ -240,6 +240,8 @@
       //서버 호출.
       sendAjax(oAPP.attr.servNm + "/getAppData", oFormData, function(param){
 
+        console.log("app 데이터 완료 : " + new Date());
+
         oAPP.DATA.APPDATA = param.APPDATA;
 
         //application ui design, attribute 정보 매핑.
@@ -275,6 +277,8 @@
         //ui design tree 전체 접힘 처리.
         oAPP.attr.ui.oLTree1.collapseAll();
 
+        
+        console.log("좌측 tree 완료 : " + new Date());
 
         //미리보기 html 정보가 로드되지 않은경우.
         if(!oAPP.attr.ui.frame){
@@ -340,6 +344,8 @@
 
       //라이브러리가 로드되지 않은경우 라이브러리 정보 로드를 위한 서버 호출.
       sendAjax(oAPP.attr.servNm + "/getLibData", oFormData, function(param){
+        
+        console.log(is_tab.alias + " : " + console.log(new Date()));
 
         //다른 db 검색 실패 여부 확인.
         var l_err = it_lib.findIndex( a => a.ERROR === "X");
@@ -378,7 +384,6 @@
 
         //모든 table이 load완료한 경우.
         if(l_find === -1){
-          debugger;
           //라이브러리 정보에 실제 라이브러리명 필드를 추가하여 매핑 처리(sap/m/Input -> sap.m.Input)
           for(var i=0, l=oAPP.DATA.LIB.T_0022.length; i<l; i++){
             oAPP.DATA.LIB.T_0022[i].LIBNM = oAPP.DATA.LIB.T_0022[i].UIOMD.replace(/\//g, ".");

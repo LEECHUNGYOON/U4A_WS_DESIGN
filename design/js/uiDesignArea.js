@@ -1171,7 +1171,6 @@
     oAPP.fn.moveCorresponding(param, ls_embed);
     ls_embed.UIATY = "6";
 
-    debugger;
     //현재 UI가 N건 바인딩 처리 됐는지 여부 확인.
     var l_path = oAPP.fn.getParentAggrBind(oAPP.attr.prev[i_drag.OBJID]);
 

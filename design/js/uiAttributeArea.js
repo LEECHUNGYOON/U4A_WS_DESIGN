@@ -1724,7 +1724,7 @@
 
   //aggregation 바인딩 callback 처리.
   oAPP.fn.attrBindCallBackAggr = function(bIsbind, is_tree, is_attr){
-    debugger;
+
     //unbind 처리건인경우.
     if(bIsbind === false){
 

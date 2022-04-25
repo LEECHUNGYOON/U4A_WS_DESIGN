@@ -11,11 +11,33 @@ oAPP.fn.uiMovePosition = function(pos, max, f_callBack){
 
   //ui 위치이동 dialog UI 생성.
   sap.ui.getCore().loadLibrary("sap.m");
-  var oDlg = new sap.m.Dialog({draggable:true, title:"move Position"});
+  var oDlg = new sap.m.Dialog({draggable:true, resizable:true});
 
   //MODEL 생성.
   var oMdl = new sap.ui.model.json.JSONModel();
   oDlg.setModel(oMdl);
+
+  var oTool = new sap.m.Toolbar();
+  oDlg.setCustomHeader(oTool);
+
+  oTool.addContent(new sap.m.Title({text:"Move Position"}));
+
+  oTool.addContent(new sap.m.ToolbarSpacer());
+
+  //우상단 닫기버튼.
+  var oBtn0 = new sap.m.Button({icon:"sap-icon://decline", type:"Reject"});
+  oTool.addContent(oBtn0);
+
+  //닫기 버튼 선택 이벤트.
+  oBtn0.attachPress(function(){
+    
+    //dialog 종료 처리.
+    lf_close();
+    
+    //001	Cancel operation
+    parent.showMessage(sap,10, "I", "Cancel operation");
+
+  });
 
   //최대 이동 위치 label.
   var oLab1 = new sap.m.Label({text:"Max " + max , design:"Bold"});
