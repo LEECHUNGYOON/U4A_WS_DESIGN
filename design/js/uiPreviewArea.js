@@ -40,6 +40,108 @@
 
 
 
+
+  //미리보기 iframe 영역 구성.
+  oAPP.fn.loadPreviewFrame = function(){
+
+    //미리보기 html 정보가 로드되지 않은경우.
+    if(!oAPP.attr.ui.frame){
+      oAPP.attr.ui.frame = document.getElementById("prevHTML");
+
+      var l_info = parent.getUserInfo();
+
+      //미리보기 서버 URL 정보 구성.
+      oAPP.attr.ui.frame.src = oAPP.attr.servNm + "/getPrevHTML?" +
+        "sap-client=" + l_info.CLIENT +  
+        "&sap-language=" + l_info.LANGU + 
+        "&LIBPATH=" + oAPP.fn.getBootStrapUrl() + 
+        "&LIBRARY=" + oAPP.fn.getUi5Libraries(true) +
+        "&THEME=" + encodeURIComponent(oAPP.DATA.APPDATA.S_0010.UITHM);
+
+      return;
+    }
+
+    //미리보기 화면 구성.
+    if(oAPP.attr.ui.frame.contentWindow && oAPP.attr.ui.frame.contentWindow._loaded === true){
+
+      //테마 구성.
+      oAPP.attr.ui.frame.contentWindow.setPreviewUiTheme(oAPP.DATA.APPDATA.S_0010.UITHM);
+
+      //라이브러리 로드 처리.
+      oAPP.attr.ui.frame.contentWindow.setUiLoadLibraries(oAPP.fn.getUi5Libraries());
+
+      //미리보기 ui 구성
+      oAPP.attr.ui.frame.contentWindow.drawPreview();
+
+    }
+
+
+  };  //미리보기 iframe 영역 구성.
+  
+
+
+  //sap.ui.getCore().loadLibrary 처리 대상건 구성.
+  oAPP.fn.getUi5Libraries = function(bFirst){
+
+    var lt_lib = [], l_indx;
+
+    for(var i=0, l=oAPP.DATA.APPDATA.T_0014.length; i<l; i++){
+
+      if(oAPP.DATA.APPDATA.T_0014[i].TGLIB === ""){continue;}
+
+      l_indx = lt_lib.findIndex( a => a  === oAPP.DATA.APPDATA.T_0014[i].TGLIB );
+
+      if(l_indx !== -1){continue;}
+
+      lt_lib.push(oAPP.DATA.APPDATA.T_0014[i].TGLIB);
+
+    }
+
+    if(bFirst){
+      return encodeURIComponent(lt_lib.join(","));
+    }
+
+    return lt_lib;
+
+  } //sap.ui.getCore().loadLibrary 처리 대상건 구성.
+
+
+
+
+  //UI5 bootstrap URL정보 얻기.
+  oAPP.fn.getBootStrapUrl = function(){
+    var ls_ua025;
+
+    //-1차 필터 별도 Application
+    ls_ua025 = oAPP.DATA.LIB.T_9011.find( a => a.CATCD === "UA025" 
+      && a.FLD01 === "WOK_" + oAPP.attr.appInfo.APPID
+      && a.FLD06 === "X" );
+
+    if(typeof ls_ua025 !== "undefined"){
+      return encodeURIComponent(ls_ua025.FLD04 + ls_ua025.FLD05);
+    }
+
+    //-2차 필터 패키지
+    ls_ua025 = oAPP.DATA.LIB.T_9011.find( a => a.CATCD === "UA025" 
+      && a.FLD01 === "WOK_" + oAPP.attr.appInfo.PACKG
+      && a.FLD06 === "X" );
+
+    if(typeof ls_ua025 !== "undefined"){
+      return encodeURIComponent(ls_ua025.FLD04 + ls_ua025.FLD05);
+    }
+
+    //-3차 필터 전체대상
+    ls_ua025 = oAPP.DATA.LIB.T_9011.find( a => a.CATCD === "UA025" 
+      && a.FLD01 === "WOK" && a.FLD06 === "X" );
+
+    if(typeof ls_ua025 !== "undefined"){
+      return encodeURIComponent(ls_ua025.FLD04 + ls_ua025.FLD05);
+    }
+
+  };  //UI5 bootstrap URL정보 얻기.
+
+
+
   //프로퍼티 설정 skip 처리 항목.
   oAPP.fn.prevSkipProp = function(is_attr){
 

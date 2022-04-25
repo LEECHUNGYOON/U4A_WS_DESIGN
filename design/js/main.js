@@ -280,23 +280,10 @@
         
         console.log("좌측 tree 완료 : " + new Date());
 
-        //미리보기 html 정보가 로드되지 않은경우.
-        if(!oAPP.attr.ui.frame){
-          oAPP.attr.ui.frame = document.getElementById("prevHTML");
 
-          var l_info = parent.getUserInfo();
-
-          //미리보기 서버 URL 정보 구성.
-          oAPP.attr.ui.frame.src = oAPP.attr.servNm +
-            "/getPrevHTML?" + "sap-client=" + l_info.CLIENT +  "&sap-language=" + l_info.LANGU;
-
-        }
 
         //미리보기 화면 구성.
-        if(oAPP.attr.ui.frame.contentWindow && oAPP.attr.ui.frame.contentWindow._loaded === true){
-          oAPP.attr.ui.frame.contentWindow.drawPreview();
-
-        }
+        oAPP.fn.loadPreviewFrame();
 
         //wait off 처리.
         //parent.setBusy('');
