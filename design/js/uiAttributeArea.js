@@ -893,8 +893,11 @@
       //drop의 클라이언트 이벤트 삭제 처리.
       oAPP.fn.attrDelClientEvent(ls_drop, "JS");
 
-      //attribute 입력건에 대한 미리보기, attr 라인 style 등에 대한 처리.
-      oAPP.fn.attrChangeProc(ls_drop, "INPUT", true);
+      //클라이언트 수집건 여부 확인 후 삭제.
+      oAPP.fn.attrChgAttrVal(ls_drop, "DDLB");
+
+      //해당 라인의 style 처리.
+      oAPP.fn.attrSetLineStyle(ls_drop);
 
       
     } //기존 이벤트 입력건 초기화 여부 FLAG가 존재하는경우, 입력 불가시.
@@ -1686,8 +1689,6 @@
 
         //PARENT, CHILD 프로퍼티 KEY 정보 구성.
         lt_UIATK = ["EXT00001190", "EXT00001191"];
-        //parent,
-        
 
         break;
 

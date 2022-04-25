@@ -378,7 +378,7 @@
 
         //모든 table이 load완료한 경우.
         if(l_find === -1){
-
+          debugger;
           //라이브러리 정보에 실제 라이브러리명 필드를 추가하여 매핑 처리(sap/m/Input -> sap.m.Input)
           for(var i=0, l=oAPP.DATA.LIB.T_0022.length; i<l; i++){
             oAPP.DATA.LIB.T_0022[i].LIBNM = oAPP.DATA.LIB.T_0022[i].UIOMD.replace(/\//g, ".");
@@ -390,7 +390,7 @@
         }
 
         //해당 DB의 검색이 완료된경우 하위 로직 SKIP.
-        if(param.END === "X"){
+        if(param.END === "X"){          
           return;
         }
 
