@@ -89,6 +89,10 @@
 
       if(oAPP.DATA.APPDATA.T_0014[i].TGLIB === ""){continue;}
 
+      if(oAPP.DATA.APPDATA.T_0014[i].TGLIB.indexOf("u4a") !== -1){continue;}
+
+      if(oAPP.DATA.APPDATA.T_0014[i].TGLIB.indexOf("sapui6") !== -1){continue;}
+
       l_indx = lt_lib.findIndex( a => a  === oAPP.DATA.APPDATA.T_0014[i].TGLIB );
 
       if(l_indx !== -1){continue;}
