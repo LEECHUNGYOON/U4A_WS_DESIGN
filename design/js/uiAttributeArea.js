@@ -4029,7 +4029,14 @@
       }
       
       //해당 라인의 활성화된 입력필드에 focus 처리.
-      lt_item[i].mAggregations.cells[1].mAggregations.items[l_pos].focus();
+      setTimeout(() => {
+        lt_item[i].mAggregations.cells[1].mAggregations.items[l_pos].focus();
+
+        var l_dom = lt_item[i].mAggregations.cells[1].mAggregations.items[l_pos].getDomRef();
+        if(l_dom){
+          l_dom.scrollIntoView(true);
+        }
+      }, 0);
 
       break;
 
