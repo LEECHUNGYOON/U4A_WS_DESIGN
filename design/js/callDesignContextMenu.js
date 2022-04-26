@@ -923,7 +923,7 @@
             //이동 가능한 aggregation 정보가 존재하지 않는경우.
             if(typeof param === "undefined"){
                 //오류 메시지 출력.
-                parent.showMessage(sap, 10, "I", "이동 가능한 aggregation이 존재하지 않습니다.");
+                parent.showMessage(sap, 10, "I", "붙여넣기가 가능한 aggregation이 존재하지 않습니다.");
                 return;                
             }
 

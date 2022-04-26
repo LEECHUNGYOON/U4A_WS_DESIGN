@@ -49,7 +49,7 @@
     oSel1.setSelectedIndex(0);
 
     //aggr ddlb 선택시
-    oSel1.attachSelect(function(){
+    oSel1.attachChange(function(){
       //확인 버튼으로 focus 처리.
       oBtn1.focus();
     });

@@ -417,6 +417,9 @@
          //UI design tree영역 체크박스 활성여부 처리.
          oAPP.fn.setTreeChkBoxEnable(oAPP.attr.oModel.oData.zTREE[0]);
 
+         //미리보기 UI의 drop 제거 처리.
+         oAPP.attr.ui.frame.contentWindow.removeDropConfig();
+
          //모델 갱신 처리.
          oAPP.attr.oModel.refresh();
 

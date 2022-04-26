@@ -28,8 +28,8 @@
 
     oRCTool.addContent(new sap.m.ToolbarSpacer());
 
-    var oRLibBtn1 = new sap.m.Button({text:"{/uiinfo/UILIB}",visible:"{/uiinfo/vis01}",tooltip:"UI5 library Reference"});
-    oRCTool.addContent(oRLibBtn1);
+    var oRLibLink = new sap.m.Link({text:"{/uiinfo/UILIB}",visible:"{/uiinfo/vis01}",tooltip:"UI5 library Reference"});
+    oRCTool.addContent(oRLibLink);
 
     var oRLibBtn2 = new sap.m.Button({icon:"sap-icon://example",visible:"{/uiinfo/vis01}",tooltip:"UI Sample"});
     oRCTool.addContent(oRLibBtn2);
