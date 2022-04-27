@@ -121,6 +121,29 @@
 
 
 
+    //context menu ui 생성 function이 존재하는경우.
+    if(typeof oAPP.fn.callAttrContextMenu !== "undefined"){
+      //context menu ui 생성 처리.
+      oAPP.attr.ui.oAttrMenu = oAPP.fn.callAttrContextMenu();
+    }else{
+      //context menu ui 생성 function이 존재하지 않는경우 script 호출.
+      oAPP.fn.getScript("design/js/callAttrContextMenu",function(){
+        //context menu ui 생성 처리.
+        oAPP.attr.ui.oAttrMenu = oAPP.fn.callAttrContextMenu();
+      });
+
+    }
+
+
+    //attribute context menu 호출 이벤트.
+    oRTab1.attachBrowserEvent("contextmenu", function(oEvent){
+
+      //attribute의 context menu 호출전 처리.
+      oAPP.fn.attrBeforeContextMenu(oEvent);
+
+    });
+
+
     //attribute명 컬럼.
     var oRCol1 = new sap.m.Column({width:"30%"});
     oRTab1.addColumn(oRCol1);
@@ -144,6 +167,9 @@
     var oRObjStat1 = new sap.m.ObjectStatus({text:"{UIATT}",icon:"{UIATT_ICON}"});
     oRListItem1.addCell(oRObjStat1);
 
+    //context menu 호출 위치를 알기위한 custom data 매핑.
+    oRObjStat1.addCustomData(new sap.ui.core.CustomData({key:"AT01"}));
+
     //attribute 입력 hbox
     var oRHbox1 = new sap.m.HBox({width:"100%",direction:"Column",renderType:"Bare",alignItems:"Center"});
     oRListItem1.addCell(oRHbox1);
@@ -160,8 +186,6 @@
 
     }); //attr 입력필드 이벤트.
 
-
-
     //input f4 help 이벤트
     oRInp2.attachValueHelpRequest(function(oEvent){
       //f4 help 버튼 선택 이벤트.
@@ -169,6 +193,8 @@
 
     }); //input f4 help 이벤트
 
+    //context menu 호출 위치를 알기위한 custom data 매핑.
+    oRInp2.addCustomData(new sap.ui.core.CustomData({key:"AT02"}));
 
 
     //Attribute DDLB UI
@@ -182,6 +208,9 @@
       oAPP.fn.attrChange(this.getBindingContext().getProperty(), "DDLB");
 
     }); //DDLB 선택 이벤트.
+
+    //context menu 호출 위치를 알기위한 custom data 매핑.
+    oRSel1.addCustomData(new sap.ui.core.CustomData({key:"AT02"}));
 
 
     //DDLB ITEM.
@@ -201,7 +230,6 @@
     }); //버튼 선택 이벤트.
 
 
-
     //Attribute checkbox UI
     var oRChk1 = new sap.m.CheckBox({selected:"{UIATV_c}",editable:"{edit}",visible:"{chk_visb}",
       enabled:"{/IS_EDIT}",valueState:"{valst}"});
@@ -215,7 +243,6 @@
     }); //체크박스 선택 이벤트
 
 
-
     //바인딩(서버 이벤트) 아이콘
     var oRIcon1 = new sap.ui.core.Icon({src:"{icon1_src}",color:"{icon1_color}",visible:"{icon1_visb}"});
     oRListItem1.addCell(oRIcon1);
@@ -226,8 +253,9 @@
       oAPP.fn.attrIcon1Proc(this.getBindingContext().getProperty());
 
     }); //바인딩(서버 이벤트) 아이콘 선택 이벤트
-
-
+    
+    //context menu 호출 위치를 알기위한 custom data 매핑.
+    oRIcon1.addCustomData(new sap.ui.core.CustomData({key:"AT03"}));
 
     //help(script 이벤트) 아이콘
     var oRIcon2 = new sap.ui.core.Icon({src:"{icon2_src}",color:"{icon2_color}",visible:"{icon2_visb}"});
@@ -241,6 +269,9 @@
       oAPP.fn.attrIcon2Proc(this.getBindingContext().getProperty());      
 
     }); //help(script 이벤트) 아이콘 선택 이벤트
+
+    //context menu 호출 위치를 알기위한 custom data 매핑.
+    oRIcon2.addCustomData(new sap.ui.core.CustomData({key:"AT04"}));
 
 
 
@@ -302,6 +333,9 @@
 
     //DDLB 변경 라인 STYLE 처리.
     oAPP.fn.attrSetLineStyle(is_attr);
+
+    //F4 HELP 버튼 활성여부 처리.
+    oAPP.fn.attrSetShowValueHelp(is_attr);
 
     //입력필드 입력 가능여부 처리.
     oAPP.fn.setAttrEditable(is_attr);
@@ -392,6 +426,51 @@
   };  ////이벤트 생성 아이콘 선택 function.
 
 
+
+
+  //attribute의 context menu 호출전 처리.
+  oAPP.fn.attrBeforeContextMenu = function(oEvent){
+
+    //편집모드가 아닌경우 EXIT.
+    if(oAPP.attr.oModel.oData.IS_EDIT !== true){
+      return;
+    }
+
+    //이벤트 발생 dom에 해당하는 UI정보 얻기.
+    var l_ui = oAPP.fn.getUiInstanceDOM(oEvent.target, sap.ui.getCore());
+
+    //UI정보를 얻지 못한 경우 exit.
+    if(!l_ui){return;}
+
+    //해당 UI의 바인딩 정보 얻기.
+    var l_ctxt = l_ui.getBindingContext();
+
+    //바인딩 정보를 얻지 못한 경우 exit.
+    if(!l_ctxt){return;}
+
+    var ls_attr = l_ctxt.getProperty();
+
+    //DOCUMENT에서 CONTEXT MENU를 호출한 경우 EXIT.
+    if(ls_attr.OBJID === "ROOT"){return;}
+
+    //custom data 설정건 정보 얻기.
+    var lt_cdata = l_ui.getCustomData();
+
+    //cusom data 설정건 정보가 존재하지 않는경우 exit.
+    if(lt_cdata.length === 0){return;}
+
+
+    //메뉴 호출전 메뉴 활성여부 설정.
+    if(oAPP.fn.attrSetContextMenu(oAPP.attr.ui.oAttrMenu, ls_attr, lt_cdata[0].getKey()) === true){
+      return; 
+    }
+
+
+    //메뉴 호출 처리.
+    oAPP.attr.ui.oAttrMenu.openBy(oEvent.target);
+
+
+  };  //attribute의 context menu 호출전 처리.
 
 
   //프로퍼티 바인딩 팝업 호출 처리 function.
@@ -905,7 +984,7 @@
 
     //모델 갱신 FLAG가 입력된 경우.
     if(bModelRefresh){
-      oAPP.attr.oModel.refresh();
+      oAPP.attr.oModel.refresh(true);
     }
 
     //해당 FUNCTION 호출처의 하위 로직 SKIP을 위한 FLAG RETURN.
@@ -1064,7 +1143,7 @@
     if(typeof ls_ua025 === "undefined"){return;}
 
     //version.
-    var l_url = "/ZU4A_ACS/U4A_API_DOCUMENT??VER=" + ls_ua025.FLD07;
+    var l_url = "/ZU4A_ACS/U4A_API_DOCUMENT?VER=" + ls_ua025.FLD07;
 
     //ATTRIBUTE의 UI DESIGN 영역 정보 얻기.
     var ls_tree = oAPP.fn.getTreeData(is_attr.OBJID);
@@ -1097,31 +1176,17 @@
     //클라이언트 스크립트 호출 FUNCTION 호출.
     oAPP.fn.fnClientEditorPopupOpener("JS", l_objid,function(param){
 
-      //동일 이벤트 정보 얻기.
-      var ls_0015 = oAPP.attr.prev[is_attr.OBJID]._T_0015.find( a=> a.UIATK === is_attr.UIATK);
+      if(param === "X"){
+        is_attr.ADDSC = "JS";
 
-      if(typeof ls_0015 === "undefined"){
-        //수집된건이 없는경우 신규 라인 생성 처리.
-        ls_0015 = oAPP.fn.crtStru0015();
-
-        //attribute라인정보 MOVE-CORRESPONDING 처리.
-        oAPP.fn.moveCorresponding(is_attr, ls_0015);
-        
-        ls_0015.APPID = oAPP.attr.appInfo.APPID;
-        ls_0015.GUINR = oAPP.attr.appInfo.GUINR;
-
-        oAPP.attr.prev[is_attr.OBJID]._T_0015.push(ls_0015);
+      }else if(param === ""){
+        is_attr.ADDSC = "";
 
       }
 
-      //javascript client event 추가됨 flag 구성.
-      is_attr.ADDSC = ls_0015.ADDSC = "JS";
+      //call back 이후 attr 갱신 처리.
+      oAPP.fn.attrChangeProc(is_attr, "", false, true);
 
-      //해당 라인의 style 처리.
-      oAPP.fn.attrSetLineStyle(is_attr);
-
-      //모델 갱신 처리.
-      oAPP.attr.oModel.refresh();
 
     });
 
@@ -1402,6 +1467,10 @@
     //desc 입력건 정보 objid 변경.
     oAPP.fn.changeDescOBJID(ls_uiinfo.OBJID, ls_uiinfo.OBJID_bf);
 
+    //현재 출력된 attribute 리스트의 OBJID 변경 처리.
+    for(var i=0, l=oAPP.attr.oModel.oData.T_ATTR.length; i<l; i++){
+      oAPP.attr.oModel.oData.T_ATTR[i].OBJID = ls_uiinfo.OBJID;
+    }
     
 
     //이전 OBJID를 변경된 ID로 업데이트.
@@ -1636,6 +1705,9 @@
 
     //바인딩 팝업에서 선택한 PATH 정보 초기화.
     is_attr.UIATV = "";
+
+    //combo box 입력값 초기화.
+    is_attr.comboval = "";
 
     //프로퍼티의 DEFAULT VALUE 검색.
     var ls_0023 = oAPP.DATA.LIB.T_0023.find( a => a.UIATK === is_attr.UIATK );
@@ -2248,6 +2320,7 @@
         oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].ISBND = is_attr.ISBND;
         oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].MPROP = is_attr.MPROP;
         oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].ADDSC = is_attr.ADDSC;
+        oAPP.attr.prev[is_attr.OBJID]._T_0015[l_indx].ISWIT = is_attr.ISWIT;
         return;
       }
 
@@ -2295,14 +2368,21 @@
     }
     
 
-    //이벤트에 라인의 입력값이 존재하지 않는경우, 수집건 존재시.
-    if(is_attr.UIATY === "2" && is_attr.UIATV === "" && l_indx !== -1){
+    //이벤트에 라인의 입력값이 존재하지 않는경우.
+    if(is_attr.UIATY === "2" && is_attr.UIATV === ""){
       
       //클라이언트 이벤트 검색.
       var l_cevt = oAPP.DATA.APPDATA.T_CEVT.find( a => a.OBJID === is_attr.OBJID + is_attr.UIASN && a.OBJTY === "JS" );
       
-      //클라이언트 이벤트가 존재하는경우 수집건 삭제처리 안함.
-      if(l_cevt){return;}
+      //클라이언트 이벤트가 존재하는경우 이벤트 수집처리.
+      if(l_cevt){
+        //서버이벤트 공백처리만 함.
+        lf_add_T_0015();
+        return;
+      }
+
+      //수집건이 존재하지 않는경우 exit.
+      if(l_indx === -1){return;}
 
       //수집건존재, 서버이벤트, 클라이언트 이벤트가 없는경우 해당 라인 삭제 처리.
       oAPP.attr.prev[is_attr.OBJID]._T_0015.splice(l_indx, 1);
@@ -2832,6 +2912,12 @@
 
         }
 
+        //Request/Task
+        if(lt_ua003[i].ITMCD === "DH001025"){
+          ls_0015.UIATV = ls_0015.UIATV = oAPP.attr.appInfo.REQNO;          
+
+        }
+
         oAPP.attr.oModel.oData.T_ATTR.push(ls_0015);
 
         ls_0015 = {};
@@ -3037,6 +3123,13 @@
 
         //이벤트 아이콘 처리.
         is_attr.UIATT_ICON = "sap-icon://border";
+
+        //이벤트에 WAIT OFF 기능을 사용한 경우.
+        if(is_attr.ISWIT === "X"){
+          //WAIT OFF 사용건 아이콘 처리.
+          is_attr.UIATT_ICON = "sap-icon://accept";
+
+        }
 
         break;
 
@@ -3327,6 +3420,19 @@
 
       //입력값 매핑.
       oAPP.attr.oModel.oData.T_ATTR[i].UIATV = ls_0015.UIATV;
+      oAPP.attr.oModel.oData.T_ATTR[i].ADDSC = ls_0015.ADDSC;
+      oAPP.attr.oModel.oData.T_ATTR[i].ISWIT = ls_0015.ISWIT;
+
+      //이벤트인경우 설정된 이벤트가 존재시.
+      if(ls_0015.UIATY === "2" && ls_0015.UIATV !== ""){
+        //서버이벤트 항목에 해당하는지 여부 확인.
+        if(oAPP.attr.T_EVT.findIndex( a=> a.KEY === ls_0015.UIATV ) === -1 ){
+          //서버이벤트 항목에 존재하지 않는 이벤트인경우 이벤트 강제 추가.
+          oAPP.attr.T_EVT.push({KEY:ls_0015.UIATV, TEXT:ls_0015.UIATV, DESC:""});
+
+        }
+
+      }
 
       //바인딩처리된경우 하위 로직 수행.
       if(ls_0015.ISBND !== "X" ){continue;}
@@ -3335,22 +3441,26 @@
       oAPP.attr.oModel.oData.T_ATTR[i].ISBND = ls_0015.ISBND;
       oAPP.attr.oModel.oData.T_ATTR[i].MPROP = ls_0015.MPROP;
 
-      //입력 비활성 처리.
-      oAPP.attr.oModel.oData.T_ATTR[i].edit = false;
+      //프로퍼티의 DDLB 항목에서 바인딩 처리한경우.
+      if(oAPP.attr.oModel.oData.T_ATTR[i].UIATY === "1" && typeof oAPP.attr.oModel.oData.T_ATTR[i].T_DDLB !== "undefined"){
+        //DDLB항목에 바인딩한 정보 추가.
+        oAPP.attr.oModel.oData.T_ATTR[i].T_DDLB.push({KEY:ls_0015.UIATV, TEXT:ls_0015.UIATV, ISBIND:"X"});
+      }
 
-      //입력필드 활성화 처리.
-      oAPP.attr.oModel.oData.T_ATTR[i].inp_visb = true;
+      // //입력 비활성 처리.
+      // oAPP.attr.oModel.oData.T_ATTR[i].edit = false;
 
-      //checkbox 비활성 처리.
-      oAPP.attr.oModel.oData.T_ATTR[i].chk_visb = false;
+      // //입력필드 활성화 처리.
+      // oAPP.attr.oModel.oData.T_ATTR[i].inp_visb = true;
 
-      //버튼 비활성 처리.
-      oAPP.attr.oModel.oData.T_ATTR[i].btn_visb = false;
+      // //checkbox 비활성 처리.
+      // oAPP.attr.oModel.oData.T_ATTR[i].chk_visb = false;
 
-      //ddlb 비활성 처리.
-      oAPP.attr.oModel.oData.T_ATTR[i].sel_visb = false;
+      // //버튼 비활성 처리.
+      // oAPP.attr.oModel.oData.T_ATTR[i].btn_visb = false;
 
-
+      // //ddlb 비활성 처리.
+      // oAPP.attr.oModel.oData.T_ATTR[i].sel_visb = false;
 
 
     } //대상 UI에 매핑되어있는 프로퍼티, 이벤트 항목에 대한건 ATTRIBUTE영역에 매핑.
