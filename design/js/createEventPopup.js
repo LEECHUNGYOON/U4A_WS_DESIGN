@@ -158,7 +158,46 @@ oAPP.fn.createEventPopup = function(is_attr, f_callBack){
       }
 
       //서버이벤트 DDLB 항목에 생성한 이벤트 메소드 정보 추가.
-      oAPP.attr.T_EVT.push({KEY:param.METHOD, TEXT:param.METHOD, DESC:ls_event.desc});
+      //oAPP.attr.T_EVT.push({KEY:param.METHOD, TEXT:param.METHOD, DESC:ls_event.desc});
+
+      if(typeof param.MLIST !== "undefined" && param.MLIST.length !== 0){
+        
+        //기존 서버 이벤트가 존재하는경우.
+        if(oAPP.attr.T_EVT.length !== 0){
+
+          //기존 서버이벤트에서 삭제된 서버 이벤트가 존재하는지 여부 확인.
+          for(var i=oAPP.attr.T_EVT.length-1; i>=0; i--){
+
+            //빈값인경우 skip.
+            if(oAPP.attr.T_EVT[i].KEY === ""){continue;}
+
+            //서버에서 전달받은 서버이벤트 항목에 현재 수집한 이벤트가 존재하지 않는경우.
+            if(param.MLIST.findIndex( a=> a.EVTNM === oAPP.attr.T_EVT[i].KEY ) === -1){
+              //해당 라인 삭제 처리.
+              oAPP.attr.T_EVT.splice(i, 1);
+            }           
+
+          }
+
+        }
+        
+        //서버에서 구성한 이벤트 항목에서 수집되지 않은 이벤트 수집처리.
+        for(var i=0, l=param.MLIST.length; i<l; i++){
+          //기존 수집한 서버이벤트 없는 이벤트 항목인경우.
+          if(oAPP.attr.T_EVT.findIndex( a=> a.KEY === param.MLIST[i].EVTNM ) === -1){
+
+            //해당 항목 수집 처리.
+            var l_ddlb = {};
+            l_ddlb.KEY = param.MLIST[i].EVTNM;
+            l_ddlb.TEXT = param.MLIST[i].EVTNM;
+            l_ddlb.DESC = param.MLIST[i].DESC;
+            oAPP.attr.T_EVT.push(l_ddlb);
+            l_ddlb = {};
+          }
+          
+        }
+
+      }
 
       //CALLBACK function 호출.
       if(typeof f_callBack !== "undefined"){
@@ -309,6 +348,13 @@ oAPP.fn.createEventPopup = function(is_attr, f_callBack){
   oModel.setData({"event":{"meth":"","desc":"",
     "meth_stat":"None","meth_text":"","desc_stat":"None","desc_text":""}});
 
+
+  //dialog 호출시 이벤트.
+  oDlg.attachAfterOpen(function(){
+    //메소드명에 focus 처리.
+    oFmInp1.focus();
+  });
+  
 
   //서버이벤트 생성 팝업 호출.
   oDlg.open();
