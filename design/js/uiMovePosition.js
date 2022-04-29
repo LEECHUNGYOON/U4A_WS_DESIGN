@@ -46,6 +46,7 @@ oAPP.fn.uiMovePosition = function(pos, max, f_callBack){
   //이동위치 입력필드.
   var oStepInp = new sap.m.StepInput({min:1, max:"{/move/max}", value:"{/move/pos}"});
   oDlg.addContent(oStepInp);
+  
 
   //이동위치 slider.
   var oSlide = new sap.m.Slider({min:1, max:"{/move/max}", value:"{/move/pos}", enableTickmarks:true});
@@ -90,6 +91,18 @@ oAPP.fn.uiMovePosition = function(pos, max, f_callBack){
   });
 
   oMdl.setData({"move":{"pos":pos,"max":max}});
+
+  //dailog 호출전 이벤트.
+  oDlg.attachAfterOpen(function(){
+    //입력필드에 focus 처리.
+    oStepInp.focus();
+
+    var l_dom = oStepInp.getDomRef("input-inner");
+    if(!l_dom || !l_dom.select){return;}
+
+    l_dom.select();
+
+  });
 
   oDlg.open();
 

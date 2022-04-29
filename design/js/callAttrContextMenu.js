@@ -6,6 +6,8 @@
         //MENU UI생성.
         var oMenu1 = new sap.m.Menu();
 
+        oMenu1.addStyleClass("sapUiSizeCozy");
+
         var oModel = new sap.ui.model.json.JSONModel();      
 
         //context menu popover에 모델 설정.
@@ -27,7 +29,7 @@
         oMenu1.addItem(oMItem1);
 
         //unbind 처리
-        var oMItem2 = new sap.m.MenuItem({key:"M02", icon:"sap-icon://disconnected", text:"unbind", visible:"{/atmenu/vis02}"});
+        var oMItem2 = new sap.m.MenuItem({key:"M02", icon:"sap-icon://disconnected", text:"unbind　　　　　　　", visible:"{/atmenu/vis02}"});
         oMenu1.addItem(oMItem2);
 
         //프로퍼티 동일 속성 동기화 처리

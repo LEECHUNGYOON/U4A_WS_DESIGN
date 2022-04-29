@@ -12,8 +12,30 @@
         //메뉴 잠금 처리.
 
         //icon popup UI 생성.
-        var oDlg = new sap.m.Dialog({title:"UI5 Icon List", resizable:true, draggable:true,
+        var oDlg = new sap.m.Dialog({resizable:true, draggable:true,
           contentWidth:"500px", contentHeight:"40%", horizontalScrolling:false});
+
+        var oTool0 = new sap.m.Toolbar();
+        oDlg.setCustomHeader(oTool0);
+        
+        var oTitle = new sap.m.Title({text:"UI5 Icon List"});
+    
+        oTool0.addContent(oTitle);
+    
+        oTool0.addContent(new sap.m.ToolbarSpacer());
+    
+        //우상단 닫기버튼.
+        var oBtn0 = new sap.m.Button({icon:"sap-icon://decline", type:"Reject"});
+        oTool0.addContent(oBtn0);
+
+        //닫기 버튼 선택 이벤트.
+        oBtn0.attachPress(function(){
+        
+            oDlg.close();
+            //001	Cancel operation
+            parent.showMessage(sap,10, "I", "Cancel operation");
+    
+        });
 
         //dialog open전 icon list 구성.
         oDlg.attachBeforeOpen(function(){

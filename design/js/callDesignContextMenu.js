@@ -364,6 +364,9 @@
                 //UI ICON 구성.
                 l_14.UICON = oAPP.fn.fnGetSapIconPath(param.E_UIOBJ.UICON);
 
+                //tree embeded aggregation 아이콘 표현.
+                oAPP.fn.setTreeAggrIcon(l_14);
+
                 //default 아이콘 비활성 처리.
                 l_14.icon_visible = false;
 
@@ -833,6 +836,10 @@
 
             //file uploader UI의 uploaderUrl 프로퍼티 예외처리.
             oAPP.fn.attrUploadUrlException(ls_14.OBJID, ls_14.UIOBK);
+
+
+            //tree embeded aggregation 아이콘 표현.
+            oAPP.fn.setTreeAggrIcon(ls_14);
 
 
             //부모 정보에 현재 복사처리한 UI 수집처리.

@@ -152,9 +152,14 @@
       }
 
       //dialog 종료 처리.
-      function lf_closeDialog(){
+      function lf_closeDialog(bSkipMsg){
         oCreateDialog.close();
         oCreateDialog.destroy();
+
+        if(bSkipMsg === true){return;}
+        
+        //001	Cancel operation
+        parent.showMessage(sap,10, "I", "Cancel operation");
 
       }
 
@@ -401,7 +406,7 @@
           onAppCrAndChgMode(appid);
 
           //dialog 종료 처리.
-          lf_closeDialog();
+          lf_closeDialog(true);
 
         },"");
 
@@ -496,6 +501,27 @@
         content: [
           oCreateDialogForm
         ]
+
+      });
+
+
+      var oTool = new sap.m.Toolbar();
+      oCreateDialog.setCustomHeader(oTool);
+      
+      var oTitle = new sap.m.Title({text:"UI5 Application Create Option Selection"});
+
+      oTool.addContent(oTitle);
+
+      oTool.addContent(new sap.m.ToolbarSpacer());
+
+      //우상단 닫기버튼.
+      var oBtn0 = new sap.m.Button({icon:"sap-icon://decline", type:"Reject"});
+      oTool.addContent(oBtn0);
+
+      //닫기 버튼 선택 이벤트.
+      oBtn0.attachPress(function(){
+        
+        lf_closeDialog();
 
       });
 

@@ -2,8 +2,14 @@
 oAPP.fn.createEventPopup = function(is_attr, f_callBack){
 
   //팝업 종료.
-  function lf_dialogClose(){
+  function lf_dialogClose(bSkipMsg){
+    
     oDlg.close();
+
+    if(bSkipMsg === true){return;}
+
+    //001	Cancel operation
+    parent.showMessage(sap,10, "I", "Cancel operation");
   }
 
 
@@ -211,7 +217,7 @@ oAPP.fn.createEventPopup = function(is_attr, f_callBack){
       }
 
       //DIALOG 종료.
-      lf_dialogClose();
+      lf_dialogClose(true);
 
       //메시지 처리.
       if(typeof param.RTMSG !== "undefined" && param.RTMSG !== ""){
@@ -240,10 +246,30 @@ oAPP.fn.createEventPopup = function(is_attr, f_callBack){
 
   //이벤트 메소드 생성 dialog UI.
   var oDlg = new sap.m.Dialog({
-    title:"Server Event Create",
     draggable:true,
     icon:"sap-icon://add-document",
     contentWidth:"30%"
+  });
+
+  var oTool = new sap.m.Toolbar();
+  oDlg.setCustomHeader(oTool);
+  
+  var oTitle = new sap.m.Title({text:"Server Event Create"});
+
+  oTool.addContent(oTitle);
+
+  oTool.addContent(new sap.m.ToolbarSpacer());
+
+  //우상단 닫기버튼.
+  var oBtn0 = new sap.m.Button({icon:"sap-icon://decline", type:"Reject"});
+  oTool.addContent(oBtn0);
+
+  //닫기 버튼 선택 이벤트.
+  oBtn0.attachPress(function(){
+    
+    lf_dialogClose();
+    
+
   });
 
   var oModel = new sap.ui.model.json.JSONModel();

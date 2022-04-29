@@ -27,17 +27,42 @@
 
 
     sap.ui.getCore().loadLibrary("sap.m");
-    var oDlg1 = new sap.m.Dialog({draggable:true,title:"Aggregation List"});
+    var oDlg1 = new sap.m.Dialog({draggable:true});
     oDlg1.addStyleClass("sapUiSizeCompact");
+
+    //dialog open 이후 이벤트.
+    oDlg1.attachAfterOpen(function(){
+      //ddlb에 focus 처리.
+      oSel1.focus();
+    });
 
     var oMdl = new sap.ui.model.json.JSONModel();
     oDlg1.setModel(oMdl);
 
     oMdl.setData({"T_SEL":lt_sel});
 
+    var oTool = new sap.m.Toolbar();
+    oDlg1.setCustomHeader(oTool);
 
-    //dialog title 구성.
+    oTool.addContent(new sap.m.Title({text:"Aggregation List"}));
 
+    oTool.addContent(new sap.m.ToolbarSpacer());
+
+    //우상단 닫기버튼.
+    var oBtn0 = new sap.m.Button({icon:"sap-icon://decline", type:"Reject"});
+    oTool.addContent(oBtn0);
+
+    //닫기 버튼 선택 이벤트.
+    oBtn0.attachPress(function(){
+      
+      oDlg1.close();
+      oDlg1.destroy();
+      //001	Cancel operation
+      parent.showMessage(sap,10, "I", "Cancel operation");
+
+    });
+
+    
     //aggregation ddlb 구성.
     var oSel1 = new sap.m.Select({width:"100%"});
 

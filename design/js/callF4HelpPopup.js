@@ -333,8 +333,30 @@ oAPP.fn.callF4HelpPopup = function(I_SHLPNAME, I_SHLP_DEF, IT_SHLP, IT_FIELDDESC
     title:l_title
   });
 
-
   oDialog.addStyleClass("sapUiSizeCompact");
+
+  var oTool = new sap.m.Toolbar();
+  oDialog.setCustomHeader(oTool);
+  
+  var oTitle = new sap.m.Title({text:"Search Help"});
+
+  oTool.addContent(oTitle);
+
+  oTool.addContent(new sap.m.ToolbarSpacer());
+
+  //우상단 닫기버튼.
+  var oBtn0 = new sap.m.Button({icon:"sap-icon://decline", type:"Reject"});
+  oTool.addContent(oBtn0);
+
+  //닫기 버튼 선택 이벤트.
+  oBtn0.attachPress(function(){
+    
+    oDialog.close();
+    oDialog.destroy();
+    //001	Cancel operation
+    parent.showMessage(sap,10, "I", "Cancel operation");
+
+  });
 
   //window에서 실행된건이 아닌경우 false 처리.
   var l_val = sap.ui.Device.os.name !== "win" || false;

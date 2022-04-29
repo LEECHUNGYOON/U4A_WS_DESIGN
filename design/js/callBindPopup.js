@@ -884,7 +884,10 @@ oAPP.fn.callBindPopup = function(sTitle, CARDI, f_callback, UIATK){
     oAPP.attr.oBindDialog._f_callback = f_callback;
 
     //팝업 title 구성.
-    oAPP.attr.oBindDialog.setTitle(sTitle);
+    var l_head = oAPP.attr.oBindDialog.getCustomHeader();
+    if(l_head){
+      l_head.getContent()[0].setText(sTitle);
+    }
 
     //광역 attr 초기화.
     oAPP.attr.oBindDialog._is_attr = {};
@@ -1166,6 +1169,25 @@ oAPP.fn.callBindPopup = function(sTitle, CARDI, f_callback, UIATK){
 
   });
 
+  var oTool0 = new sap.m.Toolbar();
+
+  var oTitle = new sap.m.Title({text:"Aggregation List"});
+
+  oTool0.addContent(oTitle);
+
+  oTool0.addContent(new sap.m.ToolbarSpacer());
+
+  //우상단 닫기버튼.
+  var oBtn0 = new sap.m.Button({icon:"sap-icon://decline", type:"Reject"});
+  oTool0.addContent(oBtn0);
+
+  //닫기 버튼 선택 이벤트.
+  oBtn0.attachPress(function(){
+    //팝업 종료 처리.
+    lf_closePopup();
+
+  });
+
   oTabCol2Sel1.bindAggregation("items",{path:"T_DDLB",
     template:new sap.ui.core.Item({key:"{KEY}",text:"{TEXT}"}),
     templateShareable:true
@@ -1183,6 +1205,7 @@ oAPP.fn.callBindPopup = function(sTitle, CARDI, f_callback, UIATK){
       //stretch: true,
       icon: "sap-icon://journey-depart",
       busyIndicatorDelay:1,
+      customHeader:oTool0,
       subHeader:oTool,
       buttons: [
         new sap.m.Button({

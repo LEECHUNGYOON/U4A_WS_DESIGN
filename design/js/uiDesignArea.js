@@ -88,7 +88,8 @@
     oLHbox2.addItem(oLtxt1);
     
     //부모 Aggregation text UI.
-    var oLtxt2 = new sap.m.Text({text:"{UIATT}"});
+    //var oLtxt2 = new sap.m.Text({text:"{UIATT}"});
+    var oLtxt2 = new sap.m.ObjectStatus({text:"{UIATT}",icon:"{UIATT_ICON}"});
     oLHbox1.addItem(oLtxt2);
     
 
@@ -471,6 +472,24 @@
 
 
 
+  
+  //tree embeded aggregation 아이콘 표현.
+  oAPP.fn.setTreeAggrIcon = function(is_tree){
+    
+    //EMBED AGGREGATION 정보가 없는경우 exit.
+    if(is_tree.UIATK === ""){return;}
+
+    //DEFAULT 0:1 AGGREGATION 표현 아이콘.
+    is_tree.UIATT_ICON = "sap-icon://color-fill";
+
+    //0:N AGGREGATION인경우.
+    if(is_tree.ISMLB === "X"){
+      //MULTI 입력 표현 아이콘.
+      is_tree.UIATT_ICON = "sap-icon://dimension";
+    }
+
+  };  //tree embeded aggregation 아이콘 표현.
+
 
   /************************************************************************
    * UI design tree 영역 UI에 따른 ICON 세팅.
@@ -478,6 +497,9 @@
    * @param {object} is_tree - 처리대상 tree 라인.
    ************************************************************************/
   oAPP.fn.setTreeUiIcon = function(is_tree){
+
+    //tree embeded aggregation 아이콘 표현.
+    oAPP.fn.setTreeAggrIcon(is_tree);
 
     //UI 라이브러리 정보 검색.
     var ls_0022 = oAPP.DATA.LIB.T_0022.find( a => a.UIOBK === is_tree.UIOBK );
@@ -541,6 +563,8 @@
     is_0014.chk = false; //chkbox checked 바인딩 필드.
 
     is_0014.UICON = ""; //ui icon 바인딩 필드.
+
+    is_0014.UIATT_ICON = ""; //aggregation cardinality 아이콘.
     
     is_0014.icon_visible = false; // icon 활성여부 필드.
 
@@ -1163,6 +1187,9 @@
     i_drag.UIADS = param.UIADS;
     i_drag.ISMLB = param.ISMLB;
     i_drag.PUIATK = param.UIATK;
+
+    //tree embeded aggregation 아이콘 표현.
+    oAPP.fn.setTreeAggrIcon(i_drag);
 
     //DRAG UI에서 EMBEDDED AGGREGATION 정보 찾기.
     var ls_embed = oAPP.attr.prev[i_drag.OBJID]._T_0015.find( a=> a.UIATY === "6");

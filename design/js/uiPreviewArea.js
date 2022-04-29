@@ -240,7 +240,8 @@
       return;
     }
 
-    var l_prop = is_attr.UIATV;
+    //프로퍼티 otr 입력값 존재시 text 검색.
+    var l_prop = oAPP.fn.prevGetOTRText(is_attr) || is_attr.UIATV;
 
     //프로퍼티 타입에 따른 입력값 parse 처리.
     switch(is_attr.UIADT){
@@ -391,7 +392,7 @@
 
     //찾지못한경우 exit.
     if(typeof l_find === "undefined"){return;}
-    debugger;
+
     //HTML content에 입력한 정보가 존재하는경우 return.
     l_find = JSON.stringify(l_find.DATA);
 
@@ -702,6 +703,77 @@
   }; //미리보기 예외처리 UI 표시.
 
 
+
+
+  //OTR TEXT정보 검색.
+  oAPP.fn.prevParseOTRValue = function(is_0015){
+
+    //검색한 OTR 항목이 존재하지 않는경우 EXIT.
+    if(oAPP.DATA.APPDATA.T_OTR.length === 0){return;}
+
+    //프로퍼티가 아닌경우  EXIT.
+    if(is_0015.UIATY !== "1"){return;}
+
+    //바인딩 처리가 된경우 EXIT.
+    if(is_0015.ISBND === "X"){return;}
+
+    //프로퍼티의 시작값이 $OTR:로 시작하지 않는경우 EXIT.
+    if(is_0015.UIATV.substr(0,5) !== "$OTR:"){return;}
+
+    //서버에서 수집한 OTR 정보 검색.
+    var l_otr = oAPP.DATA.APPDATA.T_OTR.find( a => a.NAME === is_0015.UIATV.substr(5));
+
+    //검색한 결과가 존재하지 않는경우 EXIT.
+    if(!l_otr){return;}
+
+    //OTR 정보를 찾은경우 찾은 TEXT 정보 RETURN.
+    return l_otr.VALUE;
+
+  };  //OTR TEXT정보 검색.
+
+
+
+
+  //OTR TEXT 검색.
+  oAPP.fn.prevGetOTRText = function(is_attr){
+
+    //프로퍼티가 아닌경우 EXIT.
+    if(is_attr.UIATY !== "1"){return;}
+
+    //입력값이 존재하지 않는경우 EIXT.
+    if(is_attr.UIATV === ""){return;}
+
+    //바인딩 처리된경우 EXIT.
+    if(is_attr.ISBND === "X"){return;}
+
+    //프로퍼티의 시작값이 $OTR:로 시작하지 않는경우 EXIT.
+    if(is_attr.UIATV.substr(0,5) !== "$OTR:"){return;}
+    
+    //OTR alias 정보 구성.
+    var oFormData = new FormData();
+    oFormData.append("ALIAS", is_attr.UIATV.substr(5));
+    
+    var l_text;
+
+    //OTR text 검색을 위한 서버 호출.
+    sendAjax(oAPP.attr.servNm + "/getOTRText", oFormData, function(param){
+
+      //wait 종료 처리.
+      parent.setBusy("");
+
+      //오류가 발생한 경우 EXIT.
+      if(param.RETCD === "E"){
+        return;
+      }
+      
+      //검색에 성공한 경우 TEXT 정보 RETURN.
+      l_text = param.TEXT;
+      
+    },"",false);
+
+    return l_text;
+
+  };  //OTR TEXT 검색 처리.
 
 
 })();

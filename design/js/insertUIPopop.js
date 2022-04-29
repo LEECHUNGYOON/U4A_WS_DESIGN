@@ -34,6 +34,35 @@
       contentWidth:"50%",contentHeight:"60%",verticalScrolling:false});
     oDlg.addStyleClass("sapUiSizeCompact");
 
+    //dialog open이후 이벤트.
+    oDlg.attachAfterOpen(function(){
+      //aggregation name ddlb 선택 처리.
+      oSel1.focus();
+    });
+
+    var oTool = new sap.m.Toolbar();
+    oDlg.setCustomHeader(oTool);
+    
+    var oTitle = new sap.m.Title({text:"Aggregation List"});
+
+    oTool.addContent(oTitle);
+
+    oTool.addContent(new sap.m.ToolbarSpacer());
+
+    //우상단 닫기버튼.
+    var oBtn0 = new sap.m.Button({icon:"sap-icon://decline", type:"Reject"});
+    oTool.addContent(oBtn0);
+
+    //닫기 버튼 선택 이벤트.
+    oBtn0.attachPress(function(){
+      
+      oDlg.close();
+      oDlg.destroy();
+      //001	Cancel operation
+      parent.showMessage(sap,10, "I", "Cancel operation");
+
+    });
+
 
     var oVbox1 = new sap.m.VBox({height:"100%",renderType:"Bare"});
     oDlg.addContent(oVbox1);
@@ -41,7 +70,7 @@
     //dialog 타이틀 설정.
     var ls_0022 = oAPP.DATA.LIB.T_0022.find( a => a.UIOBK === UIOBK);
     if(ls_0022){
-      oDlg.setTitle("UI Object Select [ " + ls_0022.UIOBJ + " ]");
+      oTitle.setText("UI Object Select [ " + ls_0022.UIOBJ + " ]");
     }
 
     var oMdl = new sap.ui.model.json.JSONModel();

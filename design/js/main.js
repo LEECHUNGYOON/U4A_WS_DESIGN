@@ -277,6 +277,10 @@
         //ui design tree 전체 접힘 처리.
         oAPP.attr.ui.oLTree1.collapseAll();
 
+        //ui design tree 2레벨만 처리.
+        //(접은뒤 펼쳐야 2레벨만 펼쳐짐 5레벨까지 펼쳐진상태에서 2레벨 펼치면 그냥 그대로 있음)
+        oAPP.attr.ui.oLTree1.expandToLevel(2);
+
         
         console.log("좌측 tree 완료 : " + new Date());
 

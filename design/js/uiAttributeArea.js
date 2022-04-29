@@ -663,32 +663,107 @@
     if(!l_ctxt){return;}
 
     //이벤트 발생 라인의 attribute 정보 얻기.
-    var ls_0015 = l_ctxt.getProperty();
+    var ls_attr = l_ctxt.getProperty();
 
-    //입력값이 존재하지 않는경우 exit.
-    if(ls_0015.UIATV === ""){return;}
+    //style class 더블클릭 처리.
+    if(oAPP.fn.attrDblClickStyleClass(ls_attr)){return;}
 
-    //ATTRIBUTE TYPE에 따른 로직 분기.
-    switch(ls_0015.UIATY){
-      case "1": //PROPERTY 영역인경우.
-        break;
+    //바인딩필드 더블클릭 처리.
+    if(oAPP.fn.attrDblClickBindField(ls_attr)){return;}
 
-      case "2": //EVENT 영역인경우.
-        //해당 이벤트로 네비게이션 처리.
-        oAPP.common.execControllerClass(ls_0015.UIATV);
-        break;
-
-      case "3": //AGGREGATION 영역인경우.
-        break;
-
-      default:
-        return;
-    }
+    //서버이벤트 더블클릭 처리.
+    if(oAPP.fn.attrDblClickServerEvent(ls_attr)){return;}
 
 
   };  //attribute table의 더블클릭에 따른 이벤트 처리.
 
 
+
+  //style class 더블클릭 처리.
+  oAPP.fn.attrDblClickStyleClass = function(is_attr){
+    
+    //프로퍼티가 아닌경우 exit.
+    if(is_attr.UIATY !== "1"){return;}
+
+    //styleClass 프로퍼티가 아닌경우 exit.
+    if(is_attr.UIASN !== "STYLECLASS"){return;}
+
+    //바인딩 처리가 된경우 EXIT.
+    if(is_attr.ISBND === "X"){return;}
+
+    //style class 프로퍼티에 입력값이 존재하지 않는경우 exit.
+    if(is_attr.UIATV === ""){return;}
+
+
+    //style class 호출처리.
+
+
+    //function 호출처의 하위로직 skip을 위한 flag return.
+    return true;
+
+
+  };  //style class 더블클릭 처리.
+
+
+
+
+  //바인딩필드 더블클릭 처리.
+  oAPP.fn.attrDblClickBindField = function(is_attr){
+
+    //바인딩처리가 안된경우, 바인딩 필드가 존재하지 않는경우 exit.
+    if(is_attr.ISBND !== "X" || is_attr.UIATV === ""){return;}
+
+
+    //클래스명 서버 전송 데이터에 구성.
+    var oFormData = new FormData();
+    oFormData.append("CLSID", oAPP.attr.appInfo.CLSID);
+
+    //바인딩 필드명 서버 전송 데이터에 구성.
+    oFormData.append("FLD_PATH", is_attr.UIATV);
+
+
+    //서버에서 해당 바인딩 필드의 위치 정보 얻기.
+    sendAjax(oAPP.attr.servNm + "/get_bind_fld_postion", oFormData, function(param){
+
+      //wait 종료 처리.
+      parent.setBusy('');
+
+      //서버에서 오류가 발생한 경우.
+      if(param.RETCD === "E"){
+        //오류 메시지 출력.
+        parent.showMessage(sap, 20, "E", param.RTMSG);
+        return;
+      }
+
+      //해당 파라메터를 갖고 서버 호출 펑션 수행 해야함.
+      console.log(param.PROGNM, param.LINE);
+
+
+    }); //서버에서 해당 바인딩 필드의 위치 정보 얻기.
+
+
+    //function 호출처의 하위로직 skip을 위한 flag return.
+    return true;
+
+  };  //바인딩필드 더블클릭 처리.
+
+
+
+
+  //서버이벤트 더블클릭 처리.
+  oAPP.fn.attrDblClickServerEvent = function(is_attr){
+
+    //이벤트가 아닌경우 EXIT.
+    if(is_attr.UIATY !== "2"){return;}
+
+    //입력한 서버이벤트가 존재하지 않는경우 EXIT.
+    if(is_attr.UIATV === ""){return;}
+
+    //해당 이벤트로 네비게이션 처리.
+    oAPP.common.execControllerClass(is_attr.UIATV);
+
+
+  };  //서버이벤트 더블클릭 처리.
 
 
   /************************************************************************
@@ -2439,12 +2514,39 @@
     }
 
 
+    //OTR 입력건인경우 ALIAS 대문자 변환 처리.
+    oAPP.fn.attrSetOTRAlias(is_attr);
+
+
     //attr 입력건 수집 처리.
     lf_add_T_0015();
 
 
   }; //property, event, Aggregation 입력값 처리.
 
+
+
+
+  //OTR 입력건인경우 ALIAS 대문자 변환 처리.
+  oAPP.fn.attrSetOTRAlias = function(is_attr){
+
+    //프로퍼티가 아닌경우 EXIT.
+    if(is_attr.UIATY !== "1"){return;}
+
+    //바인딩 처리된경우 EXIT.
+    if(is_attr.ISBND === "X"){return;}
+
+    //프로퍼티 입력값이 존재하지 않는경우 EXIT.
+    if(is_attr.UIATV === ""){return;}
+
+    //$OTR: 키워드로 시작하지 않는경우 EXIT.
+    if(is_attr.UIATV.substr(0,5) !== "$OTR:"){return;}
+
+    //OTR 입력값 대문자 변환 처리.
+    is_attr.UIATV = is_attr.UIATV.toUpperCase();
+
+
+  };  //OTR 입력건인경우 ALIAS 대문자 변환 처리.
 
 
 
