@@ -44,16 +44,18 @@
   //미리보기 iframe 영역 구성.
   oAPP.fn.loadPreviewFrame = function(){
 
-    //미리보기 html 정보가 로드되지 않은경우.
-    if(!oAPP.attr.ui.frame){
+     //미리보기 html 정보가 로드되지 않은경우.
+     if(!oAPP.attr.ui.frame){
       oAPP.attr.ui.frame = document.getElementById("prevHTML");
 
       var l_info = parent.getUserInfo();
 
       //미리보기 서버 URL 정보 구성.
-      oAPP.attr.ui.frame.src = oAPP.attr.servNm + "/getPrevHTML?" +
+      oAPP.attr.ui.frame.src = parent.getServerHost() + "/zu4a_wbc/getPrevHTML?" +
         "sap-client=" + l_info.CLIENT +  
         "&sap-language=" + l_info.LANGU + 
+        "&sap-user=" + l_info.ID +
+        "&sap-password=" + l_info.PW +
         "&LIBPATH=" + oAPP.fn.getBootStrapUrl() + 
         "&LIBRARY=" + oAPP.fn.getUi5Libraries(true) +
         "&THEME=" + encodeURIComponent(oAPP.DATA.APPDATA.S_0010.UITHM);
