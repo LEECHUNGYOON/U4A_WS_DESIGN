@@ -536,22 +536,8 @@
     //aggregation에서 바인딩 처리 호출한게 아닌경우 exit.
     if(is_attr.UIATY !== "3"){return;}
 
-    //현재 ui의 tree 정보 얻기.
-    var l_tree = oAPP.fn.getTreeData(is_attr.OBJID);
-
-    //CHILD 정보가 존재하는경우.
-    if(l_tree.zTREE.length !== 0){
-
-      //현재 바인딩 아이콘을 선택한 AGGREGATION에 추가된 UI정보 얻기.
-      var lt_filter = l_tree.zTREE.filter( a => a.UIATK === is_attr.UIATK);
-
-      //현재 aggregation에 2개 이상의 UI가 추가된경우.
-      if(lt_filter.length >= 2){
-        parent.showMessage(sap, 10, "E", "If you have one or more child objects, you can not specify a model.");
-        return;
-      }
-
-    }
+    //aggregation 바인딩 처리 가능여부 점검.
+    if(oAPP.fn.attrChkBindAggrPossible(is_attr)){return;}
 
 
     var l_title = "Data Binding / Unbinding - Aggregation";
@@ -2540,7 +2526,7 @@
     }
 
     //프로퍼티 type이 숫자 유형인경우.
-    if(is_attr.UIATY === "1" && ( is_attr.UIADT === "int" || is_attr.UIADT === "float")){
+    if(is_attr.UIATY === "1" && is_attr.ISBND === "" && ( is_attr.UIADT === "int" || is_attr.UIADT === "float")){
       //입력값 숫자 유형으로 변경 처리.                
       is_attr.UIATV  = String(Number(is_attr.UIATV));
     }
@@ -3234,6 +3220,9 @@
 
           //help 아이콘 -> 상세 아이콘 처리.
           is_attr.icon2_src = "sap-icon://inspection";
+          
+          //drop 가능 처리.
+          is_attr.dropEnable = true;
 
           return;
 
@@ -4420,7 +4409,7 @@
 
     //drop UI를 얻지 못한 경우 exit.
     if(!l_row){
-      oEvent.preventDefault(true);
+      parent.showMessage(sap, 10, "E", "impossible.");
       return;
     }
 
@@ -4429,19 +4418,18 @@
 
     //바인딩 정보가 존재하지 않는경우 exit.
     if(!l_ctxt){
-      oEvent.preventDefault(true);
+      parent.showMessage(sap, 10, "E", "impossible.");
       return;
     }
 
     //현재 라인이 drop 가능한건 인지 확인.
-    var l_drop_enable = l_ctxt.getProperty("dropEnable");
+    var ls_attr = l_ctxt.getProperty();
 
     //drop 불가능한 경우 exit.
-    if(!l_drop_enable){
-      oEvent.preventDefault(true);
+    if(!ls_attr.dropEnable){
+      parent.showMessage(sap, 10, "E", "impossible.");
       return;
     }
-
     debugger;
 
     //drag 정보 얻기.
@@ -4451,20 +4439,79 @@
     //json 형식 parse, 실패시 exit.
     try{
       l_json = JSON.parse(l_json);
-    }catch(e){
 
-      oEvent.preventDefault(true);
+    }catch(e){
+      parent.showMessage(sap, 10, "E", "impossible.");
       return;
     }
 
     //바인딩 팝업에서 drag한게 아닌경우 exit.
     if(l_json.PRCCD !== "PRC001"){
+      parent.showMessage(sap, 10, "E", "impossible.");
       return;
+    }
+
+    //ROOT, structure를 drop한경우 exit.
+    if(l_json.IF_DATA.KIND === "" || l_json.IF_DATA.KIND === "S"){
+      parent.showMessage(sap, 10, "E", "impossible.");
+      return;
+    }
+
+    //aggregation인경우 TABLE을 DROP하지 않았다면.
+    if(ls_attr.UIATY === "3" && l_json.IF_DATA.KIND !== "T" ){
+      parent.showMessage(sap, 10, "E", "impossible.");
+      return;
+    }
+
+    //drop위치의 attribute가 property인경우.
+    if(ls_attr.UIATY === "1"){
+      //sap.ui.core.HTML의 content프로퍼티에 drop된경우 예외처리.
+      if(oAPP.fn.attrChkHTMLContent(ls_attr, true, function(){oAPP.fn.attrSetBindProp(ls_attr, l_json.IF_DATA);})){return;}
+
+      //프로퍼티 바인딩 처리.
+      oAPP.fn.attrSetBindProp(ls_attr, l_json.IF_DATA);
+      oEvent.preventDefault(true);
+
+    }
+
+    //drop위치의 attribute가 aggregation인경우.
+    if(ls_attr.UIATY === "3" && l_json.IF_DATA.KIND === "T"){
+
+      //aggregation 바인딩 처리 가능여부 점검.
+      if(oAPP.fn.attrChkBindAggrPossible(ls_attr)){return;}
+
+      //aggregation 바인딩 처리.
+      oAPP.fn.attrBindCallBackAggr(true, l_json.IF_DATA, ls_attr);
+      oEvent.preventDefault(true);
     }
 
 
   };  //attribute에 drag UI가 올라갔을때 이벤트.
 
 
+
+
+  //aggregation 바인딩 처리 가능여부 점검.
+  oAPP.fn.attrChkBindAggrPossible = function(is_attr){
+
+    //현재 ui의 tree 정보 얻기.
+    var l_tree = oAPP.fn.getTreeData(is_attr.OBJID);
+
+    //CHILD 정보가 없는경우 exit.
+    if(l_tree.zTREE.length === 0){return;}
+
+    //현재 바인딩 아이콘을 선택한 AGGREGATION에 추가된 UI정보 얻기.
+    var lt_filter = l_tree.zTREE.filter( a => a.UIATK === is_attr.UIATK);
+
+    //현재 aggregation에 2개 이상의 UI가 추가된경우.
+    if(lt_filter.length >= 2){      
+      parent.showMessage(sap, 10, "E", "If you have one or more child objects, you can not specify a model.");
+      
+      //오류 FLAG RETURN.
+      return true;
+    }
+
+
+  };  //aggregation 바인딩 처리 가능여부 점검.
 
 })();
