@@ -783,6 +783,16 @@
   //현재 출력된 미리보기 화면을 Skeleton Screen으로 설정처리.
   oAPP.fn.prevSetSkeletonScreen = function(){
 
+  //   if( typeof oAPP.fn.prevSetSkeletonScreen.oppner !== "undefined"){
+
+  //   }
+
+  //   //f4help 팝업을 load하지 못한경우.
+  //   oAPP.fn.getScript("design/js/callF4HelpPopup",function(){
+  //     //f4 help 팝업 function load 이후 팝업 호출.
+  //     oAPP.fn.callF4HelpPopup(ls_ua003.FLD05,ls_ua003.FLD05,[],[],lf_returnDOC);
+  // });
+
     var l_msg = "현재 미리보기 화면 레이아웃 기준으로 Skeleton Screen 으로 설정 하시겠습니까?";
 
     //설정전 확인 팝업 호출.
