@@ -4396,7 +4396,7 @@
 
 
   //ATTRIBUTE FOCUS 처리.
-  oAPP.fn.setAttrFocus = function(UIATK, TYPE){
+  oAPP.fn.setAttrFocus = function(UIATK, TYPE, f_cb){
     
     //UI Attribute Internal Key가 입력안된경우 exit.
     if(typeof UIATK === "undefined"){return;}
@@ -4480,6 +4480,13 @@
         if(l_dom){
           l_dom.scrollIntoView(true);
         }
+
+        //callback function이 존재하지 않는경우 exit.
+        if(typeof f_cb === "undefined"){return;}
+
+        //callback function 수행 처리.
+        f_cb();
+
       }, 0);
 
       break;
