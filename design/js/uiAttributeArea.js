@@ -4647,6 +4647,12 @@
       return;
     }
 
+    //kind path가 존재하지 않는경우 exit.
+    if(typeof l_json.IF_DATA.KIND_PATH === "undefined"){
+      oAPP.common.fnShowFloatingFooterMsg("E", "WS20", "impossible.");
+      return;
+    }
+
     //바인딩 팝업에서 최상위를 drag한경우, structure를 drag한경우 exit.
     if(l_json.IF_DATA.KIND === "" || l_json.IF_DATA.KIND === "S"){
       oAPP.common.fnShowFloatingFooterMsg("E", "WS20", "impossible.");
