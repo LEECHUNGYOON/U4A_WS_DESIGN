@@ -1337,7 +1337,14 @@ let oAPP = parent.oAPP;
         //DRAG한 UI ID 정보 세팅.
         event.dataTransfer.setData("prc001", l_json);
 
-    };
+    };  //drag 정보 처리.
+
+
+    //drag 종료시 css 잔상 제거.
+    window.ondragend = function(){
+        alert("ondragend");
+        oAPP.IPCRENDERER.send("if-dragEnd");
+    };  //drag 종료시 css 잔상 제거.
 
 
 })(window, oAPP);
