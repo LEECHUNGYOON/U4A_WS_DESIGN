@@ -644,10 +644,10 @@
             }
 
             //미리보기 갱신 처리.
-            oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(ls_tree.OBJID, ls_tree.UILIB, ls_tree.POBID, ls_tree.PUIOK, ls_tree.UIATT, l_cnt, ls_tree.UIOBK);
+            oAPP.attr.ui.frame.contentWindow.moveUIObjPreView(ls_tree.OBJID, ls_tree.UILIB, ls_tree.POBID, ls_tree.PUIOK, ls_tree.UIATT, l_cnt, ls_tree.ISMLB, ls_tree.UIOBK);
 
             //미리보기 ui 선택.
-            oAPP.attr.ui.frame.contentWindow.selPreviewUI(ls_tree.OBJID);
+            //oAPP.attr.ui.frame.contentWindow.selPreviewUI(ls_tree.OBJID);
 
         }
 
