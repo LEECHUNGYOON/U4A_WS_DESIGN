@@ -125,8 +125,13 @@
       var ls_drag = l_ctxt.getProperty();
       if(!ls_drag){return;}
 
-      //DRAG한 UI의 라이브러리명 정보 세팅(Runtime Class Navigator 기능에서 사용)
-      event.dataTransfer.setData("rtmcls", ls_drag.UILIB);
+      //실제 라이브러리의 정보 검색.
+      var ls_0022 = oAPP.DATA.LIB.T_0022.find( a => a.UIOBK === ls_drag.UIOBK);
+
+      if(ls_0022){
+        //DRAG한 UI의 라이브러리명 정보 세팅(Runtime Class Navigator 기능에서 사용)
+        event.dataTransfer.setData("rtmcls", ls_0022.LIBNM);
+      }
 
       //DRAG한 UI ID 정보 세팅.
       event.dataTransfer.setData("text/plain", ls_drag.OBJID + "|" + oAPP.attr.DnDRandKey);
@@ -221,6 +226,44 @@
 
     }); //접힘 이벤트
 
+    // //구분자 추가.
+    // oLTBar1.addContent(new sap.m.ToolbarSeparator());
+
+    // //UI 검색 버튼.
+    // oLBtn6 = new sap.m.Button({icon:"sap-icon://search", tooltip:"Find UI"});
+    // oLTBar1.addContent(oLBtn6);
+
+    // oLBtn6.attachPress(function(){
+
+    //   var pop1 = new sap.m.ResponsivePopover({showHeader:false});
+
+    //   var inp1 = new sap.m.Input();
+    //   pop1.addContent(inp1);
+
+    //   inp1.attachChange(function(){
+    //     var l_bind = oAPP.attr.ui.oLTree1.getBinding();
+    //     if(!l_bind){return;}
+
+    //     var l_val = this.getValue();
+        
+    //     if(l_val === ""){
+    //       l_bind.filter();
+    //     }
+
+    //     l_bind.filter(new sap.ui.model.Filter({path:"OBJID", operator:"Contains",value1:l_val}));
+
+    //   });
+      
+    //   var h1 = new sap.m.HBox({width:"100%", renderType:"Bare"});
+    //   pop1.addContent(h1);
+    //   h1.addItem(new sap.m.Button({icon:"sap-icon://accept", type:"Accept", width:"100%"}));
+    //   h1.addItem(new sap.m.Button({icon:"sap-icon://refresh", type:"Neutral", width:"100%"}));
+
+    //   pop1.openBy(this);
+
+
+    // });
+
 
     //구분자 추가.
     oLTBar1.addContent(new sap.m.ToolbarSeparator({visible:"{/IS_EDIT}"}));
@@ -236,6 +279,8 @@
       oAPP.fn.designClearCheckAll();
 
     }); //전체 선택 헤제 버튼 이벤트.
+
+
 
 
     //구분자 추가.
