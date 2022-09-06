@@ -125,7 +125,7 @@
 
         //Web Application Type
         ls_appl.APPTY = "M";
-        debugger;
+
         //DEFAULT DDLB 활성화.
         ls_appl.APPTY_edit = true;
 
