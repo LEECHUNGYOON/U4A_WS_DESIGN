@@ -79,38 +79,35 @@
      * @param {function} fnCallback - callback function.
      ************************************************************************/
     oAPP.fn.designWizardCallback = function(oReturn, fnCallback){
-
-        //aggregation 선택 팝업 callback function.
-        function lf_aggrCallback(aggr){
-
-            //busy dialog open.
-            oAPP.common.fnSetBusyDialog(true);
+        
+        //ui 생성 처리.
+        function lf_createUI(oPram, aggr){
 
             //wizard 생성 유형에 따른 분기.
-            switch (oReturn.uName) {
+            switch (oPram.uName) {
                 case "sap.m.Table":
                     //wizard m table 생성 처리.
-                    oAPP.fn.designWizardMTable(oReturn, aggr);
+                    oAPP.fn.designWizardMTable(oPram, aggr);
                     break;
                 
                 case "sap.ui.table.Table":
                     //wizard ui table 생성 처리.
-                    oAPP.fn.designWizardUiTable(oReturn, aggr);
+                    oAPP.fn.designWizardUiTable(oPram, aggr);
                     break;
 
                 case "sap.ui.table.TreeTable":
                     //wizard ui tree table 생성 처리.
-                    oAPP.fn.designWizardUiTreeTable(oReturn, aggr);
+                    oAPP.fn.designWizardUiTreeTable(oPram, aggr);
                     break;
 
                 case "LayoForm_01":
                     //wizard form UI 생성 처리.
-                    oAPP.fn.designWizardUiLayotForm01(oReturn, aggr);
+                    oAPP.fn.designWizardUiLayotForm01(oPram, aggr);
                     break;
 
                 case "SimpleForm":
                     //wizard simple form 생성 처리.
-                    oAPP.fn.designWizardUiLayotSimpleForm(oReturn, aggr);
+                    oAPP.fn.designWizardUiLayotSimpleForm(oPram, aggr);
                     break;
 
                 default:
@@ -118,6 +115,32 @@
 
             }   //wizard 생성 유형에 따른 분기.
 
+
+        }   //ui 생성 처리.
+
+
+
+        //aggregation 선택 팝업 callback function.
+        function lf_aggrCallback(aggr){
+
+            //busy dialog open.
+            oAPP.common.fnSetBusyDialog(true);
+
+            //전달받은 파라메터가 array가 아닌경우.
+            if(Array.isArray(oReturn) === false){
+                //UI 생성 처리.
+                lf_createUI(oReturn, aggr);
+                
+            }else if(Array.isArray(oReturn) === true){
+
+                //전달받은 파라메터가 array인경우.
+                for(var i=0, l=oReturn.length; i<l; i++){
+                    //라인별로 UI 생성 처리.
+                    lf_createUI(oReturn[i], aggr);
+
+                }
+
+            }
 
             //성공 FLAG 처리.
             ls_ret.SUBRC = "S";
@@ -130,9 +153,24 @@
         }   //aggregation 선택 팝업 callback function.
 
 
+        //입력 파라메터가 array가 아닌경우.
+        if(Array.isArray(oReturn) === false){
+            //선택값에 대한 가능여부 점검.
+            var ls_ret = oAPP.fn.designChkSelLine(oReturn.uName);
 
-        //선택값에 대한 가능여부 점검.
-        var ls_ret = oAPP.fn.designChkSelLine(oReturn.uName);
+        }else if(Array.isArray(oReturn) === true){
+            //입력 파라메터가 array 유형인경우.
+            for(var i=0, l=oReturn.length; i<l; i++){
+                //각 라인별로 가능여부 점검.
+                var ls_ret = oAPP.fn.designChkSelLine(oReturn[i]);
+                
+                //오류가 발생한 경우 점검 중단.
+                if(ls_ret.SUBRC === "E"){break;}
+
+            }
+
+        }
+        
 
         //선택건 점검 오류가 발생한 경우 오류 FLAG, 메시지 RETURN 후 EXIT.
         if(ls_ret.SUBRC === "E"){
@@ -142,37 +180,47 @@
         
         var ls_0014 = oAPP.fn.crtStru0014();
 
-        //wizard 생성 유형에 따른 분기.
-        switch (oReturn.uName) {
-            case "sap.m.Table":
-                //sap.m.Table의 UI OBJECT KEY 매핑.
-                ls_0014.UIOBK = "UO00447";
-                break;
+        //입력 파라메터가 array가 아닌경우.
+        if(Array.isArray(oReturn) === false){
+            //wizard 생성 유형에 따른 분기.
+            switch (oReturn.uName) {
+                case "sap.m.Table":
+                    //sap.m.Table의 UI OBJECT KEY 매핑.
+                    ls_0014.UIOBK = "UO00447";
+                    break;
+                
+                case "sap.ui.table.Table":
+                    //sap.ui.table.Table의 UI OBJECT KEY 매핑.
+                    ls_0014.UIOBK = "UO01139";
+                    break;
+
+                case "sap.ui.table.TreeTable":
+                    //sap.ui.table.TreeTable의 UI OBJECT KEY 매핑.
+                    ls_0014.UIOBK = "UO01142";
+                    break;
+
+                case "LayoForm_01":
+                    //sap.ui.layout.form.Form의 UI OBJECT KEY 매핑.
+                    ls_0014.UIOBK = "UO01001";
+                    break;
+
+                case "SimpleForm":
+                    //sap.ui.layout.form.SimpleForm의 UI OBJECT KEY 매핑.
+                    ls_0014.UIOBK = "UO01010";
+                    break;
+
+                default:
+                    break;
+
+            }   //wizard 생성 유형에 따른 분기.
+
+        }else if(Array.isArray(oReturn) === true){
+            //입력 파라메터가 array인경우.
+
+            //sap.ui.core.Control로 UI OBJECT KEY 매핑.
+            ls_0014.UIOBK = "UO00863";
             
-            case "sap.ui.table.Table":
-                //sap.ui.table.Table의 UI OBJECT KEY 매핑.
-                ls_0014.UIOBK = "UO01139";
-                break;
-
-            case "sap.ui.table.TreeTable":
-                //sap.ui.table.TreeTable의 UI OBJECT KEY 매핑.
-                ls_0014.UIOBK = "UO01142";
-                break;
-
-            case "LayoForm_01":
-                //sap.ui.layout.form.Form의 UI OBJECT KEY 매핑.
-                ls_0014.UIOBK = "UO01001";
-                break;
-
-            case "SimpleForm":
-                //sap.ui.layout.form.SimpleForm의 UI OBJECT KEY 매핑.
-                ls_0014.UIOBK = "UO01010";
-                break;
-
-            default:
-                break;
-
-        }   //wizard 생성 유형에 따른 분기.
+        }
         
         //선택한 라인의 tree 정보 얻기.
         var ls_tree = oAPP.fn.designGetSelectedTreeItem();
@@ -190,9 +238,7 @@
         oAPP.fn.getScript("design/js/aggrSelectPopup",function(){
             oAPP.fn.aggrSelectPopup(ls_0014, ls_tree, lf_aggrCallback);
 
-        });
-
-        
+        });        
 
     };  //위자드 팝업 callback 처리.
 
