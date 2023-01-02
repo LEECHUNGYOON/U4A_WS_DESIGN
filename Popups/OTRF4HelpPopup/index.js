@@ -422,9 +422,9 @@ let oAPP = parent.oAPP;
 		var oFormData = new FormData();
 		oFormData.append("trgubun", "F");
 
-		oFormData.append("sap-user", "PES");
-		oFormData.append("sap-password", "dmstjq8!");
-		oFormData.append("sap-language", "EN");
+		// oFormData.append("sap-user", "PES");
+		// oFormData.append("sap-password", "dmstjq8!");
+		// oFormData.append("sap-language", "EN");
 
 		//대표 f4 help명.
 		oFormData.append("_SHLPNAME", I_SHLPNAME);

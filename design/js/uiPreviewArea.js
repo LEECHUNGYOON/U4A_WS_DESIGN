@@ -48,21 +48,64 @@
   //미리보기 iframe 영역 구성.
   oAPP.fn.loadPreviewFrame = function(){
 
+
+    function lf_setParam(oForm, name, value){
+
+      var iput = document.createElement("input");
+          iput.setAttribute("name", name);
+          iput.setAttribute("value", value);
+          iput.setAttribute("type", "hidden");
+          oForm.appendChild(iput);
+
+    }
+    
+    debugger;
+
     //미리보기 html 정보가 로드되지 않은경우.
     if(!oAPP.attr.ui.frame || !oAPP.attr.ui.frame.contentWindow){
       oAPP.attr.ui.frame = document.getElementById("prevHTML");
 
       var l_info = parent.getUserInfo();
 
-      //미리보기 서버 URL 정보 구성.
-      oAPP.attr.ui.frame.src = parent.getHost() + "/zu4a_wbc/u4a_ipcmain/getPrevHTML?" +
-        "sap-client=" + l_info.CLIENT +  
-        "&sap-language=" + l_info.LANGU + 
-        "&sap-user=" + l_info.ID +
-        "&sap-password=" + l_info.PW +
-        "&LIBPATH=" + oAPP.fn.getBootStrapUrl() + 
-        "&LIBRARY=" + oAPP.fn.getUi5Libraries(true) +
-        "&THEME=" + encodeURIComponent(oAPP.DATA.APPDATA.S_0010.UITHM);
+      var oform = document.createElement("form");
+      oform.setAttribute("id",     "prvSendForm");
+      oform.setAttribute("target", oAPP.attr.ui.frame.id);
+      oform.setAttribute("method", "POST");
+      oform.setAttribute("action", parent.getHost() + "/zu4a_wbc/u4a_ipcmain/getPrevHTML");
+      oform.style.display = "none";
+
+      //client 파라메터 추가.
+      lf_setParam(oform, "sap-client", l_info.CLIENT);
+
+      //접속 언어 파라메터 추가.
+      lf_setParam(oform, "sap-language", l_info.LANGU);
+
+      //SAP 접속 ID 파라메터 추가.
+      lf_setParam(oform, "sap-user", l_info.ID);
+
+      //SAP 접속 PW 파라메터 추가.
+      lf_setParam(oform, "sap-password", l_info.PW);
+
+      //라이브러리 bootstrap 경로 파라메터 추가.
+      lf_setParam(oform, "LIBPATH", oAPP.fn.getBootStrapUrl());
+
+      //LOAD 대상 LIBRARY 항목 파라메터 추가.
+      lf_setParam(oform, "LIBRARY", oAPP.fn.getUi5Libraries(true));
+
+      //미리보기 THEME 정보 파라메터 추가.
+      lf_setParam(oform, "THEME", encodeURIComponent(oAPP.DATA.APPDATA.S_0010.UITHM));
+      
+      document.body.appendChild(oform);
+
+      // //미리보기 서버 URL 정보 구성.
+      // oAPP.attr.ui.frame.src = parent.getHost() + "/zu4a_wbc/u4a_ipcmain/getPrevHTML?" +
+      //   "sap-client=" + l_info.CLIENT +  
+      //   "&sap-language=" + l_info.LANGU + 
+      //   "&sap-user=" + l_info.ID +
+      //   "&sap-password=" + l_info.PW +
+      //   "&LIBPATH=" + oAPP.fn.getBootStrapUrl() + 
+      //   "&LIBRARY=" + oAPP.fn.getUi5Libraries(true) +
+      //   "&THEME=" + encodeURIComponent(oAPP.DATA.APPDATA.S_0010.UITHM);
 
       return;
 
