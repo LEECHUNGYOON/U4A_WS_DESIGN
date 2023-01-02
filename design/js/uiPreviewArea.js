@@ -4,7 +4,7 @@
 
     //미리보기 영역 구성.
     var oMfrm1 = new sap.ui.core.HTML({content:"<div style='width:100%; height:100%; overflow:hidden;'>" +
-      "<iframe id='prevHTML' style='width:100%; height:100%;' frameborder=0 " +
+      "<iframe id='prevHTML' name='prevHTML' style='width:100%; height:100%;' frameborder=0 " +
       "framespacing=0 marginheight=0 marginwidth=0 ></iframe></div>"});
     oMPage.addContent(oMfrm1);
 
@@ -93,10 +93,12 @@
       lf_setParam(oform, "LIBRARY", oAPP.fn.getUi5Libraries(true));
 
       //미리보기 THEME 정보 파라메터 추가.
-      lf_setParam(oform, "THEME", encodeURIComponent(oAPP.DATA.APPDATA.S_0010.UITHM));
+      lf_setParam(oform, "THEME", oAPP.DATA.APPDATA.S_0010.UITHM);
       
       document.body.appendChild(oform);
 
+      oform.submit();
+      
       // //미리보기 서버 URL 정보 구성.
       // oAPP.attr.ui.frame.src = parent.getHost() + "/zu4a_wbc/u4a_ipcmain/getPrevHTML?" +
       //   "sap-client=" + l_info.CLIENT +  
@@ -155,7 +157,8 @@
     }
 
     if(bFirst){
-      return encodeURIComponent(lt_lib.join(","));
+      //return encodeURIComponent(lt_lib.join(","));
+      return lt_lib.join(",");
     }
 
     return lt_lib;
@@ -175,7 +178,8 @@
       && a.FLD06 === "X" );
 
     if(typeof ls_ua025 !== "undefined"){
-      return encodeURIComponent(ls_ua025.FLD04 + ls_ua025.FLD05);
+      // return encodeURIComponent(ls_ua025.FLD04 + ls_ua025.FLD05);
+      return ls_ua025.FLD04 + ls_ua025.FLD05;
     }
 
     //-2차 필터 패키지
@@ -184,7 +188,8 @@
       && a.FLD06 === "X" );
 
     if(typeof ls_ua025 !== "undefined"){
-      return encodeURIComponent(ls_ua025.FLD04 + ls_ua025.FLD05);
+      // return encodeURIComponent(ls_ua025.FLD04 + ls_ua025.FLD05);
+      return ls_ua025.FLD04 + ls_ua025.FLD05;
     }
 
     //-3차 필터 전체대상
@@ -192,7 +197,8 @@
       && a.FLD01 === "WOK" && a.FLD06 === "X" );
 
     if(typeof ls_ua025 !== "undefined"){
-      return encodeURIComponent(ls_ua025.FLD04 + ls_ua025.FLD05);
+      // return encodeURIComponent(ls_ua025.FLD04 + ls_ua025.FLD05);
+      return ls_ua025.FLD04 + ls_ua025.FLD05;
     }
 
   };  //UI5 bootstrap URL정보 얻기.
