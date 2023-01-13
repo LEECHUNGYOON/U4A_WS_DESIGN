@@ -190,6 +190,9 @@
           if (this.readyState == 4 && this.status == 200) {
             eval(this.responseText);
             callbackFunc();
+          }else{
+            //화면 잠금 해제 처리.
+            oAPP.fn.designAreaLockUnlock();
           }
         };
 
