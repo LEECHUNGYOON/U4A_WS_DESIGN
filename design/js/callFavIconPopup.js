@@ -18,7 +18,7 @@
         loApp.attr.f_cb = f_cb;
 
         //아이콘 즐겨찾기 항목 검색.
-        loApp.attr.T_ICON = parent.WSUTIL.getIconFavorite(parent.WSUTIL.getWsSettingsInfo().globalLanguage);
+        loApp.attr.T_ICON = parent.WSUTIL.getIconFavorite(parent.getUserInfo().SYSID);
 
         //즐겨찾기 항목이 존재하지 않는다면.
         if(loApp.attr.T_ICON.length === 0){
