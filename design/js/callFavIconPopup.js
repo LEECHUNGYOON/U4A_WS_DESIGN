@@ -30,6 +30,11 @@
                     parent.WSUTIL.getWsMsgClsTxt(parent.WSUTIL.getWsSettingsInfo().globalLanguage, "ZMSG_WS_COMMON_001", "078")
                 , "", "", ""));
 
+            //팝업 UI가 이미 호출되 있다면 종료 처리.
+            if(loApp.ui.oPop && loApp.ui.oPop.isOpen()){
+                loApp.ui.oPop.close();
+            }
+
             return;
         }
 
